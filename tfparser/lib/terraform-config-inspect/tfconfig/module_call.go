@@ -11,4 +11,8 @@ type ModuleCall struct {
 	Version string `json:"version,omitempty"`
 
 	Pos SourcePos `json:"pos"`
+
+	Inputs map[string]ResourceAttributeReference `json:"inputs"`
+
+	Module *Module `json:"-"`
 }

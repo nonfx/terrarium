@@ -4,30 +4,29 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/tfparser/lib/terraform-config-inspect/tfconfig"
 )
 
-func main() {
-	config, _ := tfconfig.LoadModule("./modules/terraform-aws-vpc")
-	// if diag.HasErrors() {
-	// 	log.Fatalf(diag.Error())
-	// }
-	fmt.Printf("Module Input, Resource Input Attribute, Resource, Resource Output Attribute, Module Output\n")
-	attrByResource := make(map[string]map[string]map[string]string) // resource-type.resource-name: attribute_kind: resource-attribute-name: attribute_path
-	// fmt.Print("Resources:\n")
-	for resourceKey, resource := range config.ManagedResources {
-		inputs := make(map[string]string)
-		for name, item := range resource.Inputs {
-			inputs[name] = fmt.Sprintf("%s.%s.%s", item.ResourceType, item.ResourceName, strings.Join(item.AttributePath, ".")) // resource-attribute: module-input-var
-			// fmt.Printf("%s.%s: %s '%s' . %s\n", resourceName, name, item.ResourceType, item.ResourceName, strings.Join(item.AttributePath, "."))
-		}
-		attrByResource[resourceKey] = map[string]map[string]string{
-			"inputs": inputs,
+func loadAttributesByResource(config *tfconfig.Module, attrByResource map[string]map[string]map[string]string) {
+	for name, items := range config.Inputs {
+		for _, item := range items {
+			attrsForResource, ok := attrByResource[item.ResourceType+"."+item.ResourceName]
+			if !ok {
+				attrsForResource = make(map[string]map[string]string)
+				attrByResource[item.ResourceType+"."+item.ResourceName] = attrsForResource
+			}
+
+			inputs, ok := attrsForResource["inputs"]
+			if !ok {
+				inputs = make(map[string]string)
+				attrsForResource["inputs"] = inputs // resource-attribute: input-variable
+			}
+
+			inputs[strings.Join(item.AttributePath, ".")] = name
 		}
 	}
-	// fmt.Print("Outputs:\n")
 	for name, item := range config.Outputs {
-		attrsForResource, ok := attrByResource[item.Value.ResourceType]
+		attrsForResource, ok := attrByResource[item.Value.ResourceType+"."+item.Value.ResourceName]
 		if !ok {
 			attrsForResource = make(map[string]map[string]string)
 			attrByResource[item.Value.ResourceType+"."+item.Value.ResourceName] = attrsForResource
@@ -40,10 +39,22 @@ func main() {
 		}
 
 		outputs[strings.Join(item.Value.AttributePath, ".")] = name
-
-		// fmt.Printf("%s: %s '%s' . %s\n", name, item.Value.ResourceType, item.Value.ResourceName, strings.Join(item.Value.AttributePath, "."))
 	}
+}
 
+func parseModule(modulePath string) {
+	config, _ := tfconfig.LoadModule(modulePath)
+	// if diag.HasErrors() {
+	// 	log.Fatalf(diag.Error())
+	// }
+	attrByResource := make(map[string]map[string]map[string]string) // resource-type.resource-name: attribute_kind: resource-attribute-name: attribute_path
+	// fmt.Print("Resources:\n")
+	loadAttributesByResource(config, attrByResource)
+	// for _, subModuleCall := range config.ModuleCalls {
+	// 	loadAttributesByResource(subModuleCall.Module, attrByResource)
+	// }
+
+	fmt.Printf("Module Input, Resource Input Attribute, Resource, Resource Output Attribute, Module Output\n")
 	for resourceKey, r1 := range attrByResource {
 		for resourceAttributeName, moduleInputName := range r1["inputs"] {
 			fmt.Printf("%s, %s, %s, %s, %s\n", moduleInputName, resourceAttributeName, resourceKey, "", "")
@@ -52,38 +63,18 @@ func main() {
 			fmt.Printf("%s, %s, %s, %s, %s\n", "", "", resourceKey, resourceAttributeName, moduleOutputName)
 		}
 	}
+}
 
-	// b, err := os.ReadFile("./modules/terraform-aws-vpc/main.tf")
-	// if err != nil {
-	// 	log.Fatalf(err.Error())
-	// }
-
-	// config := make(map[string]interface{})
-	// if err := hclsimple.Decode(
-	// 	"example.hcl", b,
-	// 	nil, &config,
-	// ); err != nil {
-	// 	log.Fatalf("Failed to load configuration: %s", err)
-	// }
-	// fmt.Printf("Configuration is %v\n", config)
-
-	// config, diag := hclwrite.ParseConfig(b, "", hcl.Pos{Line: 1, Column: 1})
-	// if diag.HasErrors() {
-	// 	log.Fatalf(diag.Error())
-	// }
-	// for _, b := range config.Body().Blocks() {
-	// 	fmt.Printf("> %s block %s\n", b.Type(), b.Labels())
-	// 	for _, a := range b.Body().Attributes() {
-	// 		fmt.Printf("  >> attribute %s\n", a.Expr().BuildTokens(nil).Bytes())
-	// 		// for _, v := range a.Expr().Variables() {
-	// 		// 	fmt.Printf("  >> %v\n", v.BuildTokens(nil))
-	// 		// }
-	// 	}
-	// }
-
-	// _, err := json.Marshal(config)
-	// if err != nil {
-	// 	log.Fatalf(err.Error())
-	// }
-	// fmt.Print(string(jb))
+func main() {
+	for _, p := range []string{
+		"./modules/terraform-aws-vpc",
+		"./modules/terraform-aws-rds",
+		"./modules/terraform-aws-security-group",
+		"./modules/terraform-aws-eks",
+		"./modules/terraform-aws-s3-bucket",
+	} {
+		fmt.Printf("MODULE: %s\n", p)
+		parseModule(p)
+		fmt.Printf("\n\n")
+	}
 }

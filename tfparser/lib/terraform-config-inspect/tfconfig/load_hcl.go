@@ -6,6 +6,7 @@ package tfconfig
 import (
 	"encoding/json"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
@@ -222,7 +224,7 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 			// PETMAL: extract the output value expression
 			if attr, defined := content.Attributes["value"]; defined {
 				o.Value = ResourceAttributeReference{}
-				parseOutputReference(mod.Locals, attr.Expr, &o.Value)
+				parseOutputReference(mod.Locals, mod.ModuleCalls, attr.Expr, &o.Value)
 			}
 
 		case "provider":
@@ -343,19 +345,21 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 			case "resource":
 				content, contentDiags := block.Body.JustAttributes()
 				diags = append(diags, contentDiags...)
-				if !contentDiags.HasErrors() {
-					r.Inputs = make(map[string]ResourceAttributeReference)
-					for _, attr := range content {
-						switch attr.Name {
-						case "tags", "count", "depends_on":
-							continue // ignore common attributes
-						default:
-							in := ResourceAttributeReference{}
-							parseOutputReference(mod.Locals, attr.Expr, &in)
-							r.Inputs[attr.Name] = in
-						}
+				// if !contentDiags.HasErrors() {
+				r.Inputs = make(map[string]ResourceAttributeReference)
+				for _, attr := range content {
+					switch attr.Name {
+					case "tags", "count", "depends_on":
+						continue // ignore common attributes
+					default:
+						in := ResourceAttributeReference{}
+						parseOutputReference(mod.Locals, mod.ModuleCalls, attr.Expr, &in)
+						r.Inputs[attr.Name] = in
+						attrPath := strings.Join(append([]string{in.ResourceType, in.ResourceName}, in.AttributePath...), ".")
+						mod.Inputs[attrPath] = append(mod.Inputs[attrPath], in)
 					}
 				}
+				// }
 			}
 
 		case "module":
@@ -394,6 +398,34 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 				diags = append(diags, valDiags...)
 				mc.Version = version
 			}
+
+			// recursively parse local module references
+			if strings.HasPrefix(mc.Source, "./") {
+				mc.Module, _ = LoadModule(path.Clean(path.Join(mod.Path, mc.Source)))
+			}
+
+			contentAttrs, contentDiags := block.Body.JustAttributes()
+			diags = append(diags, contentDiags...)
+			// if !contentDiags.HasErrors() {
+			mc.Inputs = make(map[string]ResourceAttributeReference)
+			for _, attr := range contentAttrs {
+				switch attr.Name {
+				case "tags", "count", "depends_on":
+					continue // ignore common attributes
+				default:
+					in := ResourceAttributeReference{}
+					parseOutputReference(mod.Locals, mod.ModuleCalls, attr.Expr, &in)
+					mc.Inputs[attr.Name] = in
+					if mc.Module != nil {
+						resolved := mc.Module.GetResourceAttributeReferences(attr.Name) // attr.Name is the input variable's name inside the module
+						for _, item := range resolved {
+							attrPath := strings.Join(append(append([]string{in.ResourceType, in.ResourceName}, in.AttributePath...), item.InputPath...), ".") // e.g. var.name.all.nested.attributes
+							mod.Inputs[attrPath] = append(mod.Inputs[attrPath], item.ResourceReference)
+						}
+					}
+				}
+			}
+			// }
 
 		default:
 			// Should never happen because our cases above should be
@@ -438,61 +470,88 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 // 	}
 // }
 
-func parseOutputReference(locals map[string]hcl.Expression, expr hcl.Expression, out *ResourceAttributeReference) {
+func parseOutputReference(locals map[string]hcl.Expression, submodules map[string]*ModuleCall, expr hcl.Expression, out *ResourceAttributeReference) {
 	switch t := expr.(type) {
 	case *hclsyntax.ScopeTraversalExpr:
 		out.ResourceType = t.Traversal.RootName()
 		for i := range t.Traversal {
-			switch t := t.Traversal[i].(type) {
+			switch tr := t.Traversal[i].(type) {
 			case hcl.TraverseAttr:
 				if i == 1 {
-					if out.ResourceType == "local" {
-						if val, ok := locals[t.Name]; ok {
-							parseOutputReference(locals, val, out)
+					switch out.ResourceType {
+					case "local":
+						if val, ok := locals[tr.Name]; ok {
+							parseOutputReference(locals, submodules, val, out)
 							continue
 						}
+					case "module":
+						// resolve the module reference to resource
+						if submod, ok := submodules[tr.Name]; ok {
+							relAttrs := []string{}
+							parseAttributes(t.Traversal[2:], &relAttrs)
+							if submod.Module != nil && len(relAttrs) > 0 {
+								if resolvedOutput, ok := submod.Module.Outputs[relAttrs[0]]; ok {
+									*out = resolvedOutput.Value
+									return
+								}
+							}
+						}
 					}
-					out.ResourceName = t.Name
+					out.ResourceName = tr.Name
 				} else {
-					out.AttributePath = append(out.AttributePath, t.Name)
+					out.AttributePath = append(out.AttributePath, tr.Name)
 				}
 			}
 		}
 	case *hclsyntax.FunctionCallExpr:
 		switch t.Name {
 		case "lookup":
-			parseOutputReference(locals, t.Args[0], out)
-			parseOutputReference(locals, t.Args[1], out) // the lookup attribute
+			parseOutputReference(locals, submodules, t.Args[0], out)
+			parseOutputReference(locals, submodules, t.Args[1], out) // the lookup attribute
 		default:
-			parseOutputReference(locals, t.Args[0], out) // only do first arg
+			parseOutputReference(locals, submodules, t.Args[0], out) // only do first arg
 		}
 	case *hclsyntax.SplatExpr:
-		parseOutputReference(locals, t.Source, out)
-		parseOutputReference(locals, t.Each, out)
+		parseOutputReference(locals, submodules, t.Source, out)
+		parseOutputReference(locals, submodules, t.Each, out)
 	case *hclsyntax.IndexExpr:
-		parseOutputReference(locals, t.Collection, out)
+		parseOutputReference(locals, submodules, t.Collection, out)
 	case *hclsyntax.RelativeTraversalExpr:
-		parseOutputReference(locals, t.Source, out)
-		for _, traversal := range t.Traversal {
-			switch t := traversal.(type) {
-			case hcl.TraverseAttr:
-				out.AttributePath = append(out.AttributePath, t.Name)
-			case hcl.TraverseIndex:
-				out.AttributePath = append(out.AttributePath, t.Key.AsString()) // e.g. map key
-			}
-		}
+		parseOutputReference(locals, submodules, t.Source, out)
+		parseAttributes(t.Traversal, &out.AttributePath)
+		// for _, traversal := range t.Traversal {
+		// 	switch t := traversal.(type) {
+		// 	case hcl.TraverseAttr:
+		// 		out.AttributePath = append(out.AttributePath, t.Name)
+		// 	case hcl.TraverseIndex:
+		// 		out.AttributePath = append(out.AttributePath, t.Key.AsString()) // e.g. map key
+		// 	}
+		// }
 	case *hclsyntax.ConditionalExpr:
-		parseOutputReference(locals, t.TrueResult, out) // only do True branch
+		parseOutputReference(locals, submodules, t.TrueResult, out) // only do True branch
 	case *hclsyntax.ForExpr:
 		tmp := ResourceAttributeReference{}
-		parseOutputReference(locals, t.CollExpr, out)
-		parseOutputReference(locals, t.ValExpr, &tmp)
+		parseOutputReference(locals, submodules, t.CollExpr, out)
+		parseOutputReference(locals, submodules, t.ValExpr, &tmp)
 		out.AttributePath = append(out.AttributePath, tmp.ResourceName)
 		out.AttributePath = append(out.AttributePath, tmp.AttributePath...)
 	case *hclsyntax.TemplateExpr:
 		if t.IsStringLiteral() {
 			v, _ := t.Value(nil)
 			out.AttributePath = append(out.AttributePath, v.AsString())
+		}
+	}
+}
+
+func parseAttributes(tr hcl.Traversal, out *[]string) {
+	for _, traversal := range tr {
+		switch t := traversal.(type) {
+		case hcl.TraverseAttr:
+			*out = append(*out, t.Name)
+		case hcl.TraverseIndex:
+			if t.Key.Type() == cty.String {
+				*out = append(*out, t.Key.AsString()) // e.g. map key
+			}
 		}
 	}
 }

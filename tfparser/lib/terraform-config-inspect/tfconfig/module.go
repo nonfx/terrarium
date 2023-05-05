@@ -3,7 +3,11 @@
 
 package tfconfig
 
-import "github.com/hashicorp/hcl/v2"
+import (
+	"strings"
+
+	"github.com/hashicorp/hcl/v2"
+)
 
 // Module is the top-level type representing a parsed and processed Terraform
 // module.
@@ -13,8 +17,9 @@ type Module struct {
 
 	Locals map[string]hcl.Expression
 
-	Variables map[string]*Variable `json:"variables"`
-	Outputs   map[string]*Output   `json:"outputs"`
+	Variables map[string]*Variable                    `json:"variables"`
+	Outputs   map[string]*Output                      `json:"outputs"`
+	Inputs    map[string][]ResourceAttributeReference `json:"inputs"`
 
 	RequiredCore      []string                        `json:"required_core,omitempty"`
 	RequiredProviders map[string]*ProviderRequirement `json:"required_providers"`
@@ -30,10 +35,53 @@ type Module struct {
 	Diagnostics Diagnostics `json:"diagnostics,omitempty"`
 }
 
+func (m Module) GetResourceAttributeReferences(varName string) []InputReference {
+	references := make([]InputReference, 0)
+
+	for _, mod := range m.ModuleCalls {
+		if mod.Module != nil {
+			for inpName, inp := range mod.Inputs {
+				if inp.ResourceType == "var" && inp.ResourceName == varName {
+					found := mod.Module.GetResourceAttributeReferences(inpName)
+					for i := range found {
+						found[i].InputPath = append(found[i].InputPath, inp.AttributePath...)
+					}
+					references = append(references, found...)
+				}
+			}
+		}
+	}
+
+	for _, res := range m.ManagedResources {
+		for inpName, inp := range res.Inputs {
+			if inp.ResourceType == "var" && inp.ResourceName == varName {
+				references = append(references, InputReference{
+					InputPath: inp.AttributePath,
+					ResourceReference: ResourceAttributeReference{
+						ResourceType:  res.Type,
+						ResourceName:  res.Name,
+						AttributePath: []string{inpName},
+					},
+				})
+			}
+		}
+	}
+	return references
+}
+
+type InputReference struct {
+	InputPath         []string
+	ResourceReference ResourceAttributeReference
+}
+
 type ResourceAttributeReference struct {
 	ResourceType  string   `json:"resource_type"`
 	ResourceName  string   `json:"resource_name"`
 	AttributePath []string `json:"attribute_path"`
+}
+
+func (r ResourceAttributeReference) ToKey() string {
+	return strings.Join(append([]string{r.ResourceType, r.ResourceName}, r.AttributePath...), ".")
 }
 
 // ProviderConfig represents a provider block in the configuration
@@ -49,6 +97,7 @@ func NewModule(path string) *Module {
 		Locals:            make(map[string]hcl.Expression),
 		Variables:         make(map[string]*Variable),
 		Outputs:           make(map[string]*Output),
+		Inputs:            make(map[string][]ResourceAttributeReference),
 		RequiredProviders: make(map[string]*ProviderRequirement),
 		ProviderConfigs:   make(map[string]*ProviderConfig),
 		ManagedResources:  make(map[string]*Resource),
