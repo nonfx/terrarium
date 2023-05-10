@@ -30,6 +30,12 @@ cache_data/tf_resources.json: terraform/providers.tf
 	@mkdir -p cache_data
 	@cd terraform && terraform init && terraform providers schema -json > ../cache_data/tf_resources.json
 
-seed: cache_data/tf_resources.json docker-run  ## Load .env file and run seed_resources
+resource-seed: cache_data/tf_resources.json docker-run  ## Load .env file and run seed_resources
 	@echo "Running database seed..."
 	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_resources
+
+module-seed: docker-run
+	@echo "Running database seed..."
+	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_modules
+
+seed: resource-seed module-seed

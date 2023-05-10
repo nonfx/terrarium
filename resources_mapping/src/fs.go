@@ -7,7 +7,7 @@ import (
 )
 
 func getFilePath(filename string) string {
-	return path.Join(".", "data", filename)
+	return path.Join(".", "cache_data", filename)
 }
 
 // readEmbeddingsFromFile reads vector embeddings from a JSON file
