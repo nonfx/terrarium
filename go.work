@@ -1,3 +1,6 @@
 go 1.20
 
-use ./resources_mapping
+use (
+	./api
+	./resources_mapping
+)
