@@ -1,3 +1,5 @@
+GOPATH := $(shell go env GOPATH|cut -d ":" -f 1)
+
 # Define variables for PostgreSQL container
 POSTGRES_CONTAINER := postgres
 POSTGRES_DB := cc_terrarium
@@ -22,7 +24,7 @@ docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanu
 	docker compose down -v
 
 test:  ## Run go unit tests
-	@$(GOPATH)/bin/godotenv go test github.com/cldcvr/terrarium/...
+	@$(GOPATH)/bin/godotenv go test `go list github.com/cldcvr/terrarium/... | grep -v /pkg/terraform-config-inspect/`
 
 # generate tf_resources.json file for set terraform providers
 cache_data/tf_resources.json: terraform/providers.tf
@@ -30,6 +32,12 @@ cache_data/tf_resources.json: terraform/providers.tf
 	@mkdir -p cache_data
 	@cd terraform && terraform init && terraform providers schema -json > ../cache_data/tf_resources.json
 
-seed: cache_data/tf_resources.json docker-run  ## Load .env file and run seed_resources
-	@echo "Running database seed..."
+seed_resources: cache_data/tf_resources.json docker-run  ## Load .env file and run seed_resources
+	@echo "Running resource seed..."
 	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_resources
+
+seed_modules: docker-run  ## Load .env file and run seed_modules
+	@echo "Running module seed..."
+	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_modules
+
+seed: seed_resources seed_modules

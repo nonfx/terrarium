@@ -1,0 +1,139 @@
+{
+    "path": "testdata/type-errors",
+    "diagnostics": [
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 3
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 7
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: a bool is required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 8
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 12
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 13
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 17
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Invalid provider reference",
+            "detail": "Provider argument requires a provider name followed by an optional alias, like \"aws.foo\".",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 21
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Unsuitable value type",
+            "detail": "Unsuitable value: string required",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 25
+            }
+        },
+        {
+            "severity": "error",
+            "summary": "Invalid required_providers object",
+            "detail": "Required providers entries must be strings or objects.",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 27
+            }
+        }
+    ],
+    "required_providers": {
+        "foo": {},
+        "": {}
+    },
+    "variables": {
+        "foo": {
+            "name": "foo",
+            "type": "{\"what\":\"the\"}",
+            "default": null,
+            "required": true,
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 1
+            }
+        }
+    },
+    "outputs": {
+        "foo": {
+            "name": "foo",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 6
+            }
+        }
+    },
+    "provider_configs": {
+        "foo": {"name": "foo"}
+    },
+    "managed_resources": {
+        "foo.foo": {
+            "mode": "managed",
+            "type": "foo",
+            "name": "foo",
+            "provider": {
+                "name": ""
+            },
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 20
+            }
+        }
+    },
+    "data_resources": {},
+    "module_calls": {
+        "foo": {
+            "name": "foo",
+            "source": "",
+            "pos": {
+                "filename": "testdata/type-errors/type-errors.tf",
+                "line": 11
+            }
+        }
+    }
+}
