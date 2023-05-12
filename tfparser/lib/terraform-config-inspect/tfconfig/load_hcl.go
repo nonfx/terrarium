@@ -349,14 +349,18 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 				r.Inputs = make(map[string]ResourceAttributeReference)
 				for _, attr := range content {
 					switch attr.Name {
-					case "tags", "count", "depends_on":
+					case "tags", "count", "depends_on", "for_each":
 						continue // ignore common attributes
 					default:
 						in := ResourceAttributeReference{}
 						parseOutputReference(mod.Locals, mod.ModuleCalls, attr.Expr, &in)
 						r.Inputs[attr.Name] = in
 						attrPath := strings.Join(append([]string{in.ResourceType, in.ResourceName}, in.AttributePath...), ".")
-						mod.Inputs[attrPath] = append(mod.Inputs[attrPath], in)
+						mod.Inputs[attrPath] = append(mod.Inputs[attrPath], ResourceAttributeReference{
+							ResourceType:  r.Type,
+							ResourceName:  r.Name,
+							AttributePath: []string{attr.Name},
+						})
 					}
 				}
 				// }
@@ -410,7 +414,7 @@ func LoadModuleFromFile(file *hcl.File, mod *Module) hcl.Diagnostics {
 			mc.Inputs = make(map[string]ResourceAttributeReference)
 			for _, attr := range contentAttrs {
 				switch attr.Name {
-				case "tags", "count", "depends_on":
+				case "tags", "count", "depends_on", "for_each":
 					continue // ignore common attributes
 				default:
 					in := ResourceAttributeReference{}
