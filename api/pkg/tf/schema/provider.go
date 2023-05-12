@@ -91,7 +91,9 @@ func (btr BlockRepresentation) ListLeafNodes() map[string]AttributeRepresentatio
 	leafNodes := map[string]AttributeRepresentation{}
 
 	for name, attr := range btr.Attributes {
-		leafNodes[name] = attr
+		for k, v := range getAttributePaths(name, attr) {
+			leafNodes[k] = v
+		}
 	}
 
 	for path, nestedBlock := range btr.BlockTypes {
@@ -103,4 +105,42 @@ func (btr BlockRepresentation) ListLeafNodes() map[string]AttributeRepresentatio
 	}
 
 	return leafNodes
+}
+
+func getAttributePaths(attrName string, attr AttributeRepresentation) map[string]AttributeRepresentation {
+	flattened := make(map[string]AttributeRepresentation)
+	paths := make(map[string]interface{})
+	flattenAttributePaths(buildAttributePaths(attr.Type, attr.Computed, paths), attrName, flattened)
+	return flattened
+}
+
+func buildAttributePaths(attrType interface{}, isComputed bool, paths map[string]interface{}) interface{} {
+	switch t := attrType.(type) {
+	case string:
+		return AttributeRepresentation{
+			Type:     attrType,
+			Computed: isComputed,
+		}
+	case map[string]interface{}:
+		for k, v := range t {
+			paths[k] = buildAttributePaths(v, isComputed, map[string]interface{}{})
+		}
+	case []interface{}:
+		return buildAttributePaths(t[1], isComputed, paths) // t[0] contains structure type name (e.g. list)
+	}
+
+	return paths
+}
+
+func flattenAttributePaths(paths interface{}, root string, flattened map[string]AttributeRepresentation) {
+	switch t := paths.(type) {
+	case AttributeRepresentation:
+		flattened[root] = t
+	case map[string]interface{}:
+		for k, v := range t {
+			flattenAttributePaths(v, fmt.Sprintf("%s.%s", root, k), flattened)
+
+		}
+	}
+
 }

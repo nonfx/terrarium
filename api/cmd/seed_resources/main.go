@@ -35,6 +35,7 @@ func main() {
 		return
 	}
 
+	// load resources
 	for providerName, resources := range config.ProviderSchemas {
 		provider := &db.TFProvider{
 			Name: providerName,
@@ -43,6 +44,34 @@ func main() {
 		log.Printf("%d\t%s\n", provider.ID, providerName)
 
 		for resType, block := range resources.ResourceSchemas {
+			// resName := "aws_elastic_beanstalk_environment"
+			// block := resources.ResourceSchemas[resName]
+			res := &db.TFResourceType{
+				ProviderID:   provider.ID,
+				ResourceType: resType,
+			}
+			res.Create(g)
+			log.Printf("\tResource: %d\t%s\n", res.ID, resType)
+
+			attrs := block.Block.ListLeafNodes()
+			for attrPath, attr := range attrs {
+				attrDB := &db.TFResourceAttribute{
+					ResourceTypeID: res.ID,
+					ProviderID:     provider.ID,
+					AttributePath:  attrPath,
+					DataType:       fmt.Sprintf("%v", attr.Type),
+					Description:    attr.Description,
+					Optional:       attr.Optional,
+					Computed:       attr.Computed,
+				}
+				attrDB.Create(g)
+				log.Printf("\t\tAttribute: %d\t%s\n", attrDB.ID, attrPath)
+			}
+
+			// break
+		}
+
+		for resType, block := range resources.DataSourceSchemas {
 			// resName := "aws_elastic_beanstalk_environment"
 			// block := resources.ResourceSchemas[resName]
 			res := &db.TFResourceType{
