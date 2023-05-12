@@ -27,13 +27,13 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 							"mock_resource": {
 								Block: schema.BlockRepresentation{
 									Attributes: map[string]schema.AttributeRepresentation{
-										"A": {},
+										"A": {Type: "string"},
 									},
 									BlockTypes: map[string]schema.BlockTypeRepresentation{
 										"X": {
 											Block: schema.BlockRepresentation{
 												Attributes: map[string]schema.AttributeRepresentation{
-													"Y": {},
+													"Y": {Type: "string"},
 												},
 											},
 										},

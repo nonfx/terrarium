@@ -1,3 +1,5 @@
+GOPATH := $(shell go env GOPATH|cut -d ":" -f 1)
+
 # Define variables for PostgreSQL container
 POSTGRES_CONTAINER := postgres
 POSTGRES_DB := cc_terrarium
@@ -22,7 +24,7 @@ docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanu
 	docker compose down -v
 
 test:  ## Run go unit tests
-	@$(GOPATH)/bin/godotenv go test github.com/cldcvr/terrarium/...
+	@$(GOPATH)/bin/godotenv go test `go list github.com/cldcvr/terrarium/... | grep -v /pkg/terraform-config-inspect/`
 
 # generate tf_resources.json file for set terraform providers
 cache_data/tf_resources.json: terraform/providers.tf
