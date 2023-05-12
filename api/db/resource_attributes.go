@@ -23,3 +23,7 @@ type TFResourceAttribute struct {
 func (db *gDB) CreateTFResourceAttribute(e *TFResourceAttribute) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"resource_type_id", "provider_id", "attribute_path"})
 }
+
+func (db *gDB) GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error {
+	return get(db.g(), e, where)
+}

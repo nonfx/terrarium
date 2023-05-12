@@ -18,6 +18,9 @@ type DB interface {
 	CreateTFModule(e *TFModule) (uuid.UUID, error)
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
+
+	GetTFResourceType(e *TFResourceType, where *TFResourceType) error
+	GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error
 }
 
 // Model a basic GoLang struct which includes the following fields: ID, CreatedAt, UpdatedAt, DeletedAt
@@ -57,6 +60,10 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 	}
 
 	return e.GetID(), nil
+}
+
+func get[T entity](g *gorm.DB, e T, where T) error {
+	return g.First(e, where).Error
 }
 
 type gDB gorm.DB

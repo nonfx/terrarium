@@ -19,3 +19,7 @@ type TFResourceType struct {
 func (db *gDB) CreateTFResourceType(e *TFResourceType) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"provider_id", "resource_type"})
 }
+
+func (db *gDB) GetTFResourceType(e *TFResourceType, where *TFResourceType) error {
+	return get(db.g(), e, where)
+}

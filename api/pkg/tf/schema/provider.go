@@ -95,7 +95,9 @@ func (btr BlockRepresentation) ListLeafNodes() map[string]AttributeRepresentatio
 
 	// Iterate over the attributes directly present in the block
 	for name, attr := range btr.Attributes {
-		leafNodes[name] = attr
+		for k, v := range getAttributePaths(name, attr) {
+			leafNodes[k] = v
+		}
 	}
 
 	// Iterate over the nested blocks and recursively collect leaf nodes
@@ -109,4 +111,50 @@ func (btr BlockRepresentation) ListLeafNodes() map[string]AttributeRepresentatio
 	}
 
 	return leafNodes
+}
+
+func getAttributePaths(attrName string, attr AttributeRepresentation) map[string]AttributeRepresentation {
+	flattened := make(map[string]AttributeRepresentation)
+	paths := make(map[string]interface{})
+	flattenAttributePaths(buildAttributePaths(attr, paths), attrName, flattened)
+	return flattened
+}
+
+func buildAttributePaths(attr AttributeRepresentation, paths map[string]interface{}) interface{} {
+	switch t := attr.Type.(type) {
+	case string:
+		return attr
+	case map[string]interface{}:
+		for k, v := range t {
+			paths[k] = buildAttributePaths(copyWithType(attr, v), map[string]interface{}{})
+		}
+	case []interface{}:
+		return buildAttributePaths(copyWithType(attr, t[1]), paths) // t[0] contains structure type name (e.g. list)
+	}
+
+	return paths
+}
+
+func copyWithType(src AttributeRepresentation, ty interface{}) AttributeRepresentation {
+	return AttributeRepresentation{
+		Type:        ty,
+		Description: src.Description,
+		Required:    src.Required,
+		Optional:    src.Optional,
+		Computed:    src.Computed,
+		Sensitive:   src.Sensitive,
+	}
+}
+
+func flattenAttributePaths(paths interface{}, root string, flattened map[string]AttributeRepresentation) {
+	switch t := paths.(type) {
+	case AttributeRepresentation:
+		flattened[root] = t
+	case map[string]interface{}:
+		for k, v := range t {
+			flattenAttributePaths(v, fmt.Sprintf("%s.%s", root, k), flattened)
+
+		}
+	}
+
 }
