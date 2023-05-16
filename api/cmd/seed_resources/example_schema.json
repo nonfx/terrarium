@@ -1,0 +1,39 @@
+{
+    "format_version": "",
+    "provider_schemas": {
+        "mock_provider": {
+            "provider": {
+                "version": 0,
+                "block": {
+                    "attributes": null
+                }
+            },
+            "resource_schemas": {
+                "mock_resource": {
+                    "version": 0,
+                    "block": {
+                        "attributes": {
+                            "A": {
+                                "type": "string",
+                                "description": "a",
+                                "computed": true
+                            }
+                        },
+                        "block_types": {
+                            "X": {
+                                "block": {
+                                    "attributes": {
+                                        "Y": {
+                                            "type": "string",
+                                            "description": "y"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
