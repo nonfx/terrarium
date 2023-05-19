@@ -1,3 +1,7 @@
 go 1.20
 
-use ./api
+use (
+	./api
+	./cmd
+	./terraform-config-inspect
+)

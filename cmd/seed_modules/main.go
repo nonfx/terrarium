@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terrarium/api/db"
-	"github.com/cldcvr/terrarium/api/pkg/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/terraform-config-inspect/tfconfig"
 )
 
 var resourceTypeByName map[string]*db.TFResourceType

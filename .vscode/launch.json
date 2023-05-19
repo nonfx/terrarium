@@ -9,24 +9,16 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/api/cmd/seed_resources",
+      "program": "${workspaceFolder}/cmd/seed_resources",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "GO111MODULE": "on",
-        "GOPRIVATE": "github.com/cldcvr",
-      },
-    }
-        {
+    },
+    {
       "name": "Seed Modules",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/api/cmd/seed_modules/main.go",
+      "program": "${workspaceFolder}/cmd/seed_modules",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "GO111MODULE": "on",
-        "GOPRIVATE": "github.com/cldcvr",
-      },
     },
   ]
 }
