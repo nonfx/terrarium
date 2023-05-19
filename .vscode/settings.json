@@ -1,0 +1,7 @@
+{
+    "go.toolsEnvVars": {
+      "GOPRIVATE": "github.com/cldcvr/*",
+      "GO111MODULE": "on",
+    },
+    "go.testFlags": ["-v"]
+}

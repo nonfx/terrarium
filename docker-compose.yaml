@@ -1,0 +1,16 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${TR_DB_PASSWORD:-}
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+    name: tr_postgres_data
