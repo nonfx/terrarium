@@ -3,5 +3,16 @@
       "GOPRIVATE": "github.com/cldcvr/*",
       "GO111MODULE": "on",
     },
-    "go.testFlags": ["-v"]
+    "go.testFlags": ["-v"],
+    "protoc": {
+      "compile_on_save": true,
+      "options": [
+        "-I=${workspaceRoot}/api/pkg/pb",
+        "-I/usr/local/include",
+        "-I${workspaceRoot}",
+        "--go-grpc_out=/tmp",
+        "--plugin=protoc-gen-grpc=grpc_go_plugin",
+        "--go_out=/tmp"
+      ]
+    },
 }

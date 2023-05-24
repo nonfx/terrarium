@@ -14,7 +14,7 @@ DUMP_DIR := ./data
 .PHONY: db-dump docker-run docker-stop docker-stop-clean seed_resources seed_modules seed test
 
 db-dump:  ## Target for dumping PostgreSQL database to a file
-	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) -C $(POSTGRES_DB) | dos2unix > $(DUMP_DIR)/$(POSTGRES_DB).sql
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump --username=$(POSTGRES_USER) --create --file=/docker-entrypoint-initdb.d/$(POSTGRES_DB).sql $(POSTGRES_DB)
 
 docker-run:  ## Starts app in docker containers
 	docker compose up -d
@@ -29,11 +29,17 @@ docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanu
 # Following targets need terraform installed on the system
 ######################################################
 
+TERRAFORM_DIR := ./terraform
+TF_FILES := $(shell find $(TERRAFORM_DIR) -name '*.tf')
+
+$(TERRAFORM_DIR)/.terraform: $(TF_FILES)
+	@rm -rf terraform/.terraform
+	@cd $(TERRAFORM_DIR) && terraform init
+
 # generate tf_resources.json file for set terraform providers
-cache_data/tf_resources.json: terraform/providers.tf
+cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
-	@mkdir -p cache_data
-	@cd terraform && terraform init && terraform providers schema -json > ../cache_data/tf_resources.json
+	@cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
 
 ######################################################
 # Following targets need Go installed on the system
@@ -46,15 +52,13 @@ test:  ## Run go unit tests
 
 seed: seed_resources seed_modules
 
-seed_resources: cache_data/tf_resources.json docker-run  ## Load .env file and run seed_resources
+seed_resources: docker-run cache_data/tf_resources.json  ## Seed tf-provider resources into db from terraform/provider.tf
 	@echo "Running resource seed..."
 	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_resources
 
-# run terraform init to have terraform modules downloaded
-terraform/.terraform/modules/modules.json: terraform/modules.tf
-	@echo "running terraform init"
-	@cd terraform && terraform init
-
-seed_modules: docker-run terraform/.terraform/modules/modules.json  ## Load .env file and run seed_modules
+seed_modules: docker-run $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
 	@echo "Running module seed..."
 	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_modules
+
+include scripts/mocks.mak
+include scripts/protoc.mak
