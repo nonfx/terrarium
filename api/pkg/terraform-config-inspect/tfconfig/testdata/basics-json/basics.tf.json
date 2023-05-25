@@ -1,0 +1,30 @@
+{
+    "variable": {
+        "A": {
+            "default": "A default"
+        },
+        "B": {
+            "description": "The B variable"
+        }
+    },
+    "output": {
+        "A": {
+            "value": "${var.A}"
+        },
+        "B": {
+            "description": "I am B",
+            "value": "${var.A}"
+        },
+        "C": {
+            "description": "C is sensitive B",
+            "value": "${var.B}",
+            "sensitive": true
+        }
+    },
+    "resource": {
+        "null_resource": {
+            "A": {},
+            "B": {}
+        }
+    }
+}

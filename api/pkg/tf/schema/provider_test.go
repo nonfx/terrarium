@@ -52,6 +52,34 @@ func TestBlockRepresentation_ListLeafNodes(t *testing.T) {
 				"nestedBlock1.nestedAttribute1": {Type: "bool", Description: "Nested Attr 1", Optional: true},
 			},
 		},
+		{
+			name: "NestedAttributeTypes",
+			fields: fields{
+				Attributes: map[string]AttributeRepresentation{
+					"identity": {
+						Type: []interface{}{
+							"list", []interface{}{
+								"object", map[string]interface{}{
+									"oidc": []interface{}{
+										"list", []interface{}{
+											"object", map[string]interface{}{
+												"issuer": "string",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				BlockTypes: map[string]BlockTypeRepresentation{},
+			},
+			want: map[string]AttributeRepresentation{
+				"identity.oidc.issuer": {
+					Type: "string",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
