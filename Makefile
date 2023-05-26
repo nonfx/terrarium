@@ -41,6 +41,11 @@ cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
 	@cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
 
+# run terraform init to have terraform modules downloaded
+terraform/.terraform/modules/modules.json: terraform/modules.tf
+	@echo "running terraform init"
+	@cd terraform && terraform init
+
 ######################################################
 # Following targets need Go installed on the system
 ######################################################
