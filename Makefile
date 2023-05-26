@@ -41,6 +41,11 @@ cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
 	@cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
 
+# run terraform init to have terraform modules downloaded
+terraform/.terraform/modules/modules.json: terraform/modules.tf
+	@echo "running terraform init"
+	@cd terraform && terraform init
+
 ######################################################
 # Following targets need Go installed on the system
 ######################################################
@@ -63,6 +68,10 @@ seed_mappings: docker-run  ## Load .env file and run seed_mappings
 seed_modules: docker-run $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
 	@echo "Running module seed..."
 	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_modules
+
+seed_mappings: docker-run  ## Load .env file and run seed_mappings
+	@echo "Running mapping seed..."
+	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_mappings
 
 include scripts/mocks.mak
 include scripts/protoc.mak
