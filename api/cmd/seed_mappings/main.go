@@ -10,7 +10,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const linkingModulePath = "terraform/mappings/"
+const linkingModulePath = "terraform/"
 
 var resourceTypeByName map[string]*db.TFResourceType
 

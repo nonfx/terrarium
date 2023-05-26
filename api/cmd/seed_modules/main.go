@@ -44,7 +44,12 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 		ProviderID:     resDB.ProviderID,
 		AttributePath:  strings.Join(res.AttributePath, "."),
 	}); err != nil {
-		return nil, fmt.Errorf("unknown resource-attribute record: %v", err)
+		// VAN-4158: the exact match on path may fail, we need to match by prefix instead
+		// we store all sub-paths such as 'rule.noncurrent_version_expiration.newer_noncurrent_versions'
+		// but the output or input variable may be refering to 'rule.noncurrent_version_expiration' portion only
+		// we should treat each "path-level" as an attribute of its own - other modules may use it as input
+		// return nil, fmt.Errorf("unknown resource-attribute record: %v", err)
+		return nil, nil
 	}
 
 	moduleAttrPathTokens := []string{v.GetName()}
