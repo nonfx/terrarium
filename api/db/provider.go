@@ -12,3 +12,7 @@ type TFProvider struct {
 func (db *gDB) CreateTFProvider(e *TFProvider) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"name"})
 }
+
+func (db *gDB) GetTFProvider(e *TFProvider, where *TFProvider) error {
+	return get(db.g(), e, where)
+}

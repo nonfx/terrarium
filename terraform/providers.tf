@@ -24,6 +24,14 @@ terraform {
       source  = "hashicorp/tls"
       version = "4.0.4"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.20.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.9.0"
+    }
   }
 }
 
@@ -48,5 +56,13 @@ provider "time" {
 }
 
 provider "tls" {
+  # Configuration options
+}
+
+provider "kubernetes" {
+  # Configuration options
+}
+
+provider "helm" {
   # Configuration options
 }
