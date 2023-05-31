@@ -364,33 +364,14 @@ func LoadModuleFromFile(file *hcl.File, mod *Module, resolvedModuleRefs *Resolve
 
 			switch block.Type {
 			case "resource":
-				content, contentDiags := block.Body.JustAttributes()
-				diags = append(diags, contentDiags...)
-				r.Inputs = make(map[string]ResourceAttributeReference)
-				for _, attr := range content {
-					switch attr.Name {
-					case "tags", "count", "depends_on", "for_each":
-						continue // ignore common attributes
-					default:
-						in := ResourceAttributeReference{}
-						parseOutputReference(mod, attr.Expr, &in)
-						r.Inputs[attr.Name] = in
-						switch in.ResourceType {
-						case "var":
-							current, ok := mod.Inputs[in.ResourceName]
-							if !ok {
-								current = make(map[string][]ResourceAttributeReference)
-								mod.Inputs[in.ResourceName] = current
-							}
-
-							attrPath := strings.Join(in.AttributePath, ".")
-							current[attrPath] = append(current[attrPath], ResourceAttributeReference{
-								ResourceType:  r.Type,
-								ResourceName:  r.Name,
-								AttributePath: []string{attr.Name},
-							})
-						}
+				switch t := block.Body.(type) {
+				case *hclsyntax.Body:
+					r.Inputs = make(map[string]ResourceAttributeReference)
+					pathRoot := ""
+					for _, attr := range t.Attributes {
+						parseResourceAttribute(mod, r, pathRoot, attr)
 					}
+					parseNestedResourceBlocks(mod, r, pathRoot, t.Blocks)
 				}
 			}
 
@@ -474,6 +455,61 @@ func LoadModuleFromFile(file *hcl.File, mod *Module, resolvedModuleRefs *Resolve
 	}
 
 	return diags
+}
+
+func parseNestedResourceBlocks(parentModule *Module, parentResource *Resource, pathRoot string, blocks hclsyntax.Blocks) {
+	for _, block := range blocks {
+		blockName := block.Type
+		if blockName == "dynamic" {
+			blockName = block.Labels[0]
+		} else if blockName == "content" {
+			blockName = "" // ignore this level; defines body for iterators
+		}
+
+		newPathRoot := buildPath(pathRoot, blockName)
+		for _, attr := range block.Body.Attributes {
+			parseResourceAttribute(parentModule, parentResource, newPathRoot, attr)
+		}
+
+		parseNestedResourceBlocks(parentModule, parentResource, newPathRoot, block.Body.Blocks)
+	}
+}
+
+func buildPath(segments ...string) string {
+	nonEmptySegments := make([]string, 0)
+	for _, segment := range segments {
+		if segment != "" {
+			nonEmptySegments = append(nonEmptySegments, segment)
+		}
+	}
+	return strings.Join(nonEmptySegments, ".")
+}
+
+func parseResourceAttribute(parentModule *Module, parentResource *Resource, pathRoot string, attr *hclsyntax.Attribute) {
+	switch attr.Name {
+	case "tags", "count", "depends_on", "for_each":
+		return // ignore common attributes
+	default:
+		qualifiedAttrName := buildPath(pathRoot, attr.Name)
+		in := ResourceAttributeReference{}
+		parseOutputReference(parentModule, attr.Expr, &in)
+		parentResource.Inputs[qualifiedAttrName] = in
+		switch in.ResourceType {
+		case "var":
+			current, ok := parentModule.Inputs[in.ResourceName]
+			if !ok {
+				current = make(map[string][]ResourceAttributeReference)
+				parentModule.Inputs[in.ResourceName] = current
+			}
+
+			attrPath := strings.Join(in.AttributePath, ".")
+			current[attrPath] = append(current[attrPath], ResourceAttributeReference{
+				ResourceType:  parentResource.Type,
+				ResourceName:  parentResource.Name,
+				AttributePath: []string{qualifiedAttrName},
+			})
+		}
+	}
 }
 
 func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttributeReference) {
