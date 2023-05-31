@@ -75,6 +75,12 @@ func TestBlockRepresentation_ListLeafNodes(t *testing.T) {
 				BlockTypes: map[string]BlockTypeRepresentation{},
 			},
 			want: map[string]AttributeRepresentation{
+				"identity": {
+					Type: "list",
+				},
+				"identity.oidc": {
+					Type: "list",
+				},
 				"identity.oidc.issuer": {
 					Type: "string",
 				},
