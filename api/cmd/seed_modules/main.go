@@ -91,10 +91,8 @@ func main() {
 
 	for _, config := range configs {
 		log.Printf("Processing module '%s'...\n", config.Path)
-		moduleDB := &db.TFModule{
-			ModuleName: config.Path,
-			Source:     config.Path,
-		}
+
+		moduleDB := toTFModule(config)
 		if _, err := g.CreateTFModule(moduleDB); err != nil {
 			log.Println("Error creating module record:", err)
 			return
@@ -126,4 +124,17 @@ func main() {
 		log.Printf("Module '%s' done processing\n", config.Path)
 	}
 
+}
+
+func toTFModule(config *tfconfig.Module) *db.TFModule {
+	record := db.TFModule{
+		ModuleName: config.Path,
+		Source:     config.Path,
+	}
+	if config.Metadata != nil {
+		record.ModuleName = config.Metadata.Name
+		record.Source = config.Metadata.Source
+		record.Version = config.Metadata.Version
+	}
+	return &record
 }

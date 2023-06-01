@@ -6,7 +6,6 @@ package tfconfig
 import (
 	"encoding/json"
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -23,6 +22,14 @@ func loadModule(fs FS, dir string, resolvedModuleRefs *ResolvedModulesSchema) (*
 	primaryPaths, diags := dirFiles(fs, dir)
 
 	parser := hclparse.NewParser()
+
+	if meta := resolvedModuleRefs.Find(mod.Path); meta != nil {
+		mod.Metadata = &Metadata{
+			Name:    meta.Key,
+			Source:  meta.Source,
+			Version: meta.Version,
+		}
+	}
 
 	for _, filename := range primaryPaths {
 		var file *hcl.File
@@ -433,7 +440,7 @@ func LoadModuleFromFile(file *hcl.File, mod *Module, resolvedModuleRefs *Resolve
 
 			// recursively parse local module references
 			if subModPath := resolvedModuleRefs.Get(mc.Source, mc.Version); subModPath != "" {
-				mc.Module, _ = LoadModule(path.Clean(subModPath), resolvedModuleRefs)
+				mc.Module, _ = LoadModule(subModPath, resolvedModuleRefs)
 			}
 
 			contentAttrs, contentDiags := block.Body.JustAttributes()
