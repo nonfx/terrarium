@@ -544,6 +544,8 @@ func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttr
 			v, _ := t.Value(nil)
 			out.AttributePath = append(out.AttributePath, v.AsString())
 		}
+	case *hclsyntax.TemplateWrapExpr:
+		parseOutputReference(parent, t.Wrapped, out)
 	case *hclsyntax.TupleConsExpr:
 		parseOutputReference(parent, t.Exprs[0], out) // only do first item in the collection
 	}

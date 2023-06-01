@@ -91,14 +91,17 @@ func main() {
 	log.Println("Loaded 1 module")
 
 	log.Println("Processing resource declarations...")
+	totalMappingsCreatedCount := 0
 	for dstResName, dstRes := range config.ManagedResources {
 		log.Printf("Processing resource declaration '%s'...\n", dstResName)
 		mappings, err := createMappingsForResourceInputs(g, dstRes)
 		if err != nil {
 			panic(err)
 		}
-		log.Printf("Created %d mappings for resource declaration '%s'\n", len(mappings), dstResName)
+		mappingsCreatedCount := len(mappings)
+		log.Printf("Created %d mappings for resource declaration '%s'\n", mappingsCreatedCount, dstResName)
+		totalMappingsCreatedCount += mappingsCreatedCount
 	}
-	log.Printf("Processed %d resource declarations...\n", len(config.ManagedResources))
+	log.Printf("Processed %d resource declarations and created %d mappings...\n", len(config.ManagedResources), totalMappingsCreatedCount)
 
 }
