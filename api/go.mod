@@ -14,6 +14,7 @@ require (
 	github.com/rotisserie/eris v0.5.4
 	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.3
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	google.golang.org/genproto/googleapis/api v0.0.0-20230526015343-6ee61e4f9d5f
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0

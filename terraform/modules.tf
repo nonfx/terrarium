@@ -1,19 +1,19 @@
 
-# load module from Terraform Module Registry
+# # load module from Terraform Module Registry
 #module "eks" {
 #  source  = "terraform-aws-modules/eks/aws"
 #  version = "19.14.0"
 #}
 #
-# load module directly from GitHub
-#module "rds" {
+# # load module directly from GitHub
+# module "rds" {
 #  source = "github.com/terraform-aws-modules/terraform-aws-vpc.git"
-#}
-#
-# load module from local file system
-#module "vpc" {
+# }
+
+# # load module from local file system
+# module "vpc" {
 #  source = "./vpc"
-#}
+# }
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -37,5 +37,5 @@ module "eks" {
 
 module "s3-bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "3.10.1"
+  version = "3.11.0"
 }

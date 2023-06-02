@@ -7,9 +7,9 @@ import (
 type TFResourceAttributesMapping struct {
 	Model
 
-	InputAttributeID  uuid.UUID
+	InputAttributeID  uuid.UUID           `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
 	InputAttribute    TFResourceAttribute `gorm:"foreignKey:InputAttributeID"`
-	OutputAttributeID uuid.UUID
+	OutputAttributeID uuid.UUID           `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
 	OutputAttribute   TFResourceAttribute `gorm:"foreignKey:OutputAttributeID"`
 }
 

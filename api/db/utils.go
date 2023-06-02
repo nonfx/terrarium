@@ -19,6 +19,7 @@ type DB interface {
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
 
+	GetTFProvider(e *TFProvider, where *TFProvider) error
 	GetTFResourceType(e *TFResourceType, where *TFResourceType) error
 	GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error
 }
