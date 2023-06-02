@@ -49,10 +49,22 @@ func (s ResolvedModulesSchema) buildAbsPath(relPath string) string {
 func (s ResolvedModulesSchema) Get(source string, version string) string {
 	for _, item := range s.Modules {
 		if item.Source == source && item.Version == version {
-			return filepath.Join(s.baseDir, s.buildAbsPath(item.Dir))
+			return s.buildAbsPath(item.Dir)
 		}
 	}
 	return ""
+}
+
+func (s ResolvedModulesSchema) Find(path string) *ModuleReference {
+	relDir, err := filepath.Rel(s.baseDir, path)
+	if err == nil {
+		for _, item := range s.Modules {
+			if item.Dir == relDir {
+				return &item
+			}
+		}
+	}
+	return nil
 }
 
 func LoadModulesFromResolvedSchema(schemaFilePath string) ([]*Module, []Diagnostics, error) {

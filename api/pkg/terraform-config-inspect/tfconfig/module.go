@@ -9,11 +9,19 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
+type Metadata struct {
+	Name    string
+	Source  string
+	Version string
+}
+
 // Module is the top-level type representing a parsed and processed Terraform
 // module.
 type Module struct {
 	// Path is the local filesystem directory where the module was loaded from.
 	Path string `json:"path"`
+
+	Metadata *Metadata
 
 	Locals map[string]hcl.Expression
 
