@@ -10,7 +10,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const linkingModulePath = "terraform/"
+const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
 
 var resourceTypeByName map[string]*db.TFResourceType
 
@@ -79,6 +79,33 @@ func createMappingsForResourceInputs(g db.DB, dstRes *tfconfig.Resource) ([]*db.
 	return mappings, nil
 }
 
+func createMappingsForModule(g db.DB, config *tfconfig.Module) (mappings []*db.TFResourceAttributesMapping, resourceCount int, err error) {
+	log.Printf("Processing module '%s'...\n", config.Path)
+	for dstResName, dstRes := range config.ManagedResources {
+		log.Printf("Processing resource declaration '%s'...\n", dstResName)
+		mappings, err = createMappingsForResourceInputs(g, dstRes)
+		if err != nil {
+			panic(err)
+		}
+		mappingsCreatedCount := len(mappings)
+		log.Printf("Created %d mappings for resource declaration '%s'\n", mappingsCreatedCount, dstResName)
+	}
+	resourceCount += len(config.ManagedResources)
+
+	// process sub-modules
+	for _, dstMod := range config.ModuleCalls {
+		if dstMod.Module != nil {
+			subMappings, subResCount, err := createMappingsForModule(g, dstMod.Module)
+			if err != nil {
+				return subMappings, subResCount, err
+			}
+			mappings = append(mappings, subMappings...)
+			resourceCount += subResCount
+		}
+	}
+	return
+}
+
 func main() {
 	g, err := db.Connect()
 	if err != nil {
@@ -86,22 +113,23 @@ func main() {
 	}
 
 	resourceTypeByName = make(map[string]*db.TFResourceType)
-	log.Println("Loading root module...")
-	config, _ := tfconfig.LoadModule(linkingModulePath, &tfconfig.ResolvedModulesSchema{}) // no module schema: do not descend into sub-modules
-	log.Println("Loaded 1 module")
+	log.Println("Loading modules...")
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(moduleSchemaFilePath)
+	if err != nil {
+		panic(err)
+	}
+	moduleCount := len(configs)
+	log.Printf("Loaded %d modules\n", moduleCount)
 
-	log.Println("Processing resource declarations...")
+	totalResourceDeclarationsCount := 0
 	totalMappingsCreatedCount := 0
-	for dstResName, dstRes := range config.ManagedResources {
-		log.Printf("Processing resource declaration '%s'...\n", dstResName)
-		mappings, err := createMappingsForResourceInputs(g, dstRes)
+	for _, config := range configs {
+		mappings, resourceCount, err := createMappingsForModule(g, config)
 		if err != nil {
 			panic(err)
 		}
-		mappingsCreatedCount := len(mappings)
-		log.Printf("Created %d mappings for resource declaration '%s'\n", mappingsCreatedCount, dstResName)
-		totalMappingsCreatedCount += mappingsCreatedCount
+		totalResourceDeclarationsCount += resourceCount
+		totalMappingsCreatedCount += len(mappings)
 	}
-	log.Printf("Processed %d resource declarations and created %d mappings...\n", len(config.ManagedResources), totalMappingsCreatedCount)
-
+	log.Printf("Processed %d resource declarations in %d modules and created %d mappings...\n", totalResourceDeclarationsCount, moduleCount, totalMappingsCreatedCount)
 }
