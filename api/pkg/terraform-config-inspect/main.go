@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/api/pkg/terraform-config-inspect/tfconfig"
 	flag "github.com/spf13/pflag"
 )
 
@@ -24,7 +24,7 @@ func main() {
 		dir = "."
 	}
 
-	module, _ := tfconfig.LoadModule(dir)
+	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
 
 	if *showJSON {
 		showModuleJSON(module)

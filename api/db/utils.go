@@ -22,6 +22,9 @@ type DB interface {
 	GetTFProvider(e *TFProvider, where *TFProvider) error
 	GetTFResourceType(e *TFResourceType, where *TFResourceType) error
 	GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error
+
+	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
+	GetOrCreateTFProvider(e *TFProvider) (isNew bool, err error)
 }
 
 // Model a basic GoLang struct which includes the following fields: ID, CreatedAt, UpdatedAt, DeletedAt

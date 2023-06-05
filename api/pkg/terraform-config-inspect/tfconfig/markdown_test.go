@@ -34,7 +34,7 @@ func TestRenderMarkdown(t *testing.T) {
 				t.Skipf("%q not found, skipping test", fullPath)
 			}
 
-			module, _ := LoadModule(path)
+			module, _ := LoadModule(path, &ResolvedModulesSchema{})
 			if module == nil {
 				t.Fatalf("result object is nil; want a real object")
 			}
