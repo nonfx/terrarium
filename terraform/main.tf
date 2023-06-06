@@ -1,15 +1,23 @@
-terraform {
-  required_version = ">= 0.12"
+module "voting-demo" {
+  source = "github.com/cldcvr/codepipes-tutorials//voting/infra/aws/eks?ref=terrarium-sources"
 }
 
-provider "aws" {
-  region = var.aws_region
+module "serverless-sample" {
+  source = "github.com/cldcvr/codepipes-tutorials//serverless-sample/infra/aws?ref=terrarium-sources"
 }
 
-data "aws_availability_zones" "available" {}
+module "wpdemo-eks" {
+  source = "github.com/cldcvr/codepipes-tutorials//wpdemo/infra/aws/eks?ref=terrarium-sources"
+}
 
-# Not required: currently used in conjunction with using
-# icanhazip.com to determine local workstation external IP
-# to open EC2 Security Group access to the Kubernetes cluster.
-# See workstation-external-ip.tf for additional information.
-provider "http" {}
+module "wpdemo-ec2" {
+  source = "github.com/cldcvr/codepipes-tutorials//wpdemo/infra/aws/ec2?ref=terrarium-sources"
+}
+
+module "cdn" {
+  source = "github.com/cldcvr/vanguard-demo//cdn/infra/aws/eks"
+}
+
+module "codepipes-iac" {
+  source = "github.com/cldcvr/vanguard-iac//modules/vanguard-infra"
+}

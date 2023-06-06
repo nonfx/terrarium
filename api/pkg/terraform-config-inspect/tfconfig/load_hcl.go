@@ -590,7 +590,9 @@ func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttr
 	case *hclsyntax.TemplateWrapExpr:
 		parseOutputReference(parent, t.Wrapped, out)
 	case *hclsyntax.TupleConsExpr:
-		parseOutputReference(parent, t.Exprs[0], out) // only do first item in the collection
+		if t.Exprs != nil { // empty tuple []
+			parseOutputReference(parent, t.Exprs[0], out) // only do first item in the collection
+		}
 	}
 }
 
