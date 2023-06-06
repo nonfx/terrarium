@@ -196,6 +196,44 @@ func (_m *DB) CreateTaxonomy(e *db.Taxonomy) (uuid.UUID, error) {
 	return r0, r1
 }
 
+// GetOrCreateTFProvider provides a mock function with given fields: e
+func (_m *DB) GetOrCreateTFProvider(e *db.TFProvider) (bool, error) {
+	ret := _m.Called(e)
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.TFProvider) (bool, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.TFProvider) bool); ok {
+		r0 = rf(e)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.TFProvider) error); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTFProvider provides a mock function with given fields: e, where
+func (_m *DB) GetTFProvider(e *db.TFProvider, where *db.TFProvider) error {
+	ret := _m.Called(e, where)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*db.TFProvider, *db.TFProvider) error); ok {
+		r0 = rf(e, where)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetTFResourceAttribute provides a mock function with given fields: e, where
 func (_m *DB) GetTFResourceAttribute(e *db.TFResourceAttribute, where *db.TFResourceAttribute) error {
 	ret := _m.Called(e, where)

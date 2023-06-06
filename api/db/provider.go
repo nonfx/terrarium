@@ -16,3 +16,8 @@ func (db *gDB) CreateTFProvider(e *TFProvider) (uuid.UUID, error) {
 func (db *gDB) GetTFProvider(e *TFProvider, where *TFProvider) error {
 	return get(db.g(), e, where)
 }
+
+func (db *gDB) GetOrCreateTFProvider(e *TFProvider) (isNew bool, err error) {
+	result := db.g().Where(TFProvider{Name: e.Name}).FirstOrCreate(e)
+	return result.RowsAffected > 0, result.Error
+}

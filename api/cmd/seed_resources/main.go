@@ -30,13 +30,19 @@ func pushProvidersSchemaToDB(providersSchema *schema.ProvidersSchema, dbConn db.
 		provider := &db.TFProvider{
 			Name: providerName,
 		}
-		providerID, err := dbConn.CreateTFProvider(provider)
+		isNew, err := dbConn.GetOrCreateTFProvider(provider)
+
+		if !isNew {
+			log.Printf("Provider already exists, skipping resource seed: %s | %s\n", provider.ID, providerName)
+			continue
+		}
+
 		mustNotErr(err, "Error creating provider: %s", providerName)
-		log.Printf("Provider created: %s\t%s\n", providerID, providerName)
+		log.Printf("Provider created: %s | %s\n", provider.ID, providerName)
 
 		// Process each resource and data-resource type in the provider
-		pushSchemasToDB(dbConn, providerID, resources.ResourceSchemas)
-		pushSchemasToDB(dbConn, providerID, resources.DataSourceSchemas)
+		pushSchemasToDB(dbConn, provider.ID, resources.ResourceSchemas)
+		pushSchemasToDB(dbConn, provider.ID, resources.DataSourceSchemas)
 	}
 }
 
@@ -75,7 +81,7 @@ func pushSchemasToDB(dbConn db.DB, providerID uuid.UUID, schemas map[string]sche
 		}
 		resourceID, err := dbConn.CreateTFResourceType(resource)
 		mustNotErr(err, "Error creating resource type: %s", resourceType)
-		log.Printf("\tResource type created: %s\t%s\n", resourceID, resourceType)
+		log.Printf("\tResource type created: %s | %s\n", resourceID, resourceType)
 
 		// Process each attribute in the resource type
 		attributes := resourceSchema.Block.ListLeafNodes()
@@ -92,7 +98,7 @@ func pushSchemasToDB(dbConn db.DB, providerID uuid.UUID, schemas map[string]sche
 			}
 			attrID, err := dbConn.CreateTFResourceAttribute(attr)
 			mustNotErr(err, "Error creating attribute: %s", attributePath)
-			log.Printf("\t\tAttribute created: %s\t%s\n", attrID, attributePath)
+			log.Printf("\t\tAttribute created: %s | %s\n", attrID, attributePath)
 		}
 	}
 }
