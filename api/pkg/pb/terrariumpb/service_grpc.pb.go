@@ -22,14 +22,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TerrariumService_HealthCheck_FullMethodName             = "/terrarium.v0.TerrariumService/HealthCheck"
-	TerrariumService_ListModules_FullMethodName             = "/terrarium.v0.TerrariumService/ListModules"
-	TerrariumService_ListResources_FullMethodName           = "/terrarium.v0.TerrariumService/ListResources"
-	TerrariumService_GetModuleDependencies_FullMethodName   = "/terrarium.v0.TerrariumService/GetModuleDependencies"
-	TerrariumService_GetResourceDependencies_FullMethodName = "/terrarium.v0.TerrariumService/GetResourceDependencies"
-	TerrariumService_GetModuleConsumers_FullMethodName      = "/terrarium.v0.TerrariumService/GetModuleConsumers"
-	TerrariumService_GetResourceConsumers_FullMethodName    = "/terrarium.v0.TerrariumService/GetResourceConsumers"
-	TerrariumService_CodeCompletion_FullMethodName          = "/terrarium.v0.TerrariumService/CodeCompletion"
+	TerrariumService_HealthCheck_FullMethodName    = "/terrarium.v0.TerrariumService/HealthCheck"
+	TerrariumService_ListModules_FullMethodName    = "/terrarium.v0.TerrariumService/ListModules"
+	TerrariumService_CodeCompletion_FullMethodName = "/terrarium.v0.TerrariumService/CodeCompletion"
 )
 
 // TerrariumServiceClient is the client API for TerrariumService service.
@@ -40,16 +35,6 @@ type TerrariumServiceClient interface {
 	HealthCheck(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// List modules matching the source pattern
 	ListModules(ctx context.Context, in *ListModulesRequest, opts ...grpc.CallOption) (*ListModulesResponse, error)
-	// List resources matching the name pattern
-	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
-	// Get dependencies of a module or module attribute
-	GetModuleDependencies(ctx context.Context, in *DependencyRequest, opts ...grpc.CallOption) (*DependencyResponse, error)
-	// Get dependencies of a resource, or resource attribute
-	GetResourceDependencies(ctx context.Context, in *DependencyRequest, opts ...grpc.CallOption) (*DependencyResponse, error)
-	// Get consumers of a module or module attribute
-	GetModuleConsumers(ctx context.Context, in *ConsumerRequest, opts ...grpc.CallOption) (*ConsumerResponse, error)
-	// Get consumers of a resource, or resource attribute
-	GetResourceConsumers(ctx context.Context, in *ConsumerRequest, opts ...grpc.CallOption) (*ConsumerResponse, error)
 	// Code completion endpoint
 	CodeCompletion(ctx context.Context, in *CompletionRequest, opts ...grpc.CallOption) (*CompletionResponse, error)
 }
@@ -80,51 +65,6 @@ func (c *terrariumServiceClient) ListModules(ctx context.Context, in *ListModule
 	return out, nil
 }
 
-func (c *terrariumServiceClient) ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error) {
-	out := new(ListResourcesResponse)
-	err := c.cc.Invoke(ctx, TerrariumService_ListResources_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *terrariumServiceClient) GetModuleDependencies(ctx context.Context, in *DependencyRequest, opts ...grpc.CallOption) (*DependencyResponse, error) {
-	out := new(DependencyResponse)
-	err := c.cc.Invoke(ctx, TerrariumService_GetModuleDependencies_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *terrariumServiceClient) GetResourceDependencies(ctx context.Context, in *DependencyRequest, opts ...grpc.CallOption) (*DependencyResponse, error) {
-	out := new(DependencyResponse)
-	err := c.cc.Invoke(ctx, TerrariumService_GetResourceDependencies_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *terrariumServiceClient) GetModuleConsumers(ctx context.Context, in *ConsumerRequest, opts ...grpc.CallOption) (*ConsumerResponse, error) {
-	out := new(ConsumerResponse)
-	err := c.cc.Invoke(ctx, TerrariumService_GetModuleConsumers_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *terrariumServiceClient) GetResourceConsumers(ctx context.Context, in *ConsumerRequest, opts ...grpc.CallOption) (*ConsumerResponse, error) {
-	out := new(ConsumerResponse)
-	err := c.cc.Invoke(ctx, TerrariumService_GetResourceConsumers_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *terrariumServiceClient) CodeCompletion(ctx context.Context, in *CompletionRequest, opts ...grpc.CallOption) (*CompletionResponse, error) {
 	out := new(CompletionResponse)
 	err := c.cc.Invoke(ctx, TerrariumService_CodeCompletion_FullMethodName, in, out, opts...)
@@ -142,16 +82,6 @@ type TerrariumServiceServer interface {
 	HealthCheck(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// List modules matching the source pattern
 	ListModules(context.Context, *ListModulesRequest) (*ListModulesResponse, error)
-	// List resources matching the name pattern
-	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
-	// Get dependencies of a module or module attribute
-	GetModuleDependencies(context.Context, *DependencyRequest) (*DependencyResponse, error)
-	// Get dependencies of a resource, or resource attribute
-	GetResourceDependencies(context.Context, *DependencyRequest) (*DependencyResponse, error)
-	// Get consumers of a module or module attribute
-	GetModuleConsumers(context.Context, *ConsumerRequest) (*ConsumerResponse, error)
-	// Get consumers of a resource, or resource attribute
-	GetResourceConsumers(context.Context, *ConsumerRequest) (*ConsumerResponse, error)
 	// Code completion endpoint
 	CodeCompletion(context.Context, *CompletionRequest) (*CompletionResponse, error)
 	mustEmbedUnimplementedTerrariumServiceServer()
@@ -166,21 +96,6 @@ func (UnimplementedTerrariumServiceServer) HealthCheck(context.Context, *emptypb
 }
 func (UnimplementedTerrariumServiceServer) ListModules(context.Context, *ListModulesRequest) (*ListModulesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListModules not implemented")
-}
-func (UnimplementedTerrariumServiceServer) ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResources not implemented")
-}
-func (UnimplementedTerrariumServiceServer) GetModuleDependencies(context.Context, *DependencyRequest) (*DependencyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetModuleDependencies not implemented")
-}
-func (UnimplementedTerrariumServiceServer) GetResourceDependencies(context.Context, *DependencyRequest) (*DependencyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResourceDependencies not implemented")
-}
-func (UnimplementedTerrariumServiceServer) GetModuleConsumers(context.Context, *ConsumerRequest) (*ConsumerResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetModuleConsumers not implemented")
-}
-func (UnimplementedTerrariumServiceServer) GetResourceConsumers(context.Context, *ConsumerRequest) (*ConsumerResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResourceConsumers not implemented")
 }
 func (UnimplementedTerrariumServiceServer) CodeCompletion(context.Context, *CompletionRequest) (*CompletionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CodeCompletion not implemented")
@@ -234,96 +149,6 @@ func _TerrariumService_ListModules_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TerrariumService_ListResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TerrariumServiceServer).ListResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TerrariumService_ListResources_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TerrariumServiceServer).ListResources(ctx, req.(*ListResourcesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TerrariumService_GetModuleDependencies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DependencyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TerrariumServiceServer).GetModuleDependencies(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TerrariumService_GetModuleDependencies_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TerrariumServiceServer).GetModuleDependencies(ctx, req.(*DependencyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TerrariumService_GetResourceDependencies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DependencyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TerrariumServiceServer).GetResourceDependencies(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TerrariumService_GetResourceDependencies_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TerrariumServiceServer).GetResourceDependencies(ctx, req.(*DependencyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TerrariumService_GetModuleConsumers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConsumerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TerrariumServiceServer).GetModuleConsumers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TerrariumService_GetModuleConsumers_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TerrariumServiceServer).GetModuleConsumers(ctx, req.(*ConsumerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TerrariumService_GetResourceConsumers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConsumerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TerrariumServiceServer).GetResourceConsumers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TerrariumService_GetResourceConsumers_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TerrariumServiceServer).GetResourceConsumers(ctx, req.(*ConsumerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TerrariumService_CodeCompletion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CompletionRequest)
 	if err := dec(in); err != nil {
@@ -356,26 +181,6 @@ var TerrariumService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListModules",
 			Handler:    _TerrariumService_ListModules_Handler,
-		},
-		{
-			MethodName: "ListResources",
-			Handler:    _TerrariumService_ListResources_Handler,
-		},
-		{
-			MethodName: "GetModuleDependencies",
-			Handler:    _TerrariumService_GetModuleDependencies_Handler,
-		},
-		{
-			MethodName: "GetResourceDependencies",
-			Handler:    _TerrariumService_GetResourceDependencies_Handler,
-		},
-		{
-			MethodName: "GetModuleConsumers",
-			Handler:    _TerrariumService_GetModuleConsumers_Handler,
-		},
-		{
-			MethodName: "GetResourceConsumers",
-			Handler:    _TerrariumService_GetResourceConsumers_Handler,
 		},
 		{
 			MethodName: "CodeCompletion",

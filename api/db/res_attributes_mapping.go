@@ -7,10 +7,11 @@ import (
 type TFResourceAttributesMapping struct {
 	Model
 
-	InputAttributeID  uuid.UUID           `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
-	InputAttribute    TFResourceAttribute `gorm:"foreignKey:InputAttributeID"`
-	OutputAttributeID uuid.UUID           `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
-	OutputAttribute   TFResourceAttribute `gorm:"foreignKey:OutputAttributeID"`
+	InputAttributeID  uuid.UUID `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
+	OutputAttributeID uuid.UUID `gorm:"uniqueIndex:resource_attribute_mapping_unique"`
+
+	InputAttribute  TFResourceAttribute `gorm:"foreignKey:InputAttributeID"`  // Resource input-attribute object
+	OutputAttribute TFResourceAttribute `gorm:"foreignKey:OutputAttributeID"` // Resource attribute object that provides the input-attribute
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object

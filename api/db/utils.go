@@ -19,20 +19,21 @@ type DB interface {
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
 
+	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
+	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)
+
 	GetTFProvider(e *TFProvider, where *TFProvider) error
 	GetTFResourceType(e *TFResourceType, where *TFResourceType) error
 	GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error
 
-	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
-	GetOrCreateTFProvider(e *TFProvider) (isNew bool, err error)
+	// List with pagination. returns the records along with total number of records available.
+	ListTFModule(search string, limit, offset int) (result TFModules, count int64, err error)
+
+	// FindOutputMappingsByModuleID fetch the terraform module along with it's attribute and output mappings of the attribute.
+	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
 }
 
 // Model a basic GoLang struct which includes the following fields: ID, CreatedAt, UpdatedAt, DeletedAt
-// It may be embedded into your model or you may build your own model without it
-//
-//	type User struct {
-//	  gorm.Model
-//	}
 type Model struct {
 	ID        uuid.UUID `gorm:"type:uuid;primarykey;default:uuid_generate_v4()"`
 	CreatedAt time.Time

@@ -15,8 +15,11 @@ type TFResourceAttribute struct {
 	Optional       bool
 	Computed       bool
 
-	ResourceType TFResourceType `gorm:"foreignKey:ResourceTypeID"`
-	Provider     TFProvider     `gorm:"foreignKey:ProviderID"`
+	ResourceType       TFResourceType                `gorm:"foreignKey:ResourceTypeID"`
+	Provider           TFProvider                    `gorm:"foreignKey:ProviderID"`
+	RelatedModuleAttrs []TFModuleAttribute           `gorm:"foreignKey:RelatedResourceTypeAttributeID"` // Module attributes that relates to this resource attribute
+	OutputMappings     []TFResourceAttributesMapping `gorm:"foreignKey:InputAttributeID"`               // Mappings with another resources's output attribute
+	InputMappings      []TFResourceAttributesMapping `gorm:"foreignKey:OutputAttributeID"`              // Mappings with another resources's input attribute
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object

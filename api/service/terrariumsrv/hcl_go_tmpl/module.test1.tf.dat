@@ -1,0 +1,12 @@
+## TERRARIUM MODULE ## tf/mock_module_B ## mock_module_B ## _TAXONOMY_ ##
+module "mock_module_B" {
+  source = "tf/mock_module_B"
+  module_attr_Y =
+}
+
+## TERRARIUM MODULE ## tf/mock_module_A ## mock_module_A ## _TAXONOMY_ ##
+module "mock_module_A" {
+  source = "tf/mock_module_A"
+  module_attr_X = module.mock_module_B.module_attr_Y
+}
+

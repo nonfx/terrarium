@@ -196,28 +196,69 @@ func (_m *DB) CreateTaxonomy(e *db.Taxonomy) (uuid.UUID, error) {
 	return r0, r1
 }
 
-// GetOrCreateTFProvider provides a mock function with given fields: e
-func (_m *DB) GetOrCreateTFProvider(e *db.TFProvider) (bool, error) {
-	ret := _m.Called(e)
+// FindOutputMappingsByModuleID provides a mock function with given fields: ids
+func (_m *DB) FindOutputMappingsByModuleID(ids ...uuid.UUID) (db.TFModules, error) {
+	_va := make([]interface{}, len(ids))
+	for _i := range ids {
+		_va[_i] = ids[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
-	var r0 bool
+	var r0 db.TFModules
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*db.TFProvider) (bool, error)); ok {
-		return rf(e)
+	if rf, ok := ret.Get(0).(func(...uuid.UUID) (db.TFModules, error)); ok {
+		return rf(ids...)
 	}
-	if rf, ok := ret.Get(0).(func(*db.TFProvider) bool); ok {
-		r0 = rf(e)
+	if rf, ok := ret.Get(0).(func(...uuid.UUID) db.TFModules); ok {
+		r0 = rf(ids...)
 	} else {
-		r0 = ret.Get(0).(bool)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.TFModules)
+		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*db.TFProvider) error); ok {
-		r1 = rf(e)
+	if rf, ok := ret.Get(1).(func(...uuid.UUID) error); ok {
+		r1 = rf(ids...)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// GetOrCreateTFProvider provides a mock function with given fields: e
+func (_m *DB) GetOrCreateTFProvider(e *db.TFProvider) (uuid.UUID, bool, error) {
+	ret := _m.Called(e)
+
+	var r0 uuid.UUID
+	var r1 bool
+	var r2 error
+	if rf, ok := ret.Get(0).(func(*db.TFProvider) (uuid.UUID, bool, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.TFProvider) uuid.UUID); ok {
+		r0 = rf(e)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.TFProvider) bool); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	if rf, ok := ret.Get(2).(func(*db.TFProvider) error); ok {
+		r2 = rf(e)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetTFProvider provides a mock function with given fields: e, where
@@ -260,6 +301,39 @@ func (_m *DB) GetTFResourceType(e *db.TFResourceType, where *db.TFResourceType) 
 	}
 
 	return r0
+}
+
+// ListTFModule provides a mock function with given fields: search, limit, offset
+func (_m *DB) ListTFModule(search string, limit int, offset int) (db.TFModules, int64, error) {
+	ret := _m.Called(search, limit, offset)
+
+	var r0 db.TFModules
+	var r1 int64
+	var r2 error
+	if rf, ok := ret.Get(0).(func(string, int, int) (db.TFModules, int64, error)); ok {
+		return rf(search, limit, offset)
+	}
+	if rf, ok := ret.Get(0).(func(string, int, int) db.TFModules); ok {
+		r0 = rf(search, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.TFModules)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, int, int) int64); ok {
+		r1 = rf(search, limit, offset)
+	} else {
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(string, int, int) error); ok {
+		r2 = rf(search, limit, offset)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 type mockConstructorTestingTNewDB interface {

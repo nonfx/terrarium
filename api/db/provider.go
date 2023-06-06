@@ -17,7 +17,7 @@ func (db *gDB) GetTFProvider(e *TFProvider, where *TFProvider) error {
 	return get(db.g(), e, where)
 }
 
-func (db *gDB) GetOrCreateTFProvider(e *TFProvider) (isNew bool, err error) {
+func (db *gDB) GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error) {
 	result := db.g().Where(TFProvider{Name: e.Name}).FirstOrCreate(e)
-	return result.RowsAffected > 0, result.Error
+	return e.ID, result.RowsAffected > 0, result.Error
 }

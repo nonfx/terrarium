@@ -16,7 +16,8 @@ func init() {
 }
 
 func main() {
-	serviceInst := service.New()
+	serviceInst, err := service.New()
+	mustNotErr(err)
 
 	transportInst := transport.NewTerrariumAPI(serviceInst)
 
@@ -26,8 +27,8 @@ func main() {
 		GRPCPort: config.LocalGRPCPort(),
 	})
 
-	terrariumpb.RegisterTerrariumServiceServer(server.GRPCServer, transportInst)                 // Registers transportInst as service implementation in server.GRPCServer
-	err := terrariumpb.RegisterTerrariumServiceHandlerServer(ctx, server.HTTPMux, transportInst) // Adds Handlers to server.HttpMux for each endpoint in transportInst
+	terrariumpb.RegisterTerrariumServiceServer(server.GRPCServer, transportInst)                // Registers transportInst as service implementation in server.GRPCServer
+	err = terrariumpb.RegisterTerrariumServiceHandlerServer(ctx, server.HTTPMux, transportInst) // Adds Handlers to server.HttpMux for each endpoint in transportInst
 	mustNotErr(err)
 
 	// Now, that both server.GRPCServer & server.HttpMux are configured with transport layer, Run the server:

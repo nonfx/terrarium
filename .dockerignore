@@ -1,0 +1,7 @@
+.bin
+.git
+.github
+.vscode
+terraform
+cache_data
+data

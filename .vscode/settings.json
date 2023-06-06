@@ -3,7 +3,14 @@
       "GOPRIVATE": "github.com/cldcvr/*",
       "GO111MODULE": "on",
     },
-    "go.testFlags": ["-v"],
+    "go.testTimeout": "600s",
+    "go.testEnvFile": "${workspaceFolder}/.env",
+    "go.testTags": "dbtest",
+    // "go.buildTags": "dbtest", // uncomment this only while working on unit-test
+    "go.testFlags": [
+      "-v",
+      "-count=1"
+    ],
     "protoc": {
       "compile_on_save": true,
       "options": [

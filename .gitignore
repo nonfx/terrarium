@@ -31,3 +31,4 @@ override.tf.json
 .env
 cache_data
 __debug_bin
+.bin
