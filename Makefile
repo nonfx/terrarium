@@ -14,7 +14,7 @@ DUMP_DIR := ./data
 .PHONY: db-dump docker-build docker-run start-db docker-stop docker-stop-clean
 
 db-dump:  ## Target for dumping PostgreSQL database to a file
-	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) -C $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
 
 docker-build:  ## Build container image
 	docker compose build
@@ -31,17 +31,20 @@ docker-stop:  ## Stops and removes docker containers
 docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanup database
 	docker compose down -v
 
-docker-seed: start-db
-	docker compose run --rm --build seeder
+docker-tools-build:
+	docker compose --profile tooling build
 
-docker-api-test:
-	docker compose run --rm --build test
+docker-seed: docker-tools-build start-db
+	docker compose run --rm seeder
+
+docker-api-test: docker-tools-build
+	docker compose run --rm test
 
 ######################################################
 # Following targets need terraform installed on the system
 ######################################################
 
-.PHONY: clean_tf
+.PHONY: clean_tf tf_init
 
 TERRAFORM_DIR := ./terraform
 TF_FILES := $(shell find $(TERRAFORM_DIR) -name '*.tf' -not -path '$(TERRAFORM_DIR)/.terraform/*')
@@ -53,6 +56,8 @@ $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
 clean_tf:
 	rm -rf $(TERRAFORM_DIR)/.terraform
 	rm $(TERRAFORM_DIR)/.terraform.lock.hcl
+
+tf_init: $(TERRAFORM_DIR)/.terraform
 
 # generate tf_resources.json file for set terraform providers
 cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
@@ -74,7 +79,7 @@ test:  ## Run go unit tests
 
 seed: seed_resources seed_modules seed_mappings
 
-SOURCES := $(shell find . -name '*.go')
+SOURCES := $(shell find ./api/ -name '*.go')
 
 .bin/seed_resources: $(SOURCES)
 	@echo "building seed_resources"

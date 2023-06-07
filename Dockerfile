@@ -29,6 +29,7 @@ FROM hashicorp/terraform:1.4 AS seed-runner
 	COPY --from=seed-build /go/bin/seed_modules ./.bin/
 	COPY --from=seed-build /go/bin/seed_mappings ./.bin/
 	COPY Makefile ./
+	RUN touch ./.bin/seed_resources && touch ./.bin/seed_modules && touch ./.bin/seed_mappings
 	ENTRYPOINT [ "make", "seed" ]
 
 FROM golang:1.19 AS unit-test

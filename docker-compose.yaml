@@ -5,6 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${TR_DB_PASSWORD:-}
+      POSTGRES_DB: ${TR_DB_NAME:-cc_terrarium}
     volumes:
       - ./data:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data/
