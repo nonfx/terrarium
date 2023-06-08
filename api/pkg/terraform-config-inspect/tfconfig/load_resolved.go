@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	tfversion "github.com/hashicorp/go-version"
 )
 
 type ModuleReference struct {
@@ -90,9 +92,14 @@ func (s ResolvedModulesSchema) buildAbsPath(relPath string) string {
 }
 
 func (s ResolvedModulesSchema) Get(source string, version string) (path string) {
-	for _, item := range s.Modules {
-		if item.Source == source && item.Version == version {
-			return s.buildAbsPath(item.Dir)
+	skipVersionCheck := version == ""
+	if requiredVersion, err := tfversion.NewConstraint(version); skipVersionCheck || err == nil {
+		for _, item := range s.Modules {
+			if moduleSource := strings.TrimPrefix(item.Source, "registry.terraform.io/"); moduleSource == source {
+				if moduleVersion, err := tfversion.NewVersion(item.Version); skipVersionCheck || err == nil && requiredVersion.Check(moduleVersion) {
+					return s.buildAbsPath(item.Dir)
+				}
+			}
 		}
 	}
 	return ""

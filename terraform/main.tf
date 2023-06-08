@@ -1,31 +1,40 @@
 # Public modules
 
 module "eks" {
-  source = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
   version = "18.31.2"
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "4.0.2"
 }
 
 module "security-group" {
-  source = "terraform-aws-modules/security-group/aws"
+  source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.0"
 }
 
 module "rds" {
-  source = "terraform-aws-modules/rds/aws"
+  source  = "terraform-aws-modules/rds/aws"
   version = "5.1.1"
 }
 
 module "kms" {
-  source = "terraform-aws-modules/kms/aws"
+  source  = "terraform-aws-modules/kms/aws"
   version = "1.5.0"
 }
 
+module "cloudwatch-kms-key" {
+  source  = "dod-iac/cloudwatch-kms-key/aws"
+  version = "1.0.1"
+}
+
 #  Custom tf templates for mappings discovery
+
+module "tr-hide-banking-demo" {
+  source = "github.com/cldcvr/codepipes-tutorials//tfs/aws-ecr-apprunner-vpc?ref=terrarium-sources"
+}
 
 module "tr-hide-voting-demo" {
   source = "github.com/cldcvr/codepipes-tutorials//voting/infra/aws/eks?ref=terrarium-sources"
@@ -42,13 +51,3 @@ module "tr-hide-wpdemo-eks" {
 module "tr-hide-wpdemo-ec2" {
   source = "github.com/cldcvr/codepipes-tutorials//wpdemo/infra/aws/ec2?ref=terrarium-sources"
 }
-
-# # Private repos
-
-# module "tr-hide-cdn" {
-#   source = "github.com/cldcvr/vanguard-demo//cdn/infra/aws/eks"
-# }
-
-# module "tr-hide-codepipes-iac" {
-#   source = "github.com/cldcvr/vanguard-iac//modules/vanguard-infra"
-# }

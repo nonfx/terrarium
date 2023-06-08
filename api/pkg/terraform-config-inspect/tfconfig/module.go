@@ -4,10 +4,13 @@
 package tfconfig
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 )
+
+const AttributePathSeparator = "."
 
 type Metadata struct {
 	Name    string
@@ -25,9 +28,16 @@ type Module struct {
 
 	Locals map[string]hcl.Expression
 
-	Variables map[string]*Variable                               `json:"variables"`
-	Outputs   map[string]*Output                                 `json:"outputs"`
-	Inputs    map[string]map[string][]ResourceAttributeReference `json:"inputs"` // var-name: var-attr-path: res-refs
+	Variables map[string]*Variable `json:"variables"`
+	Outputs   map[string]*Output   `json:"outputs"`
+
+	// All resolved input variables of this module mapped to underlying resource inputs (as <var-name>: <var-attr-path>: <res-input-refs>)
+	// The inputs are resolved recursively (e.g. input variable of A -> module A -> module-call to B -> module B -> resource).
+	// resource "res" {
+	//	input-name = var.module_input_variable.variable_attribute
+	// }
+	// resolved as module_input_variable: variable_attribute: [res.input-name] (list since one variable may get passed to multiple resources)
+	Inputs map[string]map[string][]ResourceAttributeReference `json:"inputs"`
 
 	RequiredCore      []string                        `json:"required_core,omitempty"`
 	RequiredProviders map[string]*ProviderRequirement `json:"required_providers"`
@@ -43,16 +53,43 @@ type Module struct {
 	Diagnostics Diagnostics `json:"diagnostics,omitempty"`
 }
 
-func (m Module) GetResourceAttributeReferences(varName string) []InputReference {
-	references := make([]InputReference, 0)
+// AddResourceReference maps a given dstResource attribute from this module to
+// another srcResource attribute within this module or its sub-modules.
+//
+//	resource "destination_resource" {
+//		attr = source_resource.attribute.path
+//	}
+func (m *Module) AddResourceReference(srcResource AttributeReference, dstResource ResourceAttributeReference) bool {
+	return m.addResourceReference(m.ManagedResources, srcResource, dstResource) || m.addResourceReference(m.DataResources, srcResource, dstResource)
+}
 
-	for _, mod := range m.ModuleCalls {
-		if mod.Module != nil {
-			for inpName, inp := range mod.Inputs {
+func (m *Module) addResourceReference(resources map[string]*Resource, reference AttributeReference, referencedBy ResourceAttributeReference) bool {
+	for _, item := range resources {
+		if item.Name == referencedBy.ResourceName && item.Type == referencedBy.ResourceType {
+			attrPath := referencedBy.Path()
+			current, ok := item.References[attrPath]
+			if !ok {
+				current = make([]AttributeReference, 0)
+			}
+			item.References[attrPath] = append(current, reference)
+			return true
+		}
+	}
+	return false
+}
+
+// GetResourceAttributeReferences recursively resolves a given variable name to underlying resource reference.
+// It follows the variable to any sub-module calls and returns all resources it gets passed into.
+func (m Module) GetResourceAttributeReferences(varName string) []RelativeAttributeReference {
+	references := make([]RelativeAttributeReference, 0)
+
+	for _, mc := range m.ModuleCalls {
+		if mc.Module != nil {
+			for inpName, inp := range mc.Inputs {
 				if inp.ResourceType == "var" && inp.ResourceName == varName {
-					found := mod.Module.GetResourceAttributeReferences(inpName)
+					found := mc.Module.GetResourceAttributeReferences(inpName)
 					for i := range found {
-						found[i].InputPath = append(found[i].InputPath, inp.AttributePath...)
+						found[i].RelativePath = append(found[i].RelativePath, inp.AttributePath...)
 					}
 					references = append(references, found...)
 				}
@@ -63,13 +100,14 @@ func (m Module) GetResourceAttributeReferences(varName string) []InputReference 
 	for _, res := range m.ManagedResources {
 		for inpName, inp := range res.Inputs {
 			if inp.ResourceType == "var" && inp.ResourceName == varName {
-				references = append(references, InputReference{
-					InputPath: inp.AttributePath,
-					ResourceReference: ResourceAttributeReference{
+				references = append(references, RelativeAttributeReference{
+					ResourceAttributeReference: ResourceAttributeReference{
+						Module:        &m,
 						ResourceType:  res.Type,
 						ResourceName:  res.Name,
 						AttributePath: []string{inpName},
 					},
+					RelativePath: inp.AttributePath,
 				})
 			}
 		}
@@ -77,19 +115,65 @@ func (m Module) GetResourceAttributeReferences(varName string) []InputReference 
 	return references
 }
 
-type InputReference struct {
-	InputPath         []string
-	ResourceReference ResourceAttributeReference
+type AttributeReference interface {
+	fmt.Stringer
+	Type() string
+	Name() string
+	Attribute() string
+	Path() string
+	Pos() (file string, line int)
+}
+
+type RelativeAttributeReference struct {
+	ResourceAttributeReference
+	RelativePath []string `json:"relative_path"` // appended to the base ResourceReference
+}
+
+func (r RelativeAttributeReference) Path() string {
+	return buildAttributePath(append(append([]string{}, r.AttributePath...), r.RelativePath...)...)
 }
 
 type ResourceAttributeReference struct {
+	Expression    hcl.Expression `json:"expression"`
+	Module        *Module
 	ResourceType  string   `json:"resource_type"`
 	ResourceName  string   `json:"resource_name"`
 	AttributePath []string `json:"attribute_path"`
 }
 
-func (r ResourceAttributeReference) ToKey() string {
-	return strings.Join(append([]string{r.ResourceType, r.ResourceName}, r.AttributePath...), ".")
+func (r ResourceAttributeReference) Pos() (string, int) {
+	return r.Expression.StartRange().Filename, r.Expression.StartRange().Start.Line
+}
+
+func (r ResourceAttributeReference) Type() string {
+	return r.ResourceType
+}
+
+func (r ResourceAttributeReference) Name() string {
+	return r.ResourceName
+}
+
+func (r ResourceAttributeReference) String() string {
+	return buildAttributePath(r.ResourceType, r.Attribute())
+}
+
+func buildAttributePath(tokens ...string) string {
+	return strings.Join(tokens, AttributePathSeparator)
+}
+
+func (r ResourceAttributeReference) Attribute() string {
+	return buildAttributePath(r.ResourceType, r.Path())
+}
+
+func (r ResourceAttributeReference) Path() string {
+	return buildAttributePath(r.AttributePath...)
+}
+
+func (r ResourceAttributeReference) MakeRelative(relativePath []string) RelativeAttributeReference {
+	return RelativeAttributeReference{
+		ResourceAttributeReference: r,
+		RelativePath:               relativePath,
+	}
 }
 
 // ProviderConfig represents a provider block in the configuration

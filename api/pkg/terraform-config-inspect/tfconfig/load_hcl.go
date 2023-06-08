@@ -9,12 +9,18 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"golang.org/x/exp/slices"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
+)
+
+const (
+	passOneLoggerPrefix = "PASS-1"
+	passTwoLoggerPrefix = "PASS-2"
 )
 
 func loadModule(fs FS, dir string, resolvedModuleRefs *ResolvedModulesSchema) (*Module, Diagnostics) {
@@ -58,26 +64,20 @@ func loadModule(fs FS, dir string, resolvedModuleRefs *ResolvedModulesSchema) (*
 		diags = append(diags, contentDiags...)
 	}
 
-	// second-pass: resolve remaining local-variable references
+	// second-pass: resolve remaining references
 	// that could not be evaluated before all files are loaded
-	for _, inputVals := range mod.Inputs {
-		for _, refs := range inputVals {
-			for i := range refs {
-				resolveLocalRef(mod, &refs[i])
-			}
-		}
-	}
-	for _, output := range mod.Outputs {
-		resolveLocalRef(mod, &output.Value)
-	}
+	runSecondPassResolution(mod, mod.ManagedResources)
+	runSecondPassResolution(mod, mod.DataResources)
 
 	return mod, diagnosticsHCL(diags)
 }
 
-func resolveLocalRef(parent *Module, ref *ResourceAttributeReference) {
-	if ref.ResourceType == "local" {
-		if exp, ok := parent.Locals[ref.ResourceName]; ok {
-			parseOutputReference(parent, exp, ref)
+func runSecondPassResolution(parentModule *Module, resources map[string]*Resource) {
+	for i := range resources {
+		for qualifiedAttrName, attrValue := range resources[i].Inputs {
+			if slices.Contains([]string{"local", "module"}, attrValue.ResourceType) {
+				resolveResourceInputReference(parentModule, resources[i], qualifiedAttrName, attrValue.Expression, passTwoLoggerPrefix)
+			}
 		}
 	}
 }
@@ -299,9 +299,10 @@ func LoadModuleFromFile(file *hcl.File, mod *Module, resolvedModuleRefs *Resolve
 			name := block.Labels[1]
 
 			r := &Resource{
-				Type: typeName,
-				Name: name,
-				Pos:  sourcePosHCL(block.DefRange),
+				Type:       typeName,
+				Name:       name,
+				Pos:        sourcePosHCL(block.DefRange),
+				References: make(map[string][]AttributeReference),
 			}
 
 			var resourcesMap map[string]*Resource
@@ -428,30 +429,7 @@ func LoadModuleFromFile(file *hcl.File, mod *Module, resolvedModuleRefs *Resolve
 			diags = append(diags, contentDiags...)
 			mc.Inputs = make(map[string]ResourceAttributeReference)
 			for _, attr := range contentAttrs {
-				switch attr.Name {
-				case "tags", "count", "depends_on", "for_each":
-					continue // ignore common attributes
-				default:
-					in := ResourceAttributeReference{}
-					parseOutputReference(mod, attr.Expr, &in)
-					mc.Inputs[attr.Name] = in
-					if mc.Module != nil {
-						resolved := mc.Module.GetResourceAttributeReferences(attr.Name) // attr.Name is the input variable's name inside the module
-						for _, item := range resolved {
-							switch in.ResourceType {
-							case "var":
-								current, ok := mod.Inputs[in.ResourceName]
-								if !ok {
-									current = make(map[string][]ResourceAttributeReference)
-									mod.Inputs[in.ResourceName] = current
-								}
-
-								attrPath := strings.Join(append(append([]string{}, in.AttributePath...), item.InputPath...), ".") // e.g. var.name.all.nested.attributes
-								current[attrPath] = append(current[attrPath], item.ResourceReference)
-							}
-						}
-					}
-				}
+				parseModuleCallAttribute(mod, mc, attr)
 			}
 
 		default:
@@ -498,28 +476,118 @@ func parseResourceAttribute(parentModule *Module, parentResource *Resource, path
 		return // ignore common attributes
 	default:
 		qualifiedAttrName := buildPath(pathRoot, attr.Name)
-		in := ResourceAttributeReference{}
-		parseOutputReference(parentModule, attr.Expr, &in)
-		parentResource.Inputs[qualifiedAttrName] = in
-		switch in.ResourceType {
-		case "var":
-			current, ok := parentModule.Inputs[in.ResourceName]
-			if !ok {
-				current = make(map[string][]ResourceAttributeReference)
-				parentModule.Inputs[in.ResourceName] = current
-			}
+		resolveResourceInputReference(parentModule, parentResource, qualifiedAttrName, attr.Expr, passOneLoggerPrefix)
+	}
+}
 
-			attrPath := strings.Join(in.AttributePath, ".")
-			current[attrPath] = append(current[attrPath], ResourceAttributeReference{
-				ResourceType:  parentResource.Type,
-				ResourceName:  parentResource.Name,
-				AttributePath: []string{qualifiedAttrName},
-			})
+func resolveResourceInputReference(parentModule *Module, parentResource *Resource, qualifiedAttrName string, expr hcl.Expression, loggerPrefix string) {
+	in := ResourceAttributeReference{}
+	parseOutputReference(parentModule, expr, &in)
+	parentResource.Inputs[qualifiedAttrName] = in
+
+	// resource "res" {
+	//	 attr_1 = var.input_variable (input variable whose resolution is not known at this level - i.e. from user or a higher-level module-call)
+	//	 attr_2 = module.other_mod.out_val (reference to other module's output that has not been resolved yet - i.e. the referenced module has not been parsed yet)
+	//	 attr_3 = other_resource.attribute.path (direct resource reference - other-resource to this-resource mapping)
+	// }
+	if in.ResourceType == "" || in.ResourceName == "" {
+		// unknown reference type or literal
+		return
+	}
+
+	thisResourceReference := ResourceAttributeReference{
+		Module:        parentModule,
+		ResourceType:  parentResource.Type,
+		ResourceName:  parentResource.Name,
+		AttributePath: []string{qualifiedAttrName},
+	}
+
+	switch in.ResourceType {
+	case "var":
+		current, ok := parentModule.Inputs[in.ResourceName]
+		if !ok {
+			current = make(map[string][]ResourceAttributeReference)
+			parentModule.Inputs[in.ResourceName] = current
+		}
+
+		attrPath := strings.Join(in.AttributePath, ".")
+		current[attrPath] = append(current[attrPath], thisResourceReference)
+	case "local", "module":
+		// this may not be available before all module calls get resolved (finish during 2nd pass)
+		fmt.Printf("WARN [%s]: unresolved module-output or local-variable reference in resource %s.%s.%s'\n", loggerPrefix, parentResource.Type, parentResource.Name, qualifiedAttrName)
+	case "each":
+		// relative reference to for_each attribute value
+	default:
+		if ok := parentModule.AddResourceReference(in, thisResourceReference); ok {
+			fmt.Printf("INFO [%s]: resource-to-resource found: %s -> %s\n", loggerPrefix, in.Attribute(), thisResourceReference.Attribute())
+		} else {
+			fmt.Printf("WARN [%s]: resource-to-resource : %s -> %s\n", loggerPrefix, in.Attribute(), thisResourceReference.Attribute())
 		}
 	}
 }
 
+func parseModuleCallAttribute(parentModule *Module, parentModuleCall *ModuleCall, attr *hcl.Attribute) {
+	switch attr.Name {
+	case "tags", "count", "depends_on", "for_each":
+		return // ignore common attributes
+	default:
+		resolveModuleCallInputReference(parentModule, parentModuleCall, attr.Name, attr.Expr, passOneLoggerPrefix)
+	}
+}
+
+func resolveModuleCallInputReference(parentModule *Module, parentModuleCall *ModuleCall, qualifiedAttrName string, expr hcl.Expression, loggerPrefix string) {
+	in := ResourceAttributeReference{}
+	parseOutputReference(parentModule, expr, &in)
+	parentModuleCall.Inputs[qualifiedAttrName] = in
+
+	// module "mod" {
+	//	 attr_1 = var.input_variable (input variable whose resolution is not known at this level - i.e. from user or a higher-level module-call)
+	//	 attr_2 = module.other_mod.out_val (reference to other module's output that has not been resolved yet - i.e. the referenced module has not been parsed yet)
+	//	 attr_3 = other_resource.attribute.path (direct resource reference - knowing what attr_3 resolves to inside the called module we can compute resource-to-resource mapping)
+	// }
+	if parentModuleCall.Module != nil {
+		if in.ResourceType == "" || in.ResourceName == "" {
+			// unknown reference type, literal or special value (e.g. destroy, each)
+			return
+		}
+
+		resolved := parentModuleCall.Module.GetResourceAttributeReferences(qualifiedAttrName) // attr.Name is the input variable's name inside the module
+
+		switch in.ResourceType {
+		case "var": // resolve this variable to the underlying resource in the called sub-module
+			for _, item := range resolved {
+				current, ok := parentModule.Inputs[in.ResourceName]
+				if !ok {
+					current = make(map[string][]ResourceAttributeReference)
+					parentModule.Inputs[in.ResourceName] = current
+				}
+
+				// attrPath := strings.Join(append(append([]string{}, in.AttributePath...), item.RelativePath...), ".") // e.g. var.name.all.nested.attributes
+				attrPath := in.MakeRelative(item.RelativePath).Path() // e.g. var.name.all.nested.attributes
+				current[attrPath] = append(current[attrPath], item.ResourceAttributeReference)
+			}
+		case "local", "module":
+			fmt.Printf("WARN [%s]: unresolved module-output or local-variable reference in module-call '%s.%s'\n", loggerPrefix, parentModuleCall.Name, qualifiedAttrName)
+		case "each":
+		// relative reference to for_each attribute value
+		default:
+			for _, item := range resolved {
+				relInp := in.MakeRelative(item.RelativePath)
+				if ok := item.ResourceAttributeReference.Module.AddResourceReference(relInp, item.ResourceAttributeReference); ok {
+					fmt.Printf("INFO [%s]: resource-to-resource found: %s -> %s\n", loggerPrefix, relInp.Attribute(), item.ResourceAttributeReference.Attribute())
+				} else {
+					fmt.Printf("WARN [%s]: resource-to-resource : %s -> %s\n", loggerPrefix, relInp.Attribute(), item.ResourceAttributeReference.Attribute())
+				}
+			}
+		}
+	} else {
+		fmt.Printf("WARN [%s]: unresolved module-call '%s' ('%s', '%s')\n", loggerPrefix, parentModuleCall.Name, parentModuleCall.Source, parentModuleCall.Version)
+	}
+}
+
 func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttributeReference) {
+	out.Expression = expr // save the original parsed expression
+	out.Module = parent
 	switch t := expr.(type) {
 	case *hclsyntax.ScopeTraversalExpr:
 		out.ResourceType = t.Traversal.RootName()
@@ -540,13 +608,13 @@ func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttr
 							continue
 						}
 					case "module":
-						// resolve the module reference to resource
 						if submod, ok := parent.ModuleCalls[tr.Name]; ok {
 							relAttrs := []string{}
 							parseAttributes(traversals[2:], &relAttrs)
 							if submod.Module != nil && len(relAttrs) > 0 {
 								if resolvedOutput, ok := submod.Module.Outputs[relAttrs[0]]; ok {
 									*out = resolvedOutput.Value
+									out.AttributePath = append(append([]string{}, out.AttributePath...), relAttrs[1:]...) // append rest of the attribute path to the resolved reference
 									return
 								}
 							}
@@ -577,11 +645,23 @@ func parseOutputReference(parent *Module, expr hcl.Expression, out *ResourceAttr
 	case *hclsyntax.ConditionalExpr:
 		parseOutputReference(parent, t.TrueResult, out) // only do True branch
 	case *hclsyntax.ForExpr:
-		tmp := ResourceAttributeReference{}
-		parseOutputReference(parent, t.CollExpr, out)
-		parseOutputReference(parent, t.ValExpr, &tmp)
-		out.AttributePath = append(out.AttributePath, tmp.ResourceName)
-		out.AttributePath = append(out.AttributePath, tmp.AttributePath...)
+		// [for KeyVar, ValVar in <CollExpr (e.g. module.attr)> : <ValExpr (e.g. <ValVar>.attr)>]
+		collectionExprRef := ResourceAttributeReference{}
+		if parseOutputReference(parent, t.ValExpr, out); out.ResourceType == t.ValVar {
+			// iterator has a value variable that refers to the CollExpr: [for k, v in module.module_name.ids : v.id]
+			parseOutputReference(parent, t.CollExpr, &collectionExprRef)
+		} else if parseOutputReference(parent, t.KeyExpr, out); out.ResourceType == t.KeyVar {
+			// if not successful above, attempt the same for KeyExpr
+			parseOutputReference(parent, t.CollExpr, &collectionExprRef)
+		}
+
+		// resolve the item expression by appending it's path to the CollExpr: [for k, v in module.module_name.ids : v.id] --> module.module_name.ids
+		// if item expression does not refer to CollExpr; [for k, v in module.module_name.ids : local.vpc_cidr] --> local.vpc_cidr
+		// if out.ResourceName is empty this is probably a collection of literals: [for k, v in module.module_name.ids : "hello"]
+		if out.ResourceName != "" && collectionExprRef.ResourceName != "" {
+			collectionExprRef.AttributePath = append(append(collectionExprRef.AttributePath, out.ResourceName), out.AttributePath...)
+			*out = collectionExprRef
+		}
 	case *hclsyntax.TemplateExpr:
 		if t.IsStringLiteral() {
 			v, _ := t.Value(nil)

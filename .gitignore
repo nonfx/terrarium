@@ -32,3 +32,4 @@ override.tf.json
 cache_data
 __debug_bin
 .bin
+terraform/tr-private-sources.tf

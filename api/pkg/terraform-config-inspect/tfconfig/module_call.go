@@ -12,6 +12,11 @@ type ModuleCall struct {
 
 	Pos SourcePos `json:"pos"`
 
+	// All resolved input values to this module call (as <module-input-name>: <value-ref>).
+	// The <module-input-name> maps to an input variable in the called module.
+	// module "mod" {
+	//	input-name = value-ref (i.e. var.variable_ref, module.mod.out_ref, other_res.attr)
+	// }
 	Inputs map[string]ResourceAttributeReference `json:"inputs"`
 
 	Module *Module `json:"-"`
