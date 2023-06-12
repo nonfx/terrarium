@@ -25,68 +25,23 @@ message Module {
   string taxonomy_id = 2;
   string module_name = 3;
   string source = 4;
-  string description = 5;
-}
-
-message Resource {
-  string id = 1;
-  string name = 2;
-}
-
-message Attribute {
-  string id = 1;
-  string attribute_path = 2;
-  string data_type = 3;
-  string description = 4;
-  bool optional = 5;
-  bool computed = 6;
-}
-
-message ModuleAttribute {
-  string id = 1;
-  string module_id = 2;
-  string module_attribute_name = 3;
-  string description = 4;
-  string related_resource_type_attribute_id = 5;
-  bool optional = 6;
-  bool computed = 7;
+  string version = 5;
+  string description = 6;
 }
 
 message CompletionRequest {
-  string context = 1;
-  repeated string modules = 2;
+  string codeContext = 1;
+  repeated string modules = 2 [(validate.rules).repeated = {min_items: 1, unique: true, items: { string: {uuid: true} }}];
 }
 
 message CompletionResponse {
   repeated string suggestions = 1;
 }
 
-message DependencyRequest {
-  string id = 1 [ (validate.rules).string.uuid = true ];
-  string attribute_id = 2 [ (validate.rules).string = {uuid: true, ignore_empty: true} ];
-}
-
-message DependencyResponse {
-  repeated Module modules = 1;
-  repeated Resource resources = 2;
-  repeated Attribute attributes = 3;
-}
-
-message ConsumerRequest {
-  string id = 1;
-  string attribute_id = 2;
-}
-
-message ConsumerResponse {
-  repeated Module modules = 1;
-  repeated Resource resources = 2;
-  repeated Attribute attributes = 3;
-}
-
 message Page {
   int32 size = 1; // default 10, maximum no limit
   int32 index = 2; // 0 indexed, default 0
-  int32 total = 3; // read-only
+  int32 total = 3; // READ-ONLY. Total number of pages available. min=1, max=(max(index)+1)
 }
 
 message ListModulesRequest {
@@ -99,21 +54,11 @@ message ListModulesResponse {
   Page page = 2;
 }
 
-message ListResourcesRequest {
-  string search = 1; // optional search
-  Page page = 2;
-}
-
-message ListResourcesResponse {
-  repeated Resource resources = 1;
-  Page page = 2;
-}
-
 service TerrariumService {
   // Health check endpoint
   rpc HealthCheck(google.protobuf.Empty) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      get: "/v0/health"
+      get: "/v0/healthcheck"
     };
   }
 
@@ -124,57 +69,11 @@ service TerrariumService {
     };
   }
 
-  // List resources matching the name pattern
-  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse) {
-    option (google.api.http) = {
-      get: "/v0/resources"
-    };
-  }
-
-  // Get dependencies of a module or module attribute
-  rpc GetModuleDependencies(DependencyRequest) returns (DependencyResponse) {
-    option (google.api.http) = {
-      get: "/v0/modules/{id}/dependencies"
-      additional_bindings {
-        get: "/v0/modules/{id}/attributes/{attribute_id}/dependencies"
-      }
-    };
-  }
-
-  // Get dependencies of a resource, or resource attribute
-  rpc GetResourceDependencies(DependencyRequest) returns (DependencyResponse) {
-    option (google.api.http) = {
-      get: "/v0/resources/{id}/dependencies"
-      additional_bindings {
-        get: "/v0/resources/{id}/attributes/{attribute_id}/dependencies"
-      }
-    };
-  }
-
-  // Get consumers of a module or module attribute
-  rpc GetModuleConsumers(ConsumerRequest) returns (ConsumerResponse) {
-    option (google.api.http) = {
-      get: "/v0/modules/{id}/consumers"
-      additional_bindings {
-        get: "/v0/modules/{id}/attributes/{attribute_id}/consumers"
-      }
-    };
-  }
-
-  // Get consumers of a resource, or resource attribute
-  rpc GetResourceConsumers(ConsumerRequest) returns (ConsumerResponse) {
-    option (google.api.http) = {
-      get: "/v0/resources/{id}/consumers"
-      additional_bindings {
-        get: "/v0/resources/{id}/attributes/{attribute_id}/consumers"
-      }
-    };
-  }
-
   // Code completion endpoint
   rpc CodeCompletion(CompletionRequest) returns (CompletionResponse) {
     option (google.api.http) = {
-      get: "/v0/completion"
+      post: "/v0/completion"
+      body: "*"
     };
   }
 }

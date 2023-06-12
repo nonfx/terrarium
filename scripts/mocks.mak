@@ -4,7 +4,7 @@ PACKAGE_DIRS := $(PACKAGES:github.com/cldcvr/terrarium/%=./%)
 
 
 # Define the rule to run `go generate` in each package
-.PHONY: mock
+.PHONY: mock clean_mock
 mock: $(addsuffix /mocks, $(PACKAGE_DIRS))
 
 %/mocks: %/*.go

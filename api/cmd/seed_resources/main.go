@@ -26,23 +26,19 @@ func main() {
 func pushProvidersSchemaToDB(providersSchema *schema.ProvidersSchema, dbConn db.DB) {
 	// Process each provider in the schema
 	for providerName, resources := range providersSchema.ProviderSchemas {
-		// Create a new TFProvider instance
-		provider := &db.TFProvider{
-			Name: providerName,
-		}
-		isNew, err := dbConn.GetOrCreateTFProvider(provider)
+		providerID, isNew, err := dbConn.GetOrCreateTFProvider(&db.TFProvider{Name: providerName})
+		mustNotErr(err, "Error creating provider: %s", providerName)
 
 		if !isNew {
-			log.Printf("Provider already exists, skipping resource seed: %s | %s\n", provider.ID, providerName)
+			log.Printf("Provider already exists, skipping resource seed: %s | %s\n", providerID, providerName)
 			continue
 		}
 
-		mustNotErr(err, "Error creating provider: %s", providerName)
-		log.Printf("Provider created: %s | %s\n", provider.ID, providerName)
+		log.Printf("Provider created: %s | %s\n", providerID, providerName)
 
 		// Process each resource and data-resource type in the provider
-		pushSchemasToDB(dbConn, provider.ID, resources.ResourceSchemas)
-		pushSchemasToDB(dbConn, provider.ID, resources.DataSourceSchemas)
+		pushSchemasToDB(dbConn, providerID, resources.ResourceSchemas)
+		pushSchemasToDB(dbConn, providerID, resources.DataSourceSchemas)
 	}
 }
 

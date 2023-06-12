@@ -49,6 +49,7 @@ func TestBlockRepresentation_ListLeafNodes(t *testing.T) {
 			},
 			want: map[string]AttributeRepresentation{
 				"attribute1":                    {Type: "string", Description: "Attr 1", Required: true},
+				"nestedBlock1":                  {Type: "single"},
 				"nestedBlock1.nestedAttribute1": {Type: "bool", Description: "Nested Attr 1", Optional: true},
 			},
 		},

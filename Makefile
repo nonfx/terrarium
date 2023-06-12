@@ -11,13 +11,19 @@ POSTGRES_USER := postgres
 DUMP_DIR := ./data
 
 # Define phony targets (targets that don't correspond to files)
-.PHONY: db-dump docker-run docker-stop docker-stop-clean seed_resources seed_mappings seed_modules seed test
+.PHONY: db-dump docker-build docker-run start-db docker-stop docker-stop-clean
 
 db-dump:  ## Target for dumping PostgreSQL database to a file
-	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump --username=$(POSTGRES_USER) --create --file=/docker-entrypoint-initdb.d/$(POSTGRES_DB).sql $(POSTGRES_DB)
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
+
+docker-build:  ## Build container image
+	docker compose build
 
 docker-run:  ## Starts app in docker containers
 	docker compose up -d
+
+start-db:  ## Starts database in docker containers
+	docker compose up -d postgres
 
 docker-stop:  ## Stops and removes docker containers
 	docker compose down
@@ -25,44 +31,82 @@ docker-stop:  ## Stops and removes docker containers
 docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanup database
 	docker compose down -v
 
+docker-tools-build:
+	docker compose --profile tooling build
+
+docker-seed: docker-tools-build start-db
+	docker compose run --rm seeder
+
+docker-api-test: docker-tools-build
+	docker compose run --rm test
+
 ######################################################
 # Following targets need terraform installed on the system
 ######################################################
 
+.PHONY: clean_tf tf_init
+
 TERRAFORM_DIR := ./terraform
-TF_FILES := $(shell find $(TERRAFORM_DIR) -name '*.tf')
+TF_FILES := $(shell find $(TERRAFORM_DIR) -name '*.tf' -not -path '$(TERRAFORM_DIR)/.terraform/*')
 
 $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
-	@rm -rf terraform/.terraform
 	@cd $(TERRAFORM_DIR) && terraform init
+	@touch $(TERRAFORM_DIR)/.terraform
+
+clean_tf:
+	rm -rf $(TERRAFORM_DIR)/.terraform
+	rm $(TERRAFORM_DIR)/.terraform.lock.hcl
+
+tf_init: $(TERRAFORM_DIR)/.terraform
 
 # generate tf_resources.json file for set terraform providers
 cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
+	@mkdir -p cache_data
 	@cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
 
 ######################################################
 # Following targets need Go installed on the system
 ######################################################
 
-GOPATH = $(shell go env GOPATH|cut -d ":" -f 1)
+.PHONY: test seed seed_resources seed_mappings seed_modules
+
+-include .env
+export
 
 test:  ## Run go unit tests
-	@$(GOPATH)/bin/godotenv go test `go list github.com/cldcvr/terrarium/... | grep -v /pkg/terraform-config-inspect/`
+	go test `go list github.com/cldcvr/terrarium/... | grep -v /pkg/terraform-config-inspect/`
 
-seed: seed_resources seed_mappings seed_modules
+seed: seed_resources seed_modules seed_mappings
 
-seed_resources: docker-run cache_data/tf_resources.json  ## Seed tf-provider resources into db from terraform/provider.tf
+SOURCES := $(shell find ./api/ -name '*.go')
+
+.bin/seed_resources: $(SOURCES)
+	@echo "building seed_resources"
+	@mkdir -p ./.bin
+	@cd ./api/cmd/seed_resources && go build -o "../../../.bin"
+
+.bin/seed_modules: $(SOURCES)
+	@echo "building seed_modules"
+	@mkdir -p ./.bin
+	@cd ./api/cmd/seed_modules && go build -o "../../../.bin"
+
+.bin/seed_mappings: $(SOURCES)
+	@echo "building seed_mappings"
+	@mkdir -p ./.bin
+	@cd ./api/cmd/seed_mappings && go build -o "../../../.bin"
+
+seed_resources: .bin/seed_resources cache_data/tf_resources.json  ## Seed tf-provider resources into db from terraform/provider.tf
 	@echo "Running resource seed..."
-	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_resources
+	@./.bin/seed_resources
 
-seed_mappings: docker-run  ## Load .env file and run seed_mappings
-	@echo "Running mapping seed..."
-	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_mappings
-
-seed_modules: docker-run $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
+seed_modules: .bin/seed_modules $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
 	@echo "Running module seed..."
-	@$(GOPATH)/bin/godotenv go run ./api/cmd/seed_modules
+	@./.bin/seed_modules
 
-include scripts/mocks.mak
-include scripts/protoc.mak
+seed_mappings: .bin/seed_mappings  ## Load .env file and run seed_mappings
+	@echo "Running mapping seed..."
+	@./.bin/seed_mappings
+
+-include scripts/mocks.mak
+-include scripts/protoc.mak

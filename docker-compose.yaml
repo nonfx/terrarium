@@ -5,11 +5,59 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${TR_DB_PASSWORD:-}
+      POSTGRES_DB: ${TR_DB_NAME:-cc_terrarium}
     volumes:
       - ./data:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
+
+  api:
+    image: cldcvr/terrarium-api
+    build:
+      context: .
+      target: api-runner
+    environment:
+      # DB config
+      TR_DB_HOST: ${TR_DB_HOST:-postgres}
+      TR_DB_USER: ${TR_DB_USER:-}
+      TR_DB_PORT: ${TR_DB_PORT:-}
+      TR_DB_SSL_MODE: ${TR_DB_SSL_MODE:-}
+      TR_DB_PASSWORD: ${TR_DB_PASSWORD:-}
+
+      # Logging config
+      TR_LOG_LEVEL: ${TR_LOG_LEVEL:-trace}
+      TR_LOG_FORMAT: ${TR_LOG_FORMAT:-text}
+      TR_LOG_PRETTY_PRINT: ${TR_LOG_PRETTY_PRINT:-true}
+
+    ports:
+      - ${TR_LOCAL_HTTP_PORT:-3000}:3000
+
+  seeder:
+    image: cldcvr/terrarium-seeder
+    build:
+      context: .
+      target: seed-runner
+    environment:
+      # DB config
+      TR_DB_HOST: ${TR_DB_HOST:-postgres}
+      TR_DB_USER: ${TR_DB_USER:-}
+      TR_DB_PORT: ${TR_DB_PORT:-}
+      TR_DB_SSL_MODE: ${TR_DB_SSL_MODE:-}
+      TR_DB_PASSWORD: ${TR_DB_PASSWORD:-}
+    volumes:
+      - ./terraform:/app/terraform
+      - ./cache_data:/app/cache_data
+    profiles:
+      - tooling
+
+  test:
+    image: cldcvr/terrarium-unit-test
+    build:
+      context: .
+      target: unit-test
+    profiles:
+      - tooling
 
 volumes:
   postgres_data:

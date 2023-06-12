@@ -15,7 +15,7 @@ type TFModuleAttribute struct {
 	Computed                       bool
 
 	Module            TFModule             `gorm:"foreignKey:ModuleID"`
-	ResourceAttribute *TFResourceAttribute `gorm:"foreignKey:RelatedResourceTypeAttributeID"`
+	ResourceAttribute *TFResourceAttribute `gorm:"foreignKey:RelatedResourceTypeAttributeID"` // Resource attribute with relates to this module attribute
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object

@@ -1,0 +1,7 @@
+## TERRARIUM MODULE ## tf/mock_module_C ## mock_module_C ## _TAXONOMY_ ##
+module "mock_module_C" {
+  source = "tf/mock_module_C"
+  version = "1.0.0"
+  module_attr_X = module.mock_module_B.module_attr_Y
+}
+

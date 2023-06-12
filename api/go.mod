@@ -22,6 +22,8 @@ require (
 	gorm.io/gorm v1.25.1
 )
 
+require github.com/deckarep/golang-set/v2 v2.3.0
+
 require (
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect

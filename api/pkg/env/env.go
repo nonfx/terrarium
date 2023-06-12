@@ -11,7 +11,7 @@ var PREFIX = ""
 // or the default value if the environment variable is not set.
 func GetEnvString(name, defaultVal string) string {
 	val, isSet := os.LookupEnv(PREFIX + name)
-	if !isSet {
+	if !isSet || val == "" {
 		return defaultVal
 	}
 	return val
@@ -21,7 +21,7 @@ func GetEnvString(name, defaultVal string) string {
 // or the default value if the environment variable is not set or cannot be parsed as an integer.
 func GetEnvInt(name string, defaultVal int) int {
 	valStr, isSet := os.LookupEnv(PREFIX + name)
-	if !isSet {
+	if !isSet || valStr == "" {
 		return defaultVal
 	}
 	val, err := strconv.Atoi(valStr)
@@ -35,7 +35,7 @@ func GetEnvInt(name string, defaultVal int) int {
 // or the default value if the environment variable is not set or cannot be parsed as a boolean.
 func GetEnvBool(name string, defaultVal bool) bool {
 	valStr, isSet := os.LookupEnv(PREFIX + name)
-	if !isSet {
+	if !isSet || valStr == "" {
 		return defaultVal
 	}
 	val, err := strconv.ParseBool(valStr)

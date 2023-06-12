@@ -45,9 +45,9 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 				},
 			},
 			mocks: func(dbMocks *mocks.DB) {
-				dbMocks.On("CreateTFProvider", mock.Anything).Return(uuid.New(), nil).Once()
+				dbMocks.On("GetOrCreateTFProvider", mock.Anything).Return(uuid.New(), true, nil).Once()
 				dbMocks.On("CreateTFResourceType", mock.Anything).Return(uuid.New(), nil).Once()
-				dbMocks.On("CreateTFResourceAttribute", mock.Anything).Return(uuid.New(), nil).Twice()
+				dbMocks.On("CreateTFResourceAttribute", mock.Anything).Return(uuid.New(), nil).Times(3)
 			},
 			panicFu: assert.NotPanics,
 		},
@@ -59,7 +59,7 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 				},
 			},
 			mocks: func(dbMocks *mocks.DB) {
-				dbMocks.On("CreateTFProvider", mock.Anything).Return(uuid.Nil, fmt.Errorf("mocked error")).Once()
+				dbMocks.On("GetOrCreateTFProvider", mock.Anything).Return(uuid.Nil, false, fmt.Errorf("mocked error")).Once()
 			},
 			panicFu: assert.Panics,
 		},
