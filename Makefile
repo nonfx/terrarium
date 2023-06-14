@@ -11,7 +11,10 @@ POSTGRES_USER := postgres
 DUMP_DIR := ./data
 
 # Define phony targets (targets that don't correspond to files)
-.PHONY: db-dump docker-build docker-run start-db docker-stop docker-stop-clean
+.PHONY: docker-init db-dump docker-build docker-run start-db docker-stop docker-stop-clean
+
+docker-init:  ## Initialize the environment before running docker commands
+	touch ${HOME}/.netrc
 
 db-dump:  ## Target for dumping PostgreSQL database to a file
 	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
@@ -51,7 +54,7 @@ TERRAFORM_DIR := ./terraform
 TF_FILES := $(shell find $(TERRAFORM_DIR) -name '*.tf' -not -path '$(TERRAFORM_DIR)/.terraform/*')
 
 $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
-	@cd $(TERRAFORM_DIR) && terraform init
+	@cd $(TERRAFORM_DIR) && terraform version && terraform init && terraform providers
 	@touch $(TERRAFORM_DIR)/.terraform
 
 clean_tf:
@@ -64,7 +67,7 @@ tf_init: $(TERRAFORM_DIR)/.terraform
 cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
 	@mkdir -p cache_data
-	@cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
+	@cd terraform && terraform version && terraform providers schema -json > ../cache_data/tf_resources.json
 
 ######################################################
 # Following targets need Go installed on the system

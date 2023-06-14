@@ -4,6 +4,10 @@ volumes:
   postgres_data:
     name: tr_postgres_data
 
+secrets:
+  netrc:
+    file: $HOME/.netrc
+
 services:
   postgres:
     image: postgres:11
@@ -43,6 +47,11 @@ services:
     build:
       context: .
       target: seed-runner
+      args:
+        TERRAFORM_VERSION: ${TERRAFORM_VERSION:-latest}
+    secrets:
+      - source: netrc
+        target: /root/.netrc
     environment:
       # DB config
       TR_DB_HOST: ${TR_DB_HOST:-postgres}
