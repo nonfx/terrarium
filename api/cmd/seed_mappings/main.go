@@ -22,7 +22,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 				// ProviderID:   provDB.ID,
 				ResourceType: srcRes.Type(),
 			}); err != nil {
-				return nil, nil // skip unkown resources (e.g. need to populate more resource types)
+				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
 			}
 			resourceTypeByName[srcRes.Type()] = srcResDB
 		}
@@ -34,7 +34,8 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			AttributePath:  srcRes.Path(),
 		}); err != nil {
 			srcFile, srcLine := srcRes.Pos()
-			return nil, fmt.Errorf("unknown resource-attribute record %s: %v", fmtAttrMeta(srcRes.Type(), srcRes.Name(), srcRes.Path(), srcFile, srcLine), err)
+			log.Printf("unknown resource-attribute record %s: %v", fmtAttrMeta(srcRes.Type(), srcRes.Name(), srcRes.Path(), srcFile, srcLine), err)
+			return nil, nil // skip unknown resource attributes (e.g. reference to field in a dynamic type)
 		}
 
 		dstResDB, ok := resourceTypeByName[dstRes.Type]
@@ -44,7 +45,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 				// ProviderID:   provDB.ID,
 				ResourceType: dstRes.Type,
 			}); err != nil {
-				return nil, nil // skip unkown resources (e.g. need to populate more resource types)
+				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
 			}
 			resourceTypeByName[dstRes.Type] = dstResDB
 		}
