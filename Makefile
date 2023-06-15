@@ -32,6 +32,7 @@ docker-stop-clean:  ## Stops and removes containers as well as volumes to cleanu
 	docker compose down -v
 
 docker-tools-build:
+	@touch $(HOME)/.gitconfig && touch $(HOME)/.netrc
 	docker compose --profile tooling build
 
 docker-seed: docker-tools-build start-db
@@ -55,7 +56,7 @@ $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
 
 clean_tf:
 	rm -rf $(TERRAFORM_DIR)/.terraform
-	rm $(TERRAFORM_DIR)/.terraform.lock.hcl
+	rm -f $(TERRAFORM_DIR)/.terraform.lock.hcl
 
 tf_init: $(TERRAFORM_DIR)/.terraform
 

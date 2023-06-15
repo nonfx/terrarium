@@ -15,29 +15,40 @@ module "security-group" {
   version = "5.1.0"
 }
 
+module "rds" {
+  source = "terraform-aws-modules/rds/aws"
+  version = "5.1.1"
+}
+
+module "kms" {
+  source = "terraform-aws-modules/kms/aws"
+  version = "1.5.0"
+}
+
 #  Custom tf templates for mappings discovery
 
-module "voting-demo" {
+module "tr-hide-voting-demo" {
   source = "github.com/cldcvr/codepipes-tutorials//voting/infra/aws/eks?ref=terrarium-sources"
 }
 
-module "serverless-sample" {
+module "tr-hide-serverless-sample" {
   source = "github.com/cldcvr/codepipes-tutorials//serverless-sample/infra/aws?ref=terrarium-sources"
 }
 
-module "wpdemo-eks" {
+module "tr-hide-wpdemo-eks" {
   source = "github.com/cldcvr/codepipes-tutorials//wpdemo/infra/aws/eks?ref=terrarium-sources"
 }
 
-module "wpdemo-ec2" {
+module "tr-hide-wpdemo-ec2" {
   source = "github.com/cldcvr/codepipes-tutorials//wpdemo/infra/aws/ec2?ref=terrarium-sources"
 }
 
 # # Private repos
-# module "cdn" {
+
+# module "tr-hide-cdn" {
 #   source = "github.com/cldcvr/vanguard-demo//cdn/infra/aws/eks"
 # }
 
-# module "codepipes-iac" {
+# module "tr-hide-codepipes-iac" {
 #   source = "github.com/cldcvr/vanguard-iac//modules/vanguard-infra"
 # }
