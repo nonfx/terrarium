@@ -34,7 +34,6 @@ FROM hashicorp/terraform:1.4 AS seed-runner
 
 FROM golang:1.19 AS unit-test
 	WORKDIR /usr/src/app
-	# RUN apk update && apk add make && rm -rf /var/cache/apk/*
 	COPY --from=go-base /go /go
 	COPY . .
 	ENTRYPOINT [ "make", "test" ]

@@ -83,10 +83,12 @@ func main() {
 
 	// load modules
 	log.Println("Loading modules...")
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(moduleSchemaFilePath)
+
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(moduleSchemaFilePath, tfconfig.FilterModulesOmitLocal, tfconfig.FilterModulesOmitHidden)
 	if err != nil {
 		panic(err)
 	}
+
 	log.Printf("Loaded %d modules\n", len(configs))
 
 	for _, config := range configs {
@@ -134,7 +136,7 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 	if config.Metadata != nil {
 		record.ModuleName = config.Metadata.Name
 		record.Source = config.Metadata.Source
-		record.Version = config.Metadata.Version
+		record.Version = db.Version(config.Metadata.Version)
 	}
 	return &record
 }

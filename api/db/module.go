@@ -1,16 +1,21 @@
 package db
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/cldcvr/terrarium/api/pkg/pb/terrariumpb"
 	"github.com/google/uuid"
 )
+
+type Version string
 
 type TFModule struct {
 	Model
 
 	ModuleName  string
-	Source      string `gorm:"uniqueIndex:module_unique"`
-	Version     string `gorm:"uniqueIndex:module_unique"`
+	Source      string  `gorm:"uniqueIndex:module_unique"`
+	Version     Version `gorm:"uniqueIndex:module_unique"`
 	Description string
 	TaxonomyID  uuid.UUID `gorm:"default:null"`
 
@@ -71,7 +76,7 @@ func (m TFModule) ToProto() *terrariumpb.Module {
 		TaxonomyId:  m.TaxonomyID.String(),
 		ModuleName:  m.ModuleName,
 		Source:      m.Source,
-		Version:     m.Version,
+		Version:     string(m.Version),
 		Description: m.Description,
 	}
 }
@@ -83,4 +88,32 @@ func (mArr TFModules) ToProto() []*terrariumpb.Module {
 	}
 
 	return res
+}
+
+// Compare returns -1 if v1 is less then v2, 0 if both are equal and 1 if v1 is greater then v2.
+func (v1 Version) Compare(v2 Version) int {
+	parts1 := strings.Split(string(v1), ".")
+	parts2 := strings.Split(string(v2), ".")
+
+	for i := 0; i < len(parts1) || i < len(parts2); i++ {
+		num1 := 0
+		num2 := 0
+
+		if i < len(parts1) {
+			num1, _ = strconv.Atoi(parts1[i])
+		}
+
+		if i < len(parts2) {
+			num2, _ = strconv.Atoi(parts2[i])
+		}
+
+		if num1 < num2 {
+			return -1
+		} else if num1 > num2 {
+			return 1
+		}
+		// if this parts is equal, compare the next part
+	}
+
+	return 0
 }

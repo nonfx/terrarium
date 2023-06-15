@@ -114,32 +114,46 @@ func normalizeModuleDependency(m *db.TFModule) []string {
 // normalizeOutputMappings makes selection of one mapping of module attribute. From multiple available.
 // There are one to many relations on two levels - input resource attribute to output resource attribute mappings,
 // and resource attribute to module attribute mappings, which are both normalized to one.
-func normalizeOutputMappings(attr *db.TFModuleAttribute, connectedModuleIdSet mapset.Set[string]) {
-	// Loop over OutputMappings in ResourceAttribute
-	for i := range attr.ResourceAttribute.OutputMappings {
-		rmap := &attr.ResourceAttribute.OutputMappings[i]
-		if len(rmap.OutputAttribute.RelatedModuleAttrs) > 0 {
-			normalizeRelatedModuleAttrs(rmap, connectedModuleIdSet)
-			attr.ResourceAttribute.OutputMappings = []db.TFResourceAttributesMapping{*rmap}
-			return
+func normalizeOutputMappings(moInAttr *db.TFModuleAttribute, connectedModuleIdSet mapset.Set[string]) {
+	var chosenResOutMapping *db.TFResourceAttributesMapping
+	var chosenMoOutAttr *db.TFModuleAttribute
+	for i := range moInAttr.ResourceAttribute.OutputMappings {
+		resOutMapping := &moInAttr.ResourceAttribute.OutputMappings[i]
+
+		for j := range resOutMapping.OutputAttribute.RelatedModuleAttrs {
+			moOutAttr := &resOutMapping.OutputAttribute.RelatedModuleAttrs[j]
+
+			if chooseModuleOutputAttr(chosenMoOutAttr, moOutAttr, moInAttr) {
+				chosenResOutMapping = resOutMapping
+				chosenMoOutAttr = moOutAttr
+			}
+
 		}
+
 	}
 
-	// If there are no module output-attribute mappings, the resource attribute mappings
-	// ends up not being normalized. Fix it here.
-	if len(attr.ResourceAttribute.OutputMappings) > 1 {
-		attr.ResourceAttribute.OutputMappings = []db.TFResourceAttributesMapping{attr.ResourceAttribute.OutputMappings[0]}
+	if chosenMoOutAttr == nil {
+		moInAttr.ResourceAttribute.OutputMappings = []db.TFResourceAttributesMapping{}
+		return
 	}
+
+	chosenResOutMapping.OutputAttribute.RelatedModuleAttrs = []db.TFModuleAttribute{*chosenMoOutAttr}
+	moInAttr.ResourceAttribute.OutputMappings = []db.TFResourceAttributesMapping{*chosenResOutMapping}
+	connectedModuleIdSet.Add(chosenMoOutAttr.ModuleID.String())
 }
 
-// normalizeRelatedModuleAttrs select one module attribute out of multiple available mappings.
-// reduce one-to-many relation from resource attribute to module attribute to one-to-one.
-func normalizeRelatedModuleAttrs(rmap *db.TFResourceAttributesMapping, connectedModuleIdSet mapset.Set[string]) {
-	// Pick the first mapping, drop the rest
-	rmap.OutputAttribute.RelatedModuleAttrs = []db.TFModuleAttribute{rmap.OutputAttribute.RelatedModuleAttrs[0]}
+// chooseModuleOutputAttr returns true if the "new output attribute" must be chosen against the previous
+// based on module version number
+func chooseModuleOutputAttr(previousOutAttr, newOutAttr, inAttr *db.TFModuleAttribute) bool {
+	if inAttr.ModuleID == newOutAttr.ModuleID {
+		return false
+	}
 
-	// Add connect module ID to the lists
-	connectedModuleIdSet.Add(rmap.OutputAttribute.RelatedModuleAttrs[0].ModuleID.String())
+	if previousOutAttr == nil {
+		return true
+	}
+
+	return previousOutAttr.Module.Version.Compare(newOutAttr.Module.Version) > 0
 }
 
 // parseUUIDArr parse array of string UUIDs into `uuid.UUID` type.

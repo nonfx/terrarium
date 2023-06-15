@@ -25,7 +25,7 @@ func loadModule(fs FS, dir string, resolvedModuleRefs *ResolvedModulesSchema) (*
 
 	if meta := resolvedModuleRefs.Find(mod.Path); meta != nil {
 		mod.Metadata = &Metadata{
-			Name:    meta.Key,
+			Name:    meta.GetNormalizedKey(),
 			Source:  meta.Source,
 			Version: meta.Version,
 		}

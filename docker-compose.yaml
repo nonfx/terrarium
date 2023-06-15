@@ -1,4 +1,9 @@
 version: '3'
+
+volumes:
+  postgres_data:
+    name: tr_postgres_data
+
 services:
   postgres:
     image: postgres:11
@@ -48,6 +53,8 @@ services:
     volumes:
       - ./terraform:/app/terraform
       - ./cache_data:/app/cache_data
+      - $HOME/.netrc:/root/.netrc
+      - $HOME/.gitconfig:/root/.gitconfig
     profiles:
       - tooling
 
@@ -58,7 +65,3 @@ services:
       target: unit-test
     profiles:
       - tooling
-
-volumes:
-  postgres_data:
-    name: tr_postgres_data

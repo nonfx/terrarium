@@ -20,6 +20,12 @@ make test
 make docker-run
 ```
 
+Or to re-build the containers with latest code and run:
+
+```sh
+make docker-build docker-run
+```
+
 ## Stop containers
 
 ```sh
@@ -30,7 +36,9 @@ OR
 make docker-stop-clean # deletes database
 ```
 
-## Update terraform resources
+## Seed database
 
-1. Follow pre-requisite in [api/cmd/seed_resources/readme.md](api/cmd/seed_resources/readme.md)
-2. Run `make seed`
+1. Setup `~/.netrc` with git credentials if using private repository as terraform dependency.
+2. Run `make docker-seed` to run terraform init and all seed commands.
+3. If you want to make a fresh seed, then truncate the db tables manually, and then run `make clean_tf docker-seed`. To delete the .terraform directory and lock files and start fresh.
+4. In order to take backup of the newly seeded database, run `make db-dump`. The backup will be saved in `data/cc_terrarium.sql` directory.
