@@ -2,27 +2,26 @@ name: Run CI Checks
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   TR_DB_PASSWORD: a_super_secret_sequence_of_ordinary_characters
 
 jobs:
-
   checks:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Start API
-      run: make docker-run
+      - name: Start API
+        run: make docker-init docker-run
 
-    - name: Run API Health Check
-      run: sleep 10 && curl --fail -s http://localhost:3000/v0/healthcheck && make docker-stop-clean
+      - name: Run API Health Check
+        run: sleep 10 && curl --fail -s http://localhost:3000/v0/healthcheck && make docker-stop-clean
 
-    - name: Clean DB
-      run: rm data/cc_terrarium.sql && make docker-stop-clean
+      - name: Clean DB
+        run: rm data/cc_terrarium.sql && make docker-stop-clean
 
-    - name: Run unit tests & seed script
-      run: make docker-api-test docker-seed
+      - name: Run unit tests & seed script
+        run: make docker-api-test docker-seed

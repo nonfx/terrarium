@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/spf13/pflag v1.0.5
 	github.com/zclconf/go-cty v1.13.2
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
 
 require (

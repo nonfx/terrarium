@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/cldcvr/terrarium/api/db"
 	"github.com/cldcvr/terrarium/api/pkg/terraform-config-inspect/tfconfig"
@@ -14,83 +13,92 @@ const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
 
 var resourceTypeByName map[string]*db.TFResourceType
 
-func createMappingsForResourceInputs(g db.DB, dstRes *tfconfig.Resource) ([]*db.TFResourceAttributesMapping, error) {
-	mappings := make([]*db.TFResourceAttributesMapping, 0)
-	// provDB := &db.TFProvider{}
-	// if err := g.GetTFProvider(provDB, &db.TFProvider{
-	// 	Name: res.Provider.Name,
-	// }); err != nil {
-	// 	return nil, nil // skip unkown resources (e.g. need to populate more resource types)
-	// }
-	for dstResInputName, srcRes := range dstRes.Inputs {
-		if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.ResourceType) {
-			srcResDB, ok := resourceTypeByName[srcRes.ResourceType]
-			if !ok {
-				srcResDB = &db.TFResourceType{}
-				if err := g.GetTFResourceType(srcResDB, &db.TFResourceType{
-					// ProviderID:   provDB.ID,
-					ResourceType: srcRes.ResourceType,
-				}); err != nil {
-					return nil, nil // skip unkown resources (e.g. need to populate more resource types)
-				}
-				resourceTypeByName[srcRes.ResourceType] = srcResDB
-			}
-
-			srcAttrDB := &db.TFResourceAttribute{}
-			if err := g.GetTFResourceAttribute(srcAttrDB, &db.TFResourceAttribute{
-				ResourceTypeID: srcResDB.ID,
-				ProviderID:     srcResDB.ProviderID,
-				AttributePath:  strings.Join(srcRes.AttributePath, "."),
+func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
+	if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.Type()) {
+		srcResDB, ok := resourceTypeByName[srcRes.Type()]
+		if !ok {
+			srcResDB = &db.TFResourceType{}
+			if err := g.GetTFResourceType(srcResDB, &db.TFResourceType{
+				// ProviderID:   provDB.ID,
+				ResourceType: srcRes.Type(),
 			}); err != nil {
-				return nil, fmt.Errorf("unknown resource-attribute record: %v", err)
+				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
 			}
-
-			dstResDB, ok := resourceTypeByName[dstRes.Type]
-			if !ok {
-				dstResDB = &db.TFResourceType{}
-				if err := g.GetTFResourceType(dstResDB, &db.TFResourceType{
-					// ProviderID:   provDB.ID,
-					ResourceType: dstRes.Type,
-				}); err != nil {
-					return nil, nil // skip unkown resources (e.g. need to populate more resource types)
-				}
-				resourceTypeByName[dstRes.Type] = dstResDB
-			}
-
-			dstAttrDB := &db.TFResourceAttribute{}
-			if err := g.GetTFResourceAttribute(dstAttrDB, &db.TFResourceAttribute{
-				ResourceTypeID: dstResDB.ID,
-				ProviderID:     dstResDB.ProviderID,
-				AttributePath:  dstResInputName,
-			}); err != nil {
-				return nil, fmt.Errorf("unknown resource-attribute record: %v", err)
-			}
-
-			mappingDB := &db.TFResourceAttributesMapping{
-				InputAttributeID:  dstAttrDB.ID,
-				OutputAttributeID: srcAttrDB.ID,
-			}
-			if _, err := g.CreateTFResourceAttributesMapping(mappingDB); err != nil {
-				return nil, fmt.Errorf("error creating attribut-mapping record: %v", err)
-			}
-			mappings = append(mappings, mappingDB)
+			resourceTypeByName[srcRes.Type()] = srcResDB
 		}
+
+		srcAttrDB := &db.TFResourceAttribute{}
+		if err := g.GetTFResourceAttribute(srcAttrDB, &db.TFResourceAttribute{
+			ResourceTypeID: srcResDB.ID,
+			ProviderID:     srcResDB.ProviderID,
+			AttributePath:  srcRes.Path(),
+		}); err != nil {
+			srcFile, srcLine := srcRes.Pos()
+			log.Printf("unknown resource-attribute record %s: %v", fmtAttrMeta(srcRes.Type(), srcRes.Name(), srcRes.Path(), srcFile, srcLine), err)
+			return nil, nil // skip unknown resource attributes (e.g. reference to field in a dynamic type)
+		}
+
+		dstResDB, ok := resourceTypeByName[dstRes.Type]
+		if !ok {
+			dstResDB = &db.TFResourceType{}
+			if err := g.GetTFResourceType(dstResDB, &db.TFResourceType{
+				// ProviderID:   provDB.ID,
+				ResourceType: dstRes.Type,
+			}); err != nil {
+				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
+			}
+			resourceTypeByName[dstRes.Type] = dstResDB
+		}
+
+		dstAttrDB := &db.TFResourceAttribute{}
+		if err := g.GetTFResourceAttribute(dstAttrDB, &db.TFResourceAttribute{
+			ResourceTypeID: dstResDB.ID,
+			ProviderID:     dstResDB.ProviderID,
+			AttributePath:  dstResInputName,
+		}); err != nil {
+			return nil, fmt.Errorf("unknown resource-attribute record %s: %v", fmtAttrMeta(dstRes.Type, dstRes.Name, dstResInputName, dstRes.Pos.Filename, dstRes.Pos.Line), err)
+		}
+
+		mappingDB := &db.TFResourceAttributesMapping{
+			InputAttributeID:  dstAttrDB.ID,
+			OutputAttributeID: srcAttrDB.ID,
+		}
+		if _, err := g.CreateTFResourceAttributesMapping(mappingDB); err != nil {
+			return nil, fmt.Errorf("error creating attribut-mapping record: %v", err)
+		}
+		return mappingDB, nil
 	}
-	return mappings, nil
+	return nil, nil // skip unresolvable resources
+}
+
+func fmtAttrMeta(resType string, resName string, resAttr string, resFile string, resLine int) string {
+	return fmt.Sprintf("[resource='%s.%s'; attribute='%s'; file='%s'; line=%d]", resType, resName, resAttr, resFile, resLine)
+}
+
+func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[string]*tfconfig.Resource, created *[]*db.TFResourceAttributesMapping) (resourceCount int) {
+	for dstResName, dstRes := range resources {
+		log.Printf("Processing resource declaration '%s'...\n", dstResName)
+		resourceMallingCount := 0
+		for dstResInputName, inputValueReferences := range dstRes.References {
+			for _, item := range inputValueReferences {
+				mapping, err := createMappingRecord(g, parent, dstRes, dstResInputName, item)
+				if err != nil {
+					panic(err)
+				}
+				*created = append(*created, mapping)
+			}
+			resourceMallingCount += len(inputValueReferences)
+		}
+		log.Printf("Created %d mappings for resource declaration '%s'\n", resourceMallingCount, dstResName)
+	}
+	return len(resources)
 }
 
 func createMappingsForModule(g db.DB, config *tfconfig.Module) (mappings []*db.TFResourceAttributesMapping, resourceCount int, err error) {
 	log.Printf("Processing module '%s'...\n", config.Path)
-	for dstResName, dstRes := range config.ManagedResources {
-		log.Printf("Processing resource declaration '%s'...\n", dstResName)
-		mappings, err = createMappingsForResourceInputs(g, dstRes)
-		if err != nil {
-			panic(err)
-		}
-		mappingsCreatedCount := len(mappings)
-		log.Printf("Created %d mappings for resource declaration '%s'\n", mappingsCreatedCount, dstResName)
-	}
-	resourceCount += len(config.ManagedResources)
+	mappings = make([]*db.TFResourceAttributesMapping, 0)
+	resourceCount += createMappingsForResources(g, config, config.ManagedResources, &mappings)
+	resourceCount += createMappingsForResources(g, config, config.DataResources, &mappings)
 
 	// process sub-modules
 	for _, dstMod := range config.ModuleCalls {
