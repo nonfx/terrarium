@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/api/db"
-	"github.com/cldcvr/terrarium/api/pkg/terraform-config-inspect/tfconfig"
 	"golang.org/x/exp/slices"
 )
 
@@ -14,7 +14,7 @@ const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
 var resourceTypeByName map[string]*db.TFResourceType
 
 func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
-	if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.Type()) {
+	if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.Type()) && srcRes.Path() != "" {
 		srcResDB, ok := resourceTypeByName[srcRes.Type()]
 		if !ok {
 			srcResDB = &db.TFResourceType{}
