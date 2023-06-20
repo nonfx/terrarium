@@ -16,12 +16,3 @@ func setDefaultPage(page *terrariumpb.Page) (newPage *terrariumpb.Page) {
 
 	return
 }
-
-// setPageResp returns new page object to be used for response
-func setPageResp(pageReq *terrariumpb.Page, totalRecords int64) *terrariumpb.Page {
-	return &terrariumpb.Page{
-		Size:  pageReq.Size,
-		Index: pageReq.Index,
-		Total: int32(totalRecords/int64(pageReq.Size)) + 1,
-	}
-}

@@ -55,6 +55,21 @@ func (m *Module) Validate() error {
 
 	// no validation rules for Description
 
+	for idx, item := range m.GetInputAttributes() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ModuleValidationError{
+					field:  fmt.Sprintf("InputAttributes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -365,8 +380,6 @@ func (m *ListModulesRequest) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Search
-
 	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListModulesRequestValidationError{
@@ -376,6 +389,10 @@ func (m *ListModulesRequest) Validate() error {
 			}
 		}
 	}
+
+	// no validation rules for Search
+
+	// no validation rules for PopulateMappings
 
 	return nil
 }
@@ -527,3 +544,288 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListModulesResponseValidationError{}
+
+// Validate checks the field values on ListModuleAttributesRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListModuleAttributesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if err := m._validateUuid(m.GetModuleId()); err != nil {
+		return ListModuleAttributesRequestValidationError{
+			field:  "ModuleId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+	}
+
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListModuleAttributesRequestValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Search
+
+	// no validation rules for PopulateMappings
+
+	return nil
+}
+
+func (m *ListModuleAttributesRequest) _validateUuid(uuid string) error {
+	if matched := _service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// ListModuleAttributesRequestValidationError is the validation error returned
+// by ListModuleAttributesRequest.Validate if the designated constraints
+// aren't met.
+type ListModuleAttributesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListModuleAttributesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListModuleAttributesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListModuleAttributesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListModuleAttributesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListModuleAttributesRequestValidationError) ErrorName() string {
+	return "ListModuleAttributesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListModuleAttributesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListModuleAttributesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListModuleAttributesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListModuleAttributesRequestValidationError{}
+
+// Validate checks the field values on ListModuleAttributesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListModuleAttributesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetAttributes() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListModuleAttributesResponseValidationError{
+					field:  fmt.Sprintf("Attributes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListModuleAttributesResponseValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// ListModuleAttributesResponseValidationError is the validation error returned
+// by ListModuleAttributesResponse.Validate if the designated constraints
+// aren't met.
+type ListModuleAttributesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListModuleAttributesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListModuleAttributesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListModuleAttributesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListModuleAttributesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListModuleAttributesResponseValidationError) ErrorName() string {
+	return "ListModuleAttributesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListModuleAttributesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListModuleAttributesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListModuleAttributesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListModuleAttributesResponseValidationError{}
+
+// Validate checks the field values on ModuleAttribute with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *ModuleAttribute) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for Description
+
+	if v, ok := interface{}(m.GetParentModule()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ModuleAttributeValidationError{
+				field:  "ParentModule",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetOutputModuleAttributes() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ModuleAttributeValidationError{
+					field:  fmt.Sprintf("OutputModuleAttributes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ModuleAttributeValidationError is the validation error returned by
+// ModuleAttribute.Validate if the designated constraints aren't met.
+type ModuleAttributeValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ModuleAttributeValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ModuleAttributeValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ModuleAttributeValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ModuleAttributeValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ModuleAttributeValidationError) ErrorName() string { return "ModuleAttributeValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ModuleAttributeValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sModuleAttribute.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ModuleAttributeValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ModuleAttributeValidationError{}

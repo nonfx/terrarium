@@ -9,7 +9,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.md]
+[*.dat]
 trim_trailing_whitespace = false
 
 [{go.mod,go.sum,*.go,Makefile,*.mak,Dockerfile*}]

@@ -16,7 +16,7 @@
             "summary": "Argument or block definition required",
             "detail": "An argument or block definition is required here.",
             "pos": {
-                "filename": "testdata/syntax-error/syntax-error.tf",
+                "filename": "testdata/syntax-error/syntax-error.tf.txt",
                 "line": 1
             }
         }

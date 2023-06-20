@@ -52,7 +52,7 @@ func TestService_CodeCompletion(t *testing.T) {
 													{
 														ModuleID:            mockUuid2,
 														ModuleAttributeName: "module_attr_Y",
-														Module: db.TFModule{
+														Module: &db.TFModule{
 															Model:      db.Model{ID: mockUuid2},
 															ModuleName: "mock_module_B",
 															Source:     "tf/mock_module_B",
@@ -124,7 +124,7 @@ func TestService_CodeCompletion(t *testing.T) {
 													{
 														ModuleID:            mockUuid2,
 														ModuleAttributeName: "module_attr_Y",
-														Module: db.TFModule{
+														Module: &db.TFModule{
 															Model:      db.Model{ID: mockUuid2},
 															ModuleName: "mock_module_B",
 															Source:     "tf/mock_module_B",

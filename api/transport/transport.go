@@ -35,3 +35,7 @@ func (t terrariumAPIImplementor) ListModules(ctx context.Context, req *terrarium
 func (t terrariumAPIImplementor) CodeCompletion(ctx context.Context, req *terrariumpb.CompletionRequest) (*terrariumpb.CompletionResponse, error) {
 	return transporthelper.DefaultAPI(ctx, req, t.service.CodeCompletion, t.defaultMiddlewareOpts...)
 }
+
+func (t terrariumAPIImplementor) ListModuleAttributes(ctx context.Context, req *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error) {
+	return transporthelper.DefaultAPI(ctx, req, t.service.ListModuleAttributes, t.defaultMiddlewareOpts...)
+}
