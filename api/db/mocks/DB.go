@@ -303,37 +303,68 @@ func (_m *DB) GetTFResourceType(e *db.TFResourceType, where *db.TFResourceType) 
 	return r0
 }
 
-// ListTFModule provides a mock function with given fields: search, limit, offset
-func (_m *DB) ListTFModule(search string, limit int, offset int) (db.TFModules, int64, error) {
-	ret := _m.Called(search, limit, offset)
+// QueryTFModuleAttributes provides a mock function with given fields: filterOps
+func (_m *DB) QueryTFModuleAttributes(filterOps ...db.FilterOption) (db.TFModuleAttributes, error) {
+	_va := make([]interface{}, len(filterOps))
+	for _i := range filterOps {
+		_va[_i] = filterOps[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 db.TFModuleAttributes
+	var r1 error
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.TFModuleAttributes, error)); ok {
+		return rf(filterOps...)
+	}
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.TFModuleAttributes); ok {
+		r0 = rf(filterOps...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.TFModuleAttributes)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
+		r1 = rf(filterOps...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// QueryTFModules provides a mock function with given fields: filterOps
+func (_m *DB) QueryTFModules(filterOps ...db.FilterOption) (db.TFModules, error) {
+	_va := make([]interface{}, len(filterOps))
+	for _i := range filterOps {
+		_va[_i] = filterOps[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 db.TFModules
-	var r1 int64
-	var r2 error
-	if rf, ok := ret.Get(0).(func(string, int, int) (db.TFModules, int64, error)); ok {
-		return rf(search, limit, offset)
+	var r1 error
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.TFModules, error)); ok {
+		return rf(filterOps...)
 	}
-	if rf, ok := ret.Get(0).(func(string, int, int) db.TFModules); ok {
-		r0 = rf(search, limit, offset)
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.TFModules); ok {
+		r0 = rf(filterOps...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(db.TFModules)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, int, int) int64); ok {
-		r1 = rf(search, limit, offset)
+	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
+		r1 = rf(filterOps...)
 	} else {
-		r1 = ret.Get(1).(int64)
+		r1 = ret.Error(1)
 	}
 
-	if rf, ok := ret.Get(2).(func(string, int, int) error); ok {
-		r2 = rf(search, limit, offset)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
+	return r0, r1
 }
 
 type mockConstructorTestingTNewDB interface {

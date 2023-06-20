@@ -22,9 +22,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TerrariumService_HealthCheck_FullMethodName    = "/terrarium.v0.TerrariumService/HealthCheck"
-	TerrariumService_ListModules_FullMethodName    = "/terrarium.v0.TerrariumService/ListModules"
-	TerrariumService_CodeCompletion_FullMethodName = "/terrarium.v0.TerrariumService/CodeCompletion"
+	TerrariumService_HealthCheck_FullMethodName          = "/terrarium.v0.TerrariumService/HealthCheck"
+	TerrariumService_ListModules_FullMethodName          = "/terrarium.v0.TerrariumService/ListModules"
+	TerrariumService_CodeCompletion_FullMethodName       = "/terrarium.v0.TerrariumService/CodeCompletion"
+	TerrariumService_ListModuleAttributes_FullMethodName = "/terrarium.v0.TerrariumService/ListModuleAttributes"
 )
 
 // TerrariumServiceClient is the client API for TerrariumService service.
@@ -35,8 +36,13 @@ type TerrariumServiceClient interface {
 	HealthCheck(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// List modules matching the source pattern
 	ListModules(ctx context.Context, in *ListModulesRequest, opts ...grpc.CallOption) (*ListModulesResponse, error)
-	// Code completion endpoint
+	// CodeCompletion DEPRECATED returns HCL code snippet from the requested terraform module that includes the requested module,
+	// and the modules that it refers to. In case the linked-modules are already there in the provided code-context, then the
+	// returned code suggestion omits the existing modules and instead refers to it's attributes directly.
 	CodeCompletion(ctx context.Context, in *CompletionRequest, opts ...grpc.CallOption) (*CompletionResponse, error)
+	// ListModuleAttributes returns a list of attributes of the given module.
+	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
+	ListModuleAttributes(ctx context.Context, in *ListModuleAttributesRequest, opts ...grpc.CallOption) (*ListModuleAttributesResponse, error)
 }
 
 type terrariumServiceClient struct {
@@ -74,6 +80,15 @@ func (c *terrariumServiceClient) CodeCompletion(ctx context.Context, in *Complet
 	return out, nil
 }
 
+func (c *terrariumServiceClient) ListModuleAttributes(ctx context.Context, in *ListModuleAttributesRequest, opts ...grpc.CallOption) (*ListModuleAttributesResponse, error) {
+	out := new(ListModuleAttributesResponse)
+	err := c.cc.Invoke(ctx, TerrariumService_ListModuleAttributes_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TerrariumServiceServer is the server API for TerrariumService service.
 // All implementations must embed UnimplementedTerrariumServiceServer
 // for forward compatibility
@@ -82,8 +97,13 @@ type TerrariumServiceServer interface {
 	HealthCheck(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// List modules matching the source pattern
 	ListModules(context.Context, *ListModulesRequest) (*ListModulesResponse, error)
-	// Code completion endpoint
+	// CodeCompletion DEPRECATED returns HCL code snippet from the requested terraform module that includes the requested module,
+	// and the modules that it refers to. In case the linked-modules are already there in the provided code-context, then the
+	// returned code suggestion omits the existing modules and instead refers to it's attributes directly.
 	CodeCompletion(context.Context, *CompletionRequest) (*CompletionResponse, error)
+	// ListModuleAttributes returns a list of attributes of the given module.
+	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
+	ListModuleAttributes(context.Context, *ListModuleAttributesRequest) (*ListModuleAttributesResponse, error)
 	mustEmbedUnimplementedTerrariumServiceServer()
 }
 
@@ -99,6 +119,9 @@ func (UnimplementedTerrariumServiceServer) ListModules(context.Context, *ListMod
 }
 func (UnimplementedTerrariumServiceServer) CodeCompletion(context.Context, *CompletionRequest) (*CompletionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CodeCompletion not implemented")
+}
+func (UnimplementedTerrariumServiceServer) ListModuleAttributes(context.Context, *ListModuleAttributesRequest) (*ListModuleAttributesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListModuleAttributes not implemented")
 }
 func (UnimplementedTerrariumServiceServer) mustEmbedUnimplementedTerrariumServiceServer() {}
 
@@ -167,6 +190,24 @@ func _TerrariumService_CodeCompletion_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TerrariumService_ListModuleAttributes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListModuleAttributesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TerrariumServiceServer).ListModuleAttributes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TerrariumService_ListModuleAttributes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TerrariumServiceServer).ListModuleAttributes(ctx, req.(*ListModuleAttributesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TerrariumService_ServiceDesc is the grpc.ServiceDesc for TerrariumService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -185,6 +226,10 @@ var TerrariumService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CodeCompletion",
 			Handler:    _TerrariumService_CodeCompletion_Handler,
+		},
+		{
+			MethodName: "ListModuleAttributes",
+			Handler:    _TerrariumService_ListModuleAttributes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,10 +1,9 @@
 ARG TERRAFORM_VERSION=latest
 
-FROM golang:1.19-alpine AS go-base
+FROM golang:1.20-alpine AS go-base
 WORKDIR /usr/src/app
 COPY go.work go.work.sum ./
 COPY api/go.mod api/go.sum ./api/
-COPY api/pkg/terraform-config-inspect/go.mod api/pkg/terraform-config-inspect/go.sum ./api/pkg/terraform-config-inspect/
 RUN go mod download && go work sync
 COPY api ./api
 
@@ -34,7 +33,7 @@ COPY Makefile ./
 RUN touch ./.bin/seed_resources && touch ./.bin/seed_modules && touch ./.bin/seed_mappings
 ENTRYPOINT [ "make", "seed" ]
 
-FROM golang:1.19 AS unit-test
+FROM golang:1.20 AS unit-test
 WORKDIR /usr/src/app
 COPY --from=go-base /go /go
 COPY . .

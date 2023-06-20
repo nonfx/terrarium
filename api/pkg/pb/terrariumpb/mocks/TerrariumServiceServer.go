@@ -68,6 +68,32 @@ func (_m *TerrariumServiceServer) HealthCheck(_a0 context.Context, _a1 *emptypb.
 	return r0, r1
 }
 
+// ListModuleAttributes provides a mock function with given fields: _a0, _a1
+func (_m *TerrariumServiceServer) ListModuleAttributes(_a0 context.Context, _a1 *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *terrariumpb.ListModuleAttributesResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.ListModuleAttributesRequest) *terrariumpb.ListModuleAttributesResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*terrariumpb.ListModuleAttributesResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *terrariumpb.ListModuleAttributesRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListModules provides a mock function with given fields: _a0, _a1
 func (_m *TerrariumServiceServer) ListModules(_a0 context.Context, _a1 *terrariumpb.ListModulesRequest) (*terrariumpb.ListModulesResponse, error) {
 	ret := _m.Called(_a0, _a1)

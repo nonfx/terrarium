@@ -22,6 +22,14 @@ type TFResourceAttribute struct {
 	InputMappings      []TFResourceAttributesMapping `gorm:"foreignKey:OutputAttributeID"`              // Mappings with another resources's input attribute
 }
 
+func (a TFResourceAttribute) GetConnectedModuleOutputs() TFModuleAttributes {
+	resp := TFModuleAttributes{}
+	for _, mappings := range a.OutputMappings {
+		resp = append(resp, mappings.OutputAttribute.RelatedModuleAttrs...)
+	}
+	return resp
+}
+
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateTFResourceAttribute(e *TFResourceAttribute) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"resource_type_id", "provider_id", "attribute_path"})

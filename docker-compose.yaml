@@ -62,8 +62,6 @@ services:
     volumes:
       - ./terraform:/app/terraform
       - ./cache_data:/app/cache_data
-      - $HOME/.netrc:/root/.netrc
-      - $HOME/.gitconfig:/root/.gitconfig
     profiles:
       - tooling
 

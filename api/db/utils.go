@@ -1,6 +1,7 @@
 package db
 
 import (
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,12 +27,16 @@ type DB interface {
 	GetTFResourceType(e *TFResourceType, where *TFResourceType) error
 	GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error
 
-	// List with pagination. returns the records along with total number of records available.
-	ListTFModule(search string, limit, offset int) (result TFModules, count int64, err error)
+	// QueryTFModules list terraform modules
+	QueryTFModules(filterOps ...FilterOption) (result TFModules, err error)
+	// QueryTFModuleAttributes list terraform module attributes
+	QueryTFModuleAttributes(filterOps ...FilterOption) (result TFModuleAttributes, err error)
 
-	// FindOutputMappingsByModuleID fetch the terraform module along with it's attribute and output mappings of the attribute.
+	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
 }
+
+type FilterOption func(*gorm.DB) *gorm.DB
 
 // Model a basic GoLang struct which includes the following fields: ID, CreatedAt, UpdatedAt, DeletedAt
 type Model struct {
@@ -75,4 +80,18 @@ type gDB gorm.DB
 
 func (db *gDB) g() *gorm.DB {
 	return (*gorm.DB)(db)
+}
+
+func PaginateGlobalFilter(pageSize, pageIndex int32, totalPages *int32) FilterOption {
+	offset := pageIndex * pageSize
+	return func(g *gorm.DB) *gorm.DB {
+		var count int64
+		_ = g.Count(&count).Error
+		(*totalPages) = int32(math.Ceil(float64(count) / float64(pageSize)))
+		return g.Offset(int(offset)).Limit(int(pageSize))
+	}
+}
+
+func NoOpFilter(g *gorm.DB) *gorm.DB {
+	return g
 }

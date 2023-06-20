@@ -34,34 +34,3 @@ func TestSetDefaultPage(t *testing.T) {
 		})
 	}
 }
-
-func TestSetPageResp(t *testing.T) {
-	testCases := []struct {
-		name          string
-		pageReq       *terrariumpb.Page
-		totalRecords  int64
-		expectedSize  int32
-		expectedIndex int32
-		expectedTotal int32
-	}{
-		{
-			name:          "PageReq with Size 50 and Index 1",
-			pageReq:       &terrariumpb.Page{Size: 50, Index: 1},
-			totalRecords:  200,
-			expectedSize:  50,
-			expectedIndex: 1,
-			expectedTotal: 5,
-		},
-		// Add more test cases here for different scenarios
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			newPage := setPageResp(tc.pageReq, tc.totalRecords)
-
-			assert.Equal(t, tc.expectedSize, newPage.Size)
-			assert.Equal(t, tc.expectedIndex, newPage.Index)
-			assert.Equal(t, tc.expectedTotal, newPage.Total)
-		})
-	}
-}

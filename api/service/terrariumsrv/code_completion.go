@@ -1,5 +1,7 @@
 package terrariumsrv
 
+// DEPRECATED
+
 import (
 	"bytes"
 	"context"
@@ -193,7 +195,7 @@ func moduleToHclTemplate(moduleDef *db.TFModule, existingModulesMap map[string]s
 	// update dependency name from existing module map
 	for i, attr := range moduleDef.Attributes {
 		if attr.ResourceAttribute != nil && len(attr.ResourceAttribute.OutputMappings) > 0 && len(attr.ResourceAttribute.OutputMappings[0].OutputAttribute.RelatedModuleAttrs) > 0 {
-			module := &moduleDef.Attributes[i].ResourceAttribute.OutputMappings[0].OutputAttribute.RelatedModuleAttrs[0].Module
+			module := moduleDef.Attributes[i].ResourceAttribute.OutputMappings[0].OutputAttribute.RelatedModuleAttrs[0].Module
 			src := module.Source
 			if existingModulesMap[src] != "" {
 				module.ModuleName = existingModulesMap[src]

@@ -8,6 +8,7 @@ import (
 	"github.com/cldcvr/terrarium/api/db"
 	"github.com/cldcvr/terrarium/api/pkg/pb/terrariumpb"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestService_ListModules(t *testing.T) {
@@ -17,24 +18,23 @@ func TestService_ListModules(t *testing.T) {
 		{
 			name: "Successful retrieval of modules",
 			preCall: func(t *testing.T, tc TestCase[terrariumpb.ListModulesRequest, terrariumpb.ListModulesResponse]) {
-				tc.mockDB.On("ListTFModule", tc.req.Search, int(tc.req.Page.Size), int(tc.req.Page.Index*tc.req.Page.Size)).
+				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
 					Return(db.TFModules{
 						{
-							Model: db.Model{
-								ID: mockUuid1,
-							},
+							Model:       db.Model{ID: mockUuid1},
 							ModuleName:  "Rds",
 							Version:     "1",
 							Source:      "/rds",
 							Description: "",
 						},
-					}, int64(1), nil)
+					}, nil)
 			},
 			req: &terrariumpb.ListModulesRequest{
 				Search: "search query",
 				Page: &terrariumpb.Page{
 					Size:  10,
 					Index: 2,
+					Total: 1,
 				},
 			},
 			wantResp: &terrariumpb.ListModulesResponse{
@@ -45,11 +45,12 @@ func TestService_ListModules(t *testing.T) {
 				},
 				Modules: []*terrariumpb.Module{
 					{
-						Id:         mockUuid1.String(),
-						TaxonomyId: uuid.Nil.String(),
-						ModuleName: "Rds",
-						Version:    "1",
-						Source:     "/rds",
+						Id:              mockUuid1.String(),
+						TaxonomyId:      uuid.Nil.String(),
+						ModuleName:      "Rds",
+						Version:         "1",
+						Source:          "/rds",
+						InputAttributes: []*terrariumpb.ModuleAttribute{},
 					},
 				},
 			},
@@ -57,8 +58,8 @@ func TestService_ListModules(t *testing.T) {
 		{
 			name: "Error retrieving modules",
 			preCall: func(t *testing.T, tc TestCase[terrariumpb.ListModulesRequest, terrariumpb.ListModulesResponse]) {
-				tc.mockDB.On("ListTFModule", tc.req.Search, int(tc.req.Page.Size), int(tc.req.Page.Index*tc.req.Page.Size)).
-					Return(nil, int64(0), tc.wantErr)
+				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
+					Return(nil, tc.wantErr)
 			},
 			req: &terrariumpb.ListModulesRequest{
 				Search: "search query",
