@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/api/db"
-	"github.com/cldcvr/terrarium/api/pkg/terraform-config-inspect/tfconfig"
 )
 
 const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
@@ -20,29 +20,32 @@ type tfValue interface {
 	IsComputed() bool
 }
 
-func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.ResourceAttributeReference) (*db.TFModuleAttribute, error) {
-	resDB, ok := resourceTypeByName[res.ResourceType]
+func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {
+	if res.Type() == "module" {
+		return nil, nil // module reference was not resolved - the parser does not support remote module references
+	} else if res.Type() == "var" {
+		return nil, nil // output returns another variable (i.e. passthrough) and does not directly map to a resource
+	} else if res.Path() == "" {
+		return nil, nil // returning the entire resource
+	}
+
+	resDB, ok := resourceTypeByName[res.Type()]
 	if !ok {
-		if res.ResourceType == "module" {
-			return nil, nil // module reference was not resolved - the parser does not support remote module references
-		} else if res.ResourceType == "var" {
-			return nil, nil // output returns another variable (i.e. passthrough) and does not directly map to a resource
-		}
 		resDB = &db.TFResourceType{}
 		if err := g.GetTFResourceType(resDB, &db.TFResourceType{
 			// ProviderID:   provDB.ID,  // there may be more than a single provider (e.g. random_password)
-			ResourceType: res.ResourceType,
+			ResourceType: res.Type(),
 		}); err != nil {
 			return nil, nil // skip unkown resources (e.g. need to populate more resource types)
 		}
-		resourceTypeByName[res.ResourceType] = resDB
+		resourceTypeByName[res.Type()] = resDB
 	}
 
 	resourceAttrDB := &db.TFResourceAttribute{}
 	if err := g.GetTFResourceAttribute(resourceAttrDB, &db.TFResourceAttribute{
 		ResourceTypeID: resDB.ID,
 		ProviderID:     resDB.ProviderID,
-		AttributePath:  strings.Join(res.AttributePath, "."),
+		AttributePath:  res.Path(),
 	}); err != nil {
 		// VAN-4158: the exact match on path may fail, we need to match by prefix instead
 		// we store all sub-paths such as 'rule.noncurrent_version_expiration.newer_noncurrent_versions'

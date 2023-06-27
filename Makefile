@@ -80,7 +80,7 @@ export
 SOURCES := $(shell find ./api/ -name '*.go')
 
 test:  ## Run go unit tests
-	go test `go list github.com/cldcvr/terrarium/... | grep -v /pkg/terraform-config-inspect/`
+	go test `go list github.com/cldcvr/terrarium/...`
 
 seed: seed_resources seed_modules seed_mappings
 
