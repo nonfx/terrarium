@@ -23,6 +23,32 @@ type TFModuleAttribute struct {
 
 type TFModuleAttributes []TFModuleAttribute
 
+func (ima *TFModuleAttribute) AfterFind(*gorm.DB) (err error) {
+	if ima.ResourceAttribute == nil {
+		return
+	}
+
+	if len(ima.ResourceAttribute.OutputMappings) == 0 {
+		return
+	}
+
+	// omit the output module attributes that belong to same module as input
+	for i, om := range ima.ResourceAttribute.OutputMappings {
+		filteredMA := make(TFModuleAttributes, 0, len(om.OutputAttribute.RelatedModuleAttrs))
+		for _, oma := range om.OutputAttribute.RelatedModuleAttrs {
+			if ima.ModuleID == oma.ModuleID {
+				continue
+			}
+
+			filteredMA = append(filteredMA, oma)
+		}
+
+		ima.ResourceAttribute.OutputMappings[i].OutputAttribute.RelatedModuleAttrs = filteredMA
+	}
+
+	return
+}
+
 func (ma *TFModuleAttribute) GetConnectedModuleOutputs() TFModuleAttributes {
 	if ma.ResourceAttribute != nil {
 		return ma.ResourceAttribute.GetConnectedModuleOutputs()
