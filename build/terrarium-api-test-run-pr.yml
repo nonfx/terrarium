@@ -1,0 +1,123 @@
+name: $(Build.DefinitionName)_${{ replace(replace(variables['Build.SourceBranch'],'refs/heads/',''),'/','_') }}_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+pr:
+  branches:
+    include:
+      - main
+
+parameters:
+- name: testBranch
+  displayName: Test Branch
+  type: string
+  default: main
+
+variables:
+  testBranch: ${{ parameters.testBranch }}
+
+resources:
+  repositories:
+  - repository: templates
+    type: github
+    name: cldcvr/product-build-tools
+    endpoint: Github-CldCvr
+    trigger: none
+  - repository: terrariumTest
+    type: github
+    endpoint: Github-CldCvr
+    name: cldcvr/terrarium-api-automation
+    ref: $(testBranch)
+
+pool:
+  vmImage: "ubuntu-latest"
+
+stages:
+  - stage: Test
+    displayName: Run Tests
+    variables:
+      - group: Terrarium-API-Automation-Staging
+      - group: Common-Dev
+    jobs:
+    - job: Run_Tests
+      displayName: Run Test
+      timeoutInMinutes: 600
+      steps:
+        - checkout: self
+        - checkout: terrariumTest
+          persistCredentials: true
+        - task: DockerInstaller@0
+          displayName: "Docker Install"
+          inputs:
+            dockerVersion: '19.03.12'
+        - task: replacetokens@3
+          displayName: "Token Replace .env.tests"
+          inputs:
+            targetFiles: './terrarium-api-automation/.env.tests'
+            encoding: 'auto'
+            writeBOM: true
+            actionOnMissing: 'warn'
+            keepToken: false
+            tokenPrefix: '#{'
+            tokenSuffix: '}#'
+            useLegacyPattern: false
+            enableTransforms: false
+            enableTelemetry: true
+        - task: Docker@2
+          displayName: Docker Login
+          inputs:
+            containerRegistry: 'Docker-Hub'
+            command: 'login'
+        - script: |
+            mkdir /home/vsts/.config/gcloud
+            mkdir /home/vsts/api
+          displayName: "Create mount directories"
+        - task: mattlabrum.build-task.custom-build-task.downloadsSecureFile@0
+          displayName: 'Download Secure File Cloud Cred'
+          inputs:
+            fileInput: 'vanguard-staging-b1c22baf575c.json'
+            targetPath: '$(System.DefaultWorkingDirectory)'
+            targetName: 'application_default_credentials.json'
+        - bash:  echo "##vso[task.setvariable variable=shellopts]errexit"
+          displayName: "Force exit on error (bash)"
+        - script: |
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            cd terrarium
+            go env -w GO111MODULE=on
+            go env -w GOPRIVATE=github.com/cldcvr/*
+            rm data/cc_terrarium.sql
+            make docker-init docker-run
+            make docker-seed
+          env:
+            PM_GIT_TOKEN: $(PM_GIT_TOKEN)
+            GIT_TOKEN: $(GIT_TOKEN)
+            token: $(GIT_TOKEN)
+            TR_DB_PASSWORD: $(TR_DB_PASSWORD)
+          displayName: Start Terrarium
+        - script: |
+            git config --global url.https://${GIT_TOKEN}@github.com/.insteadOf https://github.com/
+            cd terrarium-api-automation
+            cat .env.tests
+            docker ps -a
+            TEST_REGEX=$(TEST_REGEX) TEST_ENV=${ENVIRONMENT} TEST_REGEX=${TEST_REGEX} TEST_USER=${TEST_USER} TEST_PASSWORD=${TEST_PASSWORD} TEST_VERSION=${TEST_VERSION} TEST_AZURE_BUILD_BRANCH=$(Build.SourceBranch) TEST_AZURE_BUILD_URL='$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)&_a=summary' make test-terrarium
+          env:
+            PM_GIT_TOKEN: $(PM_GIT_TOKEN)
+            GIT_TOKEN: $(GIT_TOKEN)
+          displayName: Run Test Suite
+        - task: PublishBuildArtifacts@1
+          condition: always()
+          inputs:
+            PathtoPublish: "$(Build.SourcesDirectory)/terrarium-api-automation/report"
+            ArtifactName: "reports"
+            publishLocation: "Container"
+        - script: |
+            docker logs terrarium-api-1 >& terrarium.log
+          condition: succeededOrFailed()
+          workingDirectory: $(Build.ArtifactStagingDirectory)
+          displayName: "Gather Docker Logs"
+        - task: PublishBuildArtifacts@1
+          condition: succeededOrFailed()
+          inputs:
+            PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+            ArtifactName: "logfiles"
+            publishLocation: "Container"
