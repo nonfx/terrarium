@@ -1,0 +1,62 @@
+dependency_interface:
+  postgres:
+    taxonomy: [database, sql]
+    input:
+      properties:
+        version:
+          type: string
+        db_name:
+          type: string
+    output:
+      properties:
+        host:
+          type: string
+        port:
+          type: number
+        username:
+          type: string
+        password:
+          type: string
+
+  redis:
+    taxonomy: [cache]
+    input:
+      properties:
+        version:
+          type: string
+    output:
+      properties:
+        host:
+          type: string
+        port:
+          type: string
+
+  static_site:
+    taxonomy: [compute]
+    description: CDN, SSL, etc.
+    input:
+    output:
+
+  web_service:
+    taxonomy: [compute]
+    description: SSL, HTTP, GRPC, SSL
+    input:
+    output:
+
+  private_service:
+    taxonomy: [compute]
+    description: private network, any port, any protocol, available to other services
+    input:
+    output:
+
+  background_service:
+    taxonomy: [compute]
+    description: do not have port open, listens to queues
+    input:
+    output:
+
+  cron_jobs:
+    taxonomy: [compute]
+    description: run in specific interval
+    input:
+    output:
