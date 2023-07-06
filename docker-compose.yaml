@@ -38,9 +38,8 @@ services:
       TR_LOG_LEVEL: ${TR_LOG_LEVEL:-trace}
       TR_LOG_FORMAT: ${TR_LOG_FORMAT:-text}
       TR_LOG_PRETTY_PRINT: ${TR_LOG_PRETTY_PRINT:-true}
-
     ports:
-      - ${TR_LOCAL_HTTP_PORT:-3000}:3000
+      - ${TR_SERVER_HTTP_PORT:-3000}:3000
 
   seeder:
     image: cldcvr/terrarium-seeder

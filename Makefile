@@ -77,39 +77,26 @@ $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
 -include .env
 export
 
-SOURCES := $(shell find ./api/ -name '*.go')
+SEED_SRCS := $(shell find ./src/pkg ./src/cli -name '*.go')
 
 test:  ## Run go unit tests
 	go test `go list github.com/cldcvr/terrarium/...`
 
 seed: seed_resources seed_modules seed_mappings
 
-seed_resources: .bin/seed_resources cache_data/tf_resources.json  ## Seed tf-provider resources into db from terraform/provider.tf
+seed_resources: .bin/cli cache_data/tf_resources.json  ## Seed tf-provider resources into db from terraform/provider.tf
 	@echo "Running resource seed..."
-	@./.bin/seed_resources
+	@./.bin/cli farm resources
 
-seed_modules: .bin/seed_modules $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
+seed_modules: .bin/cli $(TERRAFORM_DIR)/.terraform  ## Seed tf-modules into db from terraform/modules.tf
 	@echo "Running module seed..."
-	@./.bin/seed_modules
+	@./.bin/cli farm modules
 
-seed_mappings: .bin/seed_mappings  ## Load .env file and run seed_mappings
+seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 	@echo "Running mapping seed..."
-	@./.bin/seed_mappings
+	@./.bin/cli farm mappings
 
-.bin/seed_resources: $(SOURCES)
-	@echo "building seed_resources"
+.bin/cli: $(SEED_SRCS)
+	@echo "Building cli..."
 	@mkdir -p ./.bin
-	@go build -o "./.bin" ./api/cmd/seed_resources
-
-.bin/seed_modules: $(SOURCES)
-	@echo "building seed_modules"
-	@mkdir -p ./.bin
-	@go build -o "./.bin" ./api/cmd/seed_modules
-
-.bin/seed_mappings: $(SOURCES)
-	@echo "building seed_mappings"
-	@mkdir -p ./.bin
-	@go build -o "./.bin" ./api/cmd/seed_mappings
-
--include scripts/mocks.mak
--include scripts/protoc.mak
+	@go build -o "./.bin/cli" ./src/cli

@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+//go:generate mockery --name TerrariumServiceServer
+
+package terrarium.v0;
+
+option go_package = "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb";
+
+import "google/protobuf/empty.proto";
+
+import "src/pkg/pb/grpc/validate/validate.proto";
+import "src/pkg/pb/google/api/annotations.proto";
+import "src/pkg/pb/protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Terrarium Service API";
+    version: "0";
+  };
+  schemes: HTTPS;
+};
+
+message Module {
+  string id = 1;
+  string taxonomy_id = 2;
+  string module_name = 3;
+  string source = 4;
+  string version = 5;
+  string description = 6;
+  repeated ModuleAttribute inputAttributes = 7;
+}
+
+message CompletionRequest {
+  string codeContext = 1;
+  repeated string modules = 2 [(validate.rules).repeated = {min_items: 1, unique: true, items: { string: {uuid: true} }}];
+}
+
+message CompletionResponse {
+  repeated string suggestions = 1;
+}
+
+message Page {
+  int32 size = 1; // default 10, maximum no limit
+  int32 index = 2; // 0 indexed, default 0
+  int32 total = 3; // READ-ONLY. Total number of pages available. ceil(record_count/page_size)
+}
+
+message ListModulesRequest {
+  Page page = 1;
+  string search = 2; // optional search text
+  bool populateMappings = 3; // optional. include input-output attribute mappings of the module as well. page size cannot be higher then 10 in order to enable this option.
+}
+
+message ListModulesResponse {
+  repeated Module modules = 1;
+  Page page = 2;
+}
+
+message listModuleAttributesRequest {
+  string moduleId = 1 [(validate.rules).string.uuid = true];
+  Page page = 2;
+  string search = 3; // optional search text
+  bool populateMappings = 4; // optional. include input-output attribute mappings of the module as well. page size cannot be higher then 100 in order to enable this option.
+}
+
+message listModuleAttributesResponse {
+  repeated ModuleAttribute attributes = 1;
+  Page page = 2;
+}
+
+message ModuleAttribute {
+  string name = 1;
+  string description = 2;
+  Module parentModule = 3;
+  repeated ModuleAttribute outputModuleAttributes = 4;
+}
+
+service TerrariumService {
+  // Health check endpoint
+  rpc HealthCheck(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/v0/healthcheck"
+    };
+  }
+
+  // List modules matching the source pattern
+  rpc ListModules(ListModulesRequest) returns (ListModulesResponse) {
+    option (google.api.http) = {
+      get: "/v0/modules"
+    };
+  }
+
+  // CodeCompletion DEPRECATED returns HCL code snippet from the requested terraform module that includes the requested module,
+  // and the modules that it refers to. In case the linked-modules are already there in the provided code-context, then the
+  // returned code suggestion omits the existing modules and instead refers to it's attributes directly.
+  rpc CodeCompletion(CompletionRequest) returns (CompletionResponse) {
+    option (google.api.http) = {
+      post: "/v0/completion"
+      body: "*"
+    };
+  }
+
+  // ListModuleAttributes returns a list of attributes of the given module.
+  // Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
+  rpc ListModuleAttributes(listModuleAttributesRequest) returns (listModuleAttributesResponse) {
+    option (google.api.http) = {
+      get: "/v0/modules/{moduleId=*}/attributes"
+    };
+  }
+}

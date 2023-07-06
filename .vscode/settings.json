@@ -14,7 +14,7 @@
     "protoc": {
       "compile_on_save": true,
       "options": [
-        "-I=${workspaceRoot}/api/pkg/pb",
+        "-I=${workspaceRoot}/src/pkg/pb",
         "-I/usr/local/include",
         "-I${workspaceRoot}",
         "--go-grpc_out=/tmp",

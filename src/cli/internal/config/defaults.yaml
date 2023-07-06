@@ -1,0 +1,22 @@
+# Configuration System:
+#
+# The project uses the Viper library to manage its configuration system.
+# The configuration values can be accessed using dot notation, where nested object and array values can be referred to using dot notation in the project.
+# For example, to access the value of the 'host' property in the 'db' object, you can use `viper.GetString("db.host")`.
+#
+# Environment Variable Configuration:
+#
+# To set these configuration values using environment variables, you need to use the project prefix "TR" followed by an underscore (_) as a separator.
+# For example, to set the value of 'host' property in the 'db' object using an environment variable, you would use "TR_DB_HOST".
+#
+# Default Configuration:
+#
+# The following is the default configuration:
+
+db:
+  host: "localhost"
+  user: "postgres"
+  # password: # no default, panic if not set.
+  name: "cc_terrarium"
+  port: 5432
+  ssl_mode: false
