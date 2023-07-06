@@ -16,7 +16,7 @@ FROM go-base AS api-build
 WORKDIR /usr/src/app
 RUN --mount=type=cache,target=/root/.cache/go-build \
 	--mount=type=cache,target=/go/pkg/mod/ \
-	cd ./src/api/cmd && CGO_ENABLED=0 GOOS=linux go build -o /go/bin/server
+	cd ./src/api && CGO_ENABLED=0 GOOS=linux go build -o /go/bin/server
 
 FROM go-base AS cli-build
 WORKDIR /usr/src/app
