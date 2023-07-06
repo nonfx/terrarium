@@ -1,6 +1,6 @@
 .PHONY: proto openapi proto_deps clean_proto clean_openapi
 
-PROTO_DIR := api/pkg/pb
+PROTO_DIR := src/pkg/pb
 OPENAPI_EXT := .swagger.json
 PROTOC_INCLUDES := -I/usr/local/include -I$(PROTO_DIR) -I.
 PROTO_SRC_FILES := $(shell find $(PROTO_DIR) -name \*.proto -not -path */google/* -not -path */grpc/* -not -path */protoc-gen-openapiv2/*)

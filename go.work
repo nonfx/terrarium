@@ -1,3 +1,7 @@
 go 1.20
 
-use ./api
+use (
+	./src/api
+	./src/pkg
+	./src/seeder
+)
