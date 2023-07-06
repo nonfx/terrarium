@@ -1,4 +1,4 @@
-package main
+package modules
 
 import (
 	"fmt"
@@ -6,8 +6,9 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/cldcvr/terrarium/src/seeder/internal/config"
+	"github.com/spf13/cobra"
 )
 
 const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
@@ -19,6 +20,19 @@ type tfValue interface {
 	GetDescription() string
 	IsRequired() bool
 	IsComputed() bool
+}
+
+var modulesCmd = &cobra.Command{
+	Use:   "modules",
+	Short: "Scrapes Terraform modules and attributes from the farm directory",
+	Long:  "The 'modules' command scrapes all Terraform modules and their attributes from the specified farm directory.",
+	Run: func(cmd *cobra.Command, args []string) {
+		main()
+	},
+}
+
+func GetCmd() *cobra.Command {
+	return modulesCmd
 }
 
 func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {

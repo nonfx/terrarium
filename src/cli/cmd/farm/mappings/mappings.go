@@ -1,18 +1,32 @@
-package main
+package mappings
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/cldcvr/terrarium/src/seeder/internal/config"
+	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
 )
 
 const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
 
 var resourceTypeByName map[string]*db.TFResourceType
+
+func GetCmd() *cobra.Command {
+	return mappingsCmd
+}
+
+var mappingsCmd = &cobra.Command{
+	Use:   "mappings",
+	Short: "Scrapes resource attribute mappings from the farm directory",
+	Long:  "The 'mappings' command scrapes resource attribute mappings fromthe specified farm directory.",
+	Run: func(cmd *cobra.Command, args []string) {
+		main()
+	},
+}
 
 func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
 	if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.Type()) && srcRes.Path() != "" {

@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"encoding/json"
@@ -6,11 +6,25 @@ import (
 	"log"
 	"os"
 
+	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/tf/schema"
-	"github.com/cldcvr/terrarium/src/seeder/internal/config"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 )
+
+var resourcesCmd = &cobra.Command{
+	Use:   "resources",
+	Short: "Scrapes Terraform resources and attributes from the farm directory",
+	Long:  "The 'resources' command scrapes all Terraform resources and their attributes from the specified farm directory.",
+	Run: func(cmd *cobra.Command, args []string) {
+		main()
+	},
+}
+
+func GetCmd() *cobra.Command {
+	return resourcesCmd
+}
 
 func main() {
 	// Connect to the database
