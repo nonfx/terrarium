@@ -24,8 +24,8 @@ type TFResourceAttribute struct {
 
 func (a TFResourceAttribute) GetConnectedModuleOutputs() TFModuleAttributes {
 	resp := TFModuleAttributes{}
-	for _, mappings := range a.OutputMappings {
-		resp = append(resp, mappings.OutputAttribute.RelatedModuleAttrs...)
+	for _, om := range a.OutputMappings {
+		resp = append(resp, om.OutputAttribute.RelatedModuleAttrs...)
 	}
 	return resp
 }
