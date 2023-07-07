@@ -26,6 +26,10 @@ services:
     build:
       context: .
       target: api-runner
+      secrets: [ netrc ]
+    secrets:
+      - source: netrc
+        target: /root/.netrc
     environment:
       # DB config
       TR_DB_HOST: ${TR_DB_HOST:-postgres}
@@ -46,6 +50,7 @@ services:
     build:
       context: .
       target: seed-runner
+      secrets: [ netrc ]
       args:
         TERRAFORM_VERSION: ${TERRAFORM_VERSION:-latest}
     secrets:

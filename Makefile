@@ -14,7 +14,12 @@ POSTGRES_USER := postgres
 DUMP_DIR := ./data
 
 docker-init:  ## Initialize the environment before running docker commands
-	touch ${HOME}/.netrc
+	@touch ${HOME}/.netrc
+ifneq (${GITHUB_TOKEN},)
+	@echo "updating GITHUB_TOKEN in ${HOME}/.netrc"
+	@sed -i '/^machine github.com login/d' ${HOME}/.netrc
+	@echo "machine github.com login ${GITHUB_TOKEN}" >> ${HOME}/.netrc
+endif
 
 db-dump:  ## Target for dumping PostgreSQL database to a file
 	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
@@ -72,12 +77,26 @@ $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
 # Following targets need Go installed on the system
 ######################################################
 
-.PHONY: test seed seed_resources seed_modules seed_mappings
+.PHONY: test mod-tidy seed seed_resources seed_modules seed_mappings
 
 -include .env
 export
 
 SEED_SRCS := $(shell find ./src/pkg ./src/cli -name '*.go')
+
+mod-clean:  # delete go*.sum files
+	@echo "deleting .sum files..."
+	@rm -f ./src/api/go.sum ./src/cli/go.sum ./src/pkg/go.sum ./go.work.sum
+
+mod-tidy:  # run go mod tidy on each workspace entity, and then sync workspace
+	@echo "running api go mod tidy..."
+	@cd src/api && go mod tidy || echo "ignore these errors..."
+	@echo "running cli go mod tidy..."
+	@cd src/cli && go mod tidy || echo "ignore these errors..."
+	@echo "running pkg go mod tidy..."
+	@cd src/pkg && go mod tidy || echo "ignore these errors..."
+	@echo "running go workspace sync..."
+	@go mod download && go work sync
 
 test:  ## Run go unit tests
 	go test `go list github.com/cldcvr/terrarium/...`
