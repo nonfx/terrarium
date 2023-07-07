@@ -18,7 +18,7 @@ docker-init:  ## Initialize the environment before running docker commands
 ifneq (${GITHUB_TOKEN},)
 	@echo "updating GITHUB_TOKEN in ${HOME}/.netrc"
 	@sed -i '/^machine github.com login/d' ${HOME}/.netrc
-	@echo "machine github.com login ${GITHUB_TOKEN}" >> ${HOME}/.netrc
+	@echo "machine github.com login x-access-token password ${GITHUB_TOKEN}" >> ${HOME}/.netrc
 endif
 
 db-dump:  ## Target for dumping PostgreSQL database to a file

@@ -74,5 +74,8 @@ services:
     build:
       context: .
       target: unit-test
+    secrets:
+      - source: netrc
+        target: /root/.netrc
     profiles:
       - tooling
