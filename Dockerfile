@@ -9,7 +9,6 @@ COPY src/cli/go.mod src/cli/go.sum ./src/cli/
 
 ENV GOPRIVATE=github.com/cldcvr
 RUN --mount=type=cache,target=/go/pkg/mod/ \
-	--mount=type=secret,id=netrc,dst=/root/.netrc \
 	go mod download && go work sync
 
 COPY src ./src

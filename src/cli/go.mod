@@ -2,9 +2,11 @@ module github.com/cldcvr/terrarium/src/cli
 
 go 1.20
 
+replace github.com/cldcvr/terrarium/src/pkg => ../pkg
+
 require (
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230706112531-5640b4995fb5
-	github.com/cldcvr/terrarium/src/pkg v0.0.0-20230706181033-a018004e275f
+	github.com/cldcvr/terrarium/src/pkg v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rotisserie/eris v0.5.4
