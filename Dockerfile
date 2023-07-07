@@ -1,12 +1,13 @@
 ARG TERRAFORM_VERSION=latest
 
-FROM golang:1.20-alpine AS go-base
+FROM golang:1.20 AS go-base
 WORKDIR /usr/src/app
 COPY go.work go.work.sum ./
 COPY src/api/go.mod src/api/go.sum ./src/api/
 COPY src/pkg/go.mod src/pkg/go.sum ./src/pkg/
 COPY src/cli/go.mod src/cli/go.sum ./src/cli/
 
+ENV GOPRIVATE=github.com/cldcvr
 RUN --mount=type=cache,target=/go/pkg/mod/ \
 	go mod download && go work sync
 

@@ -16,6 +16,8 @@ jobs:
 
       - name: Start API
         run: make docker-init docker-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run API Health Check
         run: sleep 10 && curl --fail -s http://localhost:3000/v0/healthcheck && make docker-stop-clean
