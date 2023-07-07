@@ -77,7 +77,7 @@ $(TERRAFORM_DIR)/.terraform: $(TF_FILES)
 -include .env
 export
 
-SEED_SRCS := $(shell find ./src/pkg ./src/cli -name '*.go')
+SEED_SRCS := $(shell find ./src/pkg ./src/cli \( -name '*.go' -o -name 'go.mod' \))
 
 mod-clean:  # delete go*.sum files
 	@echo "deleting .sum files..."
