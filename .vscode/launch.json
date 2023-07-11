@@ -10,7 +10,10 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/src/cli/main.go",
-      "args": ["farm", "resources"],
+      "args": [
+        "farm",
+        "resources"
+      ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
     },
@@ -20,7 +23,10 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/src/cli/main.go",
-      "args": ["farm", "modules"],
+      "args": [
+        "farm",
+        "modules"
+      ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
     },
@@ -30,7 +36,25 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/src/cli/main.go",
-      "args": ["farm", "mappings"],
+      "args": [
+        "farm",
+        "mappings"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "Run Platform Lint",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/main.go",
+      "args": [
+        "platform",
+        "lint",
+        "--dir",
+        "platform/definition",
+      ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
     },
