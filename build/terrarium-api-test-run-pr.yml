@@ -103,6 +103,8 @@ stages:
           env:
             PM_GIT_TOKEN: $(PM_GIT_TOKEN)
             GIT_TOKEN: $(GIT_TOKEN)
+            GIT_OWNER: cldcvr
+            GIT_REPO: terrarium
           displayName: Run Test Suite
         - task: PublishBuildArtifacts@1
           condition: always()
