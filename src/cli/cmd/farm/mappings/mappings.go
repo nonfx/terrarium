@@ -22,7 +22,7 @@ func GetCmd() *cobra.Command {
 var mappingsCmd = &cobra.Command{
 	Use:   "mappings",
 	Short: "Scrapes resource attribute mappings from the farm directory",
-	Long:  "The 'mappings' command scrapes resource attribute mappings fromthe specified farm directory.",
+	Long:  "The 'mappings' command scrapes resource attribute mappings from the specified farm directory.",
 	Run: func(cmd *cobra.Command, args []string) {
 		main()
 	},

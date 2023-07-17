@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/cldcvr/terrarium/src/cli/cmd/farm"
+	"github.com/cldcvr/terrarium/src/cli/cmd/generate"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(farm.GetCmd())
+	rootCmd.AddCommand(generate.GetCmd())
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
 }
 
