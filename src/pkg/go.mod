@@ -3,15 +3,22 @@ module github.com/cldcvr/terrarium/src/pkg
 go 1.20
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.6
+	github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230712113351-2a570a430e38
+	github.com/creack/pty v1.1.18
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/go-kit/kit v0.12.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/hashicorp/hcl/v2 v2.17.0
+	github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rotisserie/eris v0.5.4
 	github.com/sirupsen/logrus v1.9.3
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/zclconf/go-cty v1.13.2
@@ -19,6 +26,8 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
+	gopkg.in/h2non/gock.v1 v1.1.2
+	gopkg.in/square/go-jose.v2 v2.6.0
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.2
 )
@@ -35,14 +44,17 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-test/deep v1.1.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.3.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
