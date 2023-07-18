@@ -1,0 +1,73 @@
+<html>
+<head>
+<style>
+h1   {color: black; text-align: center;font-size:25px;}
+h2   {color: black; text-align: center;font-size:20px;}
+TABLE {border: 0.5px solid #000; border-collapse: collapse; width:100%;cellpadding:1;cellspacing:1;}
+#topRow{ color:black;}th {font-size:15px;border: 0.5px solid #000; border-collapse: collapse; background-color: #9FC1CB}td {font-size:15px;border: 0.5px solid #000; border-collapse: collapse; background-color: #F5FCFE}
+#log{font-size:10px; word-break: break-all; width: 25%}
+#info{word-break: break-all}
+#fail{background-color:#EE7373}
+#moduleRow{background-color:#C4E2EB}
+#totalRow{text-align: left;}#summarytable{border: 0.5px solid #000; border-collapse: collapse; width:50%;cellpadding:1;cellspacing:1;}
+#apitable{border: 0.5px solid #000; border-collapse: collapse; width:75%;cellpadding:1;cellspacing:1;}</style>
+</head>
+<body>
+<center><h1>{{.Project}}</h1></center>
+<center><h2>{{.Environment}}</h2></center>
+<center><h5>{{.StartTime}}</h5></center>
+<center><h5><br/></h5></center>
+<center><TABLE id="summarytable">
+<tr id=topRow, bgcolor="#778899"><th>Module</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>
+{{range $index, $element := .Module}}
+<tr bgcolor="#E4F0F4"><td>{{$index}}</td><td>{{$element.TotalPass}}</td><td>{{$element.Totalfail}}</td><td>{{$element.TotalSkip}}</td></tr>
+ {{end}}
+ <tr id=totalRow><th id=totalRow>Total</th><th id=totalRow>{{.TotalPass}}</th>
+ {{if .Totalfail}} 
+         <th id="fail">{{.Totalfail}}</th>
+    {{else}} 
+        <th id="totalRow">{{.Totalfail}}</th>
+   {{end}}
+ <th id=totalRow>{{.TotalSkip}}</th></tr>
+ </TABLE></center>
+{{if .Totalfail}} 
+<center><h2><br/>Failed Tests</h2></center>
+<center><TABLE>
+<tr id=topRow, bgcolor="#778899"><th>Module</th><th>Test</th><th>Request</th><th>Response</th><th>Assertion</th></tr>
+{{range $name, $data := .Module}}
+{{range $index, $test := $data.Test}}
+{{if eq $test.Status 0}}
+<tr bgcolor="#E4F0F4"><td id="info">{{$name}}</td><td id="info">{{$test.TestNamne}}</td>
+<td id="log">
+{{range $key, $req := $test.Request}}
+ <br>{{$key}}: {{$req}}<br>
+ {{end}}
+</td>
+<td id="log">
+{{range $key, $res := $test.Response}}
+ {{$key}}: {{$res}}<br>
+ {{end}}
+</td>
+<td id="log">Error Trace: {{$test.ErrorTrace}}<br>Message: {{$test.Exception}}<br> {{$test.AssertDetail}}</td>
+{{end}}
+{{end}}
+ {{end}}
+{{end}}
+</TABLE></center>
+
+{{if .TotalSkip}}
+<center><h2><br/>Skipped Tests</h2></center>
+<center><TABLE>
+<center><TABLE>
+<tr id=topRow, bgcolor="#778899"><th>Module</th><th>Test</th><th>Cause</th></tr>
+{{range $name, $data := .Module}}
+{{range $index, $test := $data.Test}}
+{{if eq $test.Status -1}}
+<tr bgcolor="#E4F0F4"><td id="info">{{$name}}</td><td id="info">{{$test.TestNamne}}</td><td id="info"><a target="_blank" href={{$test.ErrorTrace}}>{{$test.Exception}}</a></td></tr>
+{{end}}
+{{end}}
+ {{end}}
+{{end}}
+</TABLE></center>
+ </body>
+ </html>
