@@ -141,6 +141,8 @@ install_go:
 	@tar -C $(GO_INSTALL_DIR) -xzf go.tar.gz
 	@rm -f go.tar.gz
 	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
+	@export PATH=$PATH:/usr/local/go/bin
+	@which go
 	@go version
 
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
