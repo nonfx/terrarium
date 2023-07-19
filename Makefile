@@ -122,10 +122,22 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 ## These targets are temporary until we have ability to pass the terraform and cache directory in terrarium resource, module and mappings commands
 
 # generate tf_resources.json file for set terraform providers
+TERRAFORM_VERSION := 1.5.3
+INSTALL_DIR := /usr/local/bin
+DOWNLOAD_URL := https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_linux_amd64.zip
+
+install_terraform:
+	@echo "Installing Terraform $(TERRAFORM_VERSION)..."
+	@curl -sSL -o terraform.zip $(DOWNLOAD_URL)
+	@unzip -o terraform.zip -d $(INSTALL_DIR)
+	@rm -f terraform.zip
+	@echo "Terraform $(TERRAFORM_VERSION) is installed at $(INSTALL_DIR)/terraform"
+	@terraform --version
+
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
 	@mkdir -p ./src/cli/int_test/test/cache_data
 	@cd terraform && terraform version && terraform providers schema -json > ../src/cli/int_test/test/cache_data/tf_resources.json
 
-test-int: clean_tf tf_init test_cache_data/tf_resources.json
+test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json
 	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s
