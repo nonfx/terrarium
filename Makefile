@@ -124,6 +124,7 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 # generate tf_resources.json file for set terraform providers
 TERRAFORM_VERSION := 1.5.3
 GO_VERSION := 1.20.6
+INSTALL_DIR := /usr/local/bin
 GO_INSTALL_DIR := /usr/local
 CURRENT_GO_VERSION := $(shell go version | awk '{print $$3}' | cut -d '.' -f 2)
 
