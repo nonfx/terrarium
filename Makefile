@@ -136,12 +136,12 @@ install_terraform:
 	@terraform --version
 
 install_go:
-	@echo "Installing Go $(GO_VERSION)..."
-	@curl -sSL -o go.tar.gz https://dl.google.com/go/go$(GO_VERSION).linux-amd64.tar.gz
-	@tar -C $(GO_INSTALL_DIR) -xzf go.tar.gz
-	@rm -f go.tar.gz
-	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
-	@export PATH=$PATH:/usr/local/go/bin:$GO_INSTALL_DIR/go/bin
+	# @echo "Installing Go $(GO_VERSION)..."
+	# @curl -sSL -o go.tar.gz https://dl.google.com/go/go$(GO_VERSION).linux-amd64.tar.gz
+	# @tar -C $(GO_INSTALL_DIR) -xzf go.tar.gz
+	# @rm -f go.tar.gz
+	# @echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
+	# @export PATH=$PATH:/usr/local/go/bin:$GO_INSTALL_DIR/go/bin
 	@which go
 	@ls -la /usr/local/go/bin/
 	@echo $PATH
