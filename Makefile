@@ -114,3 +114,32 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 	@echo "Building cli..."
 	@mkdir -p ./.bin
 	@go build -o "./.bin/cli" ./src/cli
+
+######################################################
+# Following targets are used for integration tests
+######################################################
+
+## These targets are temporary until we have ability to pass the terraform and cache directory in terrarium resource, module and mappings commands
+.PHONY: test_clean_tf test_tf_init
+
+TEST_TERRAFORM_DIR := ./src/cli/int_test/test/terraform
+TEST_TF_FILES := $(shell find $(TEST_TERRAFORM_DIR) -name '*.tf' -not -path '$(TEST_TERRAFORM_DIR)/.terraform/*')
+
+test_clean_tf:
+	rm -rf $(TEST_TERRAFORM_DIR)/.terraform
+	rm -f $(TEST_TERRAFORM_DIR)/.terraform.lock.hcl
+	cd $(TEST_TERRAFORM_DIR) && cd .. && rm -rf cache_data
+
+test_tf_init: $(TEST_TERRAFORM_DIR)/.terraform
+
+# generate tf_resources.json file for set terraform providers
+test_cache_data/tf_resources.json: $(TEST_TERRAFORM_DIR)/.terraform
+	@echo "generating ./test_cache_data/tf_resources.json"
+	cd ./src/cli/int_test/test && mkdir -p cache_data && cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
+
+$(TEST_TERRAFORM_DIR)/.terraform: $(TEST_TF_FILES)
+	@cd $(TEST_TERRAFORM_DIR) && terraform version && terraform init || (terraform providers && exit 1)
+	@touch $(TEST_TERRAFORM_DIR)/.terraform
+
+test-int: test_clean_tf test_cache_data/tf_resources.json
+	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s

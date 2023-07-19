@@ -1,3 +1,6 @@
+//go:build smoke
+// +build smoke
+
 package test
 
 import (

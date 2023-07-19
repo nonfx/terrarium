@@ -20,7 +20,7 @@ type SmokeTestSuite struct {
 
 func (suite *SmokeTestSuite) SetupSuite() {
 	// Initialize the report
-	report = customReport.NewReport(helpers.TestSuiteName, helpers.Env, os.Getenv("GIT_REF"), os.Getenv("AZURE_BUILD_URL"))
+	report = customReport.NewReport(helpers.TestSuiteName, helpers.Env, os.Getenv("GIT_REF"), os.Getenv("BUILD_URL"))
 }
 
 func (suite *SmokeTestSuite) BeforeTest(suiteName, testName string) {
