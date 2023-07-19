@@ -143,7 +143,7 @@ install_go:
 	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
 	@export PATH=$PATH:/usr/local/go/bin:$GO_INSTALL_DIR/go/bin
 	@which go
-	@ls -a /usr/local/go
+	@ls -la /usr/local/go/bin/
 	@echo $PATH
 	@go version
 
