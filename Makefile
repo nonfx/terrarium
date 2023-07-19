@@ -123,9 +123,9 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 
 # generate tf_resources.json file for set terraform providers
 TERRAFORM_VERSION := 1.5.3
-GO_VERSION := 1.20
-INSTALL_DIR := /usr/local/bin
+GO_VERSION := 1.20.6
 GO_INSTALL_DIR := /usr/local
+CURRENT_GO_VERSION := $(shell go version | awk '{print $$3}' | cut -d '.' -f 2)
 
 install_terraform:
 	@echo "Installing Terraform $(TERRAFORM_VERSION)..."
@@ -135,17 +135,24 @@ install_terraform:
 	@echo "Terraform $(TERRAFORM_VERSION) is installed at $(INSTALL_DIR)/terraform"
 	@terraform --version
 
-install_go:
-	# @echo "Installing Go $(GO_VERSION)..."
-	# @curl -sSL -o go.tar.gz https://dl.google.com/go/go$(GO_VERSION).linux-amd64.tar.gz
-	# @tar -C $(GO_INSTALL_DIR) -xzf go.tar.gz
-	# @rm -f go.tar.gz
-	# @echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
-	# @export PATH=$PATH:/usr/local/go/bin:$GO_INSTALL_DIR/go/bin
-	@which go
-	@ls -la /usr/local/go/bin/
-	@echo $PATH
+
+install_go: uninstall_go
+	@echo "Downloading Go $(GO_VERSION)..."
+	@curl -sSL -o go.tar.gz https://golang.org/dl/go$(GO_VERSION).linux-amd64.tar.gz
+	@tar -C $(INSTALL_DIR) -xzf go.tar.gz
+	@rm -f go.tar.gz
+	@echo "Go $(GO_VERSION) is installed at $(INSTALL_DIR)/go"
 	@go version
+
+uninstall_go:
+@echo $(CURRENT_GO_VERSION)
+ifeq ($(CURRENT_GO_VERSION),$(word 2,$(sort 1.20 $(CURRENT_GO_VERSION))))
+	@echo "Uninstalling previous Go version..."
+	@rm -rf $(INSTALL_DIR)/go
+	@echo "Previous Go version uninstalled."
+else
+	@echo "No previous Go version found."
+endif
 
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
@@ -154,3 +161,5 @@ test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 
 test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json install_go
 	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s
+
+
