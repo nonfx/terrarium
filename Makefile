@@ -120,17 +120,6 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 ######################################################
 
 ## These targets are temporary until we have ability to pass the terraform and cache directory in terrarium resource, module and mappings commands
-.PHONY: test_clean_tf test_tf_init
-
-TEST_TERRAFORM_DIR := ./src/cli/int_test/test/terraform
-TEST_TF_FILES := $(shell find $(TEST_TERRAFORM_DIR) -name '*.tf' -not -path '$(TEST_TERRAFORM_DIR)/.terraform/*')
-
-test_clean_tf:
-	rm -rf $(TEST_TERRAFORM_DIR)/.terraform
-	rm -f $(TEST_TERRAFORM_DIR)/.terraform.lock.hcl
-	cd $(TEST_TERRAFORM_DIR) && cd .. && rm -rf cache_data
-
-test_tf_init: $(TEST_TERRAFORM_DIR)/.terraform
 
 # generate tf_resources.json file for set terraform providers
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
