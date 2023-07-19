@@ -1,0 +1,28 @@
+id: banking_app # REQUIRED. no special chars, start with alpha, contains alpha-num, and cannot be gt 20 chars. used by IaC to uniquely identify the dependency in the project.
+name: Banking App
+env_prefix: BA # defaults to empty string.
+
+service: # dependency of type `service.*` with id = app id, and can be defined only one of this
+  type: service.web
+  inputs:
+    port: 3000
+
+dependencies:
+  - id: user_db                # REQUIRED. no special chars, start with alpha, contains alpha-num, and cannot be gt 20 chars. used by IaC to uniquely identify the dependency in the project.
+    type: database.postgres@11 # points to one specific taxon in the taxonomy hierarchy. Interface available on this taxon is used in inputs and outputs blocks below.
+    env_prefix: USER           # defaults to dependency ID upper case.
+  - id: ledger_db
+    type: database.postgres
+    env_prefix: LEDGER
+    inputs: # use available customization options for the selected dependency interface.
+      db_name: ledger
+      version: 11
+    outputs: # map env variables to dependency outputs. default to `<app_env_prefix>_<dependency_env_prefix>_<dependency_output_name_to_upper>`
+      PG_CON: "host={{host}} user={{username}} password={{password}} dbname={{dbname}} port={{port}} sslmode={{sslmode}}"
+  - id: user_cache
+    type: database.redis
+  - id: auth_app
+    no_provision: true # shared dependency. this is provisioned in another app, and it's outputs are made available here.
+    type: service.web
+    outputs:
+      URL: "{{endpoint}}"
