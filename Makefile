@@ -133,13 +133,10 @@ test_clean_tf:
 test_tf_init: $(TEST_TERRAFORM_DIR)/.terraform
 
 # generate tf_resources.json file for set terraform providers
-test_cache_data/tf_resources.json: $(TEST_TERRAFORM_DIR)/.terraform
-	@echo "generating ./test_cache_data/tf_resources.json"
-	cd ./src/cli/int_test/test && mkdir -p cache_data && cd terraform && terraform providers schema -json > ../cache_data/tf_resources.json
+test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
+	@echo "generating ./cache_data/tf_resources.json"
+	@mkdir -p ./src/cli/int_test/test/cache_data
+	@cd terraform && terraform version && terraform providers schema -json > ../src/cli/int_test/test/cache_data/tf_resources.json
 
-$(TEST_TERRAFORM_DIR)/.terraform: $(TEST_TF_FILES)
-	@cd $(TEST_TERRAFORM_DIR) && terraform version && terraform init || (terraform providers && exit 1)
-	@touch $(TEST_TERRAFORM_DIR)/.terraform
-
-test-int: test_clean_tf test_cache_data/tf_resources.json
+test-int: clean_tf tf_init test_cache_data/tf_resources.json
 	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s
