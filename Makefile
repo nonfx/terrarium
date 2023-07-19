@@ -142,7 +142,10 @@ install_go:
 	@rm -f go.tar.gz
 	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
 	@export PATH=$PATH:/usr/local/go/bin
+	@source ~/.bashrc
 	@which go
+	@echo $PATH
+	@go version
 
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
