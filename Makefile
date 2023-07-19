@@ -142,8 +142,8 @@ install_go:
 	@rm -f go.tar.gz
 	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
 	@export PATH=$PATH:/usr/local/go/bin
-	@source ~/.bashrc
 	@which go
+	@ls -a /usr/local/go
 	@echo $PATH
 	@go version
 
