@@ -145,7 +145,6 @@ install_go: uninstall_go
 	@go version
 
 uninstall_go:
-@echo $(CURRENT_GO_VERSION)
 ifeq ($(CURRENT_GO_VERSION),$(word 2,$(sort 1.20 $(CURRENT_GO_VERSION))))
 	@echo "Uninstalling previous Go version..."
 	@rm -rf $(INSTALL_DIR)/go
@@ -159,7 +158,7 @@ test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@mkdir -p ./src/cli/int_test/test/cache_data
 	@cd terraform && terraform version && terraform providers schema -json > ../src/cli/int_test/test/cache_data/tf_resources.json
 
-test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json install_go
+test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json
 	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s
 
 
