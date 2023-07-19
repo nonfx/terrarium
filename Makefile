@@ -123,21 +123,30 @@ seed_mappings: .bin/cli  ## Load .env file and run seed_mappings
 
 # generate tf_resources.json file for set terraform providers
 TERRAFORM_VERSION := 1.5.3
+GO_VERSION := 1.20
 INSTALL_DIR := /usr/local/bin
-DOWNLOAD_URL := https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_linux_amd64.zip
+GO_INSTALL_DIR := /usr/local
 
 install_terraform:
 	@echo "Installing Terraform $(TERRAFORM_VERSION)..."
-	@curl -sSL -o terraform.zip $(DOWNLOAD_URL)
+	@curl -sSL -o terraform.zip https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_linux_amd64.zip
 	@unzip -o terraform.zip -d $(INSTALL_DIR)
 	@rm -f terraform.zip
 	@echo "Terraform $(TERRAFORM_VERSION) is installed at $(INSTALL_DIR)/terraform"
 	@terraform --version
+
+install_go:
+	@echo "Installing Go $(GO_VERSION)..."
+	@curl -sSL -o go.tar.gz https://dl.google.com/go/go$(GO_VERSION).linux-amd64.tar.gz
+	@tar -C $(GO_INSTALL_DIR) -xzf go.tar.gz
+	@rm -f go.tar.gz
+	@echo "Go $(GO_VERSION) is installed at $(GO_INSTALL_DIR)/go"
+	@go version
 
 test_cache_data/tf_resources.json: $(TERRAFORM_DIR)/.terraform
 	@echo "generating ./cache_data/tf_resources.json"
 	@mkdir -p ./src/cli/int_test/test/cache_data
 	@cd terraform && terraform version && terraform providers schema -json > ../src/cli/int_test/test/cache_data/tf_resources.json
 
-test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json
+test-int: clean_tf install_terraform tf_init test_cache_data/tf_resources.json install_go
 	 	@go test ./src/cli/int_test/test -v -testify.m="${TEST_REGEX}" --tags="${TEST_TAG}" -timeout 600000s
