@@ -3,15 +3,17 @@ package modules
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/spf13/cobra"
 )
 
-const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
+var moduleDirectoryFlag string
 
 var resourceTypeByName map[string]*db.TFResourceType
 
@@ -32,7 +34,12 @@ var modulesCmd = &cobra.Command{
 }
 
 func GetCmd() *cobra.Command {
+	addFlags()
 	return modulesCmd
+}
+
+func addFlags() {
+	modulesCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "terraform", "farm directory path")
 }
 
 func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {
@@ -102,7 +109,7 @@ func main() {
 	// load modules
 	log.Println("Loading modules...")
 
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(moduleSchemaFilePath, tfconfig.FilterModulesOmitLocal, tfconfig.FilterModulesOmitHidden)
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(moduleDirectoryFlag, constants.ModuleSchemaFilePath), tfconfig.FilterModulesOmitLocal, tfconfig.FilterModulesOmitHidden)
 	if err != nil {
 		panic(err)
 	}
