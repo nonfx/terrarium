@@ -3,29 +3,36 @@ package mappings
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
 )
 
-const moduleSchemaFilePath = "terraform/.terraform/modules/modules.json"
-
 var resourceTypeByName map[string]*db.TFResourceType
 
+var moduleDirectoryFlag string
+
 func GetCmd() *cobra.Command {
+	addFlags()
 	return mappingsCmd
 }
 
 var mappingsCmd = &cobra.Command{
 	Use:   "mappings",
 	Short: "Scrapes resource attribute mappings from the farm directory",
-	Long:  "The 'mappings' command scrapes resource attribute mappings fromthe specified farm directory.",
+	Long:  "The 'mappings' command scrapes resource attribute mappings from the specified farm directory.",
 	Run: func(cmd *cobra.Command, args []string) {
 		main()
 	},
+}
+
+func addFlags() {
+	mappingsCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "terraform", "farm directory path")
 }
 
 func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
@@ -137,7 +144,7 @@ func main() {
 
 	resourceTypeByName = make(map[string]*db.TFResourceType)
 	log.Println("Loading modules...")
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(moduleSchemaFilePath)
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(moduleDirectoryFlag, constants.ModuleSchemaFilePath))
 	if err != nil {
 		panic(err)
 	}

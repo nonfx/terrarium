@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var moduleSchemaFilePathFlag string
+
 var resourcesCmd = &cobra.Command{
 	Use:   "resources",
 	Short: "Scrapes Terraform resources and attributes from the farm directory",
@@ -23,7 +25,12 @@ var resourcesCmd = &cobra.Command{
 }
 
 func GetCmd() *cobra.Command {
+	addFlags()
 	return resourcesCmd
+}
+
+func addFlags() {
+	resourcesCmd.Flags().StringVarP(&moduleSchemaFilePathFlag, "file", "f", "cache_data/tf_resources.json", "schema file path")
 }
 
 func main() {
@@ -32,7 +39,7 @@ func main() {
 	mustNotErr(err, "Error connecting to the database")
 
 	// Load providers schema from file
-	providersSchema, err := loadProvidersSchema("cache_data/tf_resources.json")
+	providersSchema, err := loadProvidersSchema(moduleSchemaFilePathFlag)
 	mustNotErr(err, "Error loading providers schema")
 
 	pushProvidersSchemaToDB(providersSchema, db)
