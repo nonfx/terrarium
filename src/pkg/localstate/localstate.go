@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	stateFileName = ".codepipes_state"
+	stateFileDir = ".terrarium"
+	stateFileName = ".terrarium_state"
 	stateFileExt  = "yaml"
 )
 
@@ -25,7 +26,7 @@ type localState struct {
 
 func init() {
 	ls = new(localState)
-	ls.stateFileName = fmt.Sprintf("%s/%s.%s", findHomeDir(), stateFileName, stateFileExt)
+	ls.stateFileName = fmt.Sprintf("%s/%s/%s.%s", findHomeDir(), stateFileDir, stateFileName, stateFileExt)
 	reset()
 }
 
