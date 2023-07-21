@@ -1,5 +1,11 @@
 version: '3'
 
+networks:
+  terrarium:
+    driver: bridge
+    name: ${TER_DOCKER_NETWORK:-terrarium}
+    external: ${TER_DOCKER_NETWORK_EXTERNAL:-false}
+
 volumes:
   postgres_data:
     name: tr_postgres_data
@@ -11,6 +17,8 @@ secrets:
 services:
   postgres:
     image: postgres:11
+    container_name: postgres
+    networks: [terrarium]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${TR_DB_PASSWORD:-}
@@ -21,8 +29,10 @@ services:
     ports:
       - "5432:5432"
 
-  api:
+  terrarium-api:
     image: cldcvr/terrarium-api
+    container_name: terrarium-api
+    networks: [terrarium]
     build:
       context: .
       target: api-runner
@@ -43,6 +53,8 @@ services:
 
   farm-harvester:
     image: cldcvr/terrarium-farm-harvester
+    container_name: terrarium-seeder
+    networks: [terrarium]
     build:
       context: .
       target: farm-harvester
@@ -63,8 +75,10 @@ services:
     profiles:
       - tooling
 
-  test:
+  terrarium-unit-test:
     image: cldcvr/terrarium-unit-test
+    container_name: terrarium-unit-test
+    networks: [terrarium]
     build:
       context: .
       target: unit-test
