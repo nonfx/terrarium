@@ -1,5 +1,5 @@
-dependency_interface:
-  postgres:
+components:
+  - id: postgres
     taxonomy: [storage, database, rdbms, sql]
     title: PostgreSQL Database
     description: A relational database management system using SQL.
@@ -32,7 +32,7 @@ dependency_interface:
           title: Password
           description: The password for accessing the PostgreSQL database.
 
-  redis:
+  - id: redis
     taxonomy: [storage, cache, in_memory]
     title: Redis Cache
     description: An in-memory data structure store used as a cache or message broker.
@@ -53,7 +53,7 @@ dependency_interface:
           title: Port
           description: The port number on which the Redis server is listening.
 
-  static_site:
+  - id: static_site
     taxonomy: [compute]
     title: Static Website
     description: A static website hosted on a Content Delivery Network (CDN) with SSL support.
@@ -83,7 +83,7 @@ dependency_interface:
           title: CDN URL
           description: The URL of the static website on the CDN.
 
-  web_service:
+  - id: web_service
     taxonomy: [compute]
     title: Web Service
     description: A compute resource that provides SSL, HTTP, and GRPC endpoints.
@@ -100,7 +100,7 @@ dependency_interface:
           title: Service Endpoint
           description: The endpoint URL of the web service.
 
-  private_service:
+  - id: private_service
     taxonomy: [compute]
     title: Private Service
     description: A compute resource accessible only within a private network.
@@ -113,12 +113,12 @@ dependency_interface:
           type: string
           description: The protocol used by the service (e.g., TCP, UDP).
 
-  background_service:
+  - id: background_service
     taxonomy: [compute]
     title: Background Service
     description: A compute resource that listens to queues and performs background tasks.
 
-  cron_jobs:
+  - id: cron_jobs
     taxonomy: [compute]
     title: Cron Jobs
     description: Scheduled tasks that run at specific intervals.

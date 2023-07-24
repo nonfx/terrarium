@@ -6,11 +6,9 @@ COPY go.work go.work.sum ./
 COPY src/api/go.mod src/api/go.sum ./src/api/
 COPY src/pkg/go.mod src/pkg/go.sum ./src/pkg/
 COPY src/cli/go.mod src/cli/go.sum ./src/cli/
-
 ENV GOPRIVATE=github.com/cldcvr
 RUN --mount=type=cache,target=/go/pkg/mod/ \
 	go mod download && go work sync
-
 COPY src ./src
 
 FROM go-base AS api-build
@@ -31,16 +29,16 @@ WORKDIR /app
 COPY --from=api-build /go/bin/server .
 ENTRYPOINT ["./server"]
 
-FROM hashicorp/terraform:${TERRAFORM_VERSION} AS seed-runner
+FROM hashicorp/terraform:${TERRAFORM_VERSION} AS farm-harvester
 RUN apk update && apk add make && rm -rf /var/cache/apk/*
 WORKDIR /app
-COPY --from=cli-build /go/bin/terrarium ./.bin/
+COPY --from=cli-build /go/bin/terrarium /bin/
 COPY Makefile ./
-# trick make target to not trigger build since the build is already ready
+ENV FARM_DIR=./farm
+# workaround to use Makefile
 RUN mkdir -p ./src/pkg && \
-	mkdir -p ./src/cli && \
-	touch ./.bin/terrarium
-ENTRYPOINT [ "make", "seed" ]
+	mkdir -p ./src/cli
+ENTRYPOINT [ "make", "farm-harvest" ]
 
 FROM golang:1.20 AS unit-test
 WORKDIR /usr/src/app

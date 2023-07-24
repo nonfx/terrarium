@@ -5,7 +5,7 @@ module "tr_component_postgres" {
 
   identifier     = each.key
   engine_version = each.value.version
-  db_name        = each.value.db_name
+  db_name        = coalesce(each.value.db_name, each.key)
   engine         = "postgres"
   family         = format("postgres%s", each.value.version)
 

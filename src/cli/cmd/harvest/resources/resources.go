@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/tf/schema"
@@ -15,10 +16,15 @@ import (
 
 var moduleSchemaFilePathFlag string
 
+const DefaultSchemaPath = ".terraform/providers/schema.json"
+
 var resourcesCmd = &cobra.Command{
 	Use:   "resources",
-	Short: "Scrapes Terraform resources and attributes from the farm directory",
-	Long:  "The 'resources' command scrapes all Terraform resources and their attributes from the specified farm directory.",
+	Short: "Harvests Terraform resources and attributes using the provider schema json",
+	Long: heredoc.Docf(`
+		This command requires terraform provider schema already generated. To do that, run:
+			terraform providers schema -json > %s
+	`, DefaultSchemaPath),
 	Run: func(cmd *cobra.Command, args []string) {
 		main()
 	},
@@ -30,7 +36,7 @@ func GetCmd() *cobra.Command {
 }
 
 func addFlags() {
-	resourcesCmd.Flags().StringVarP(&moduleSchemaFilePathFlag, "file", "f", "cache_data/tf_resources.json", "schema file path")
+	resourcesCmd.Flags().StringVarP(&moduleSchemaFilePathFlag, "file", "f", DefaultSchemaPath, "terraform provider schema json file path")
 }
 
 func main() {

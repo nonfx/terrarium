@@ -91,7 +91,7 @@ stages:
             go env -w GOPRIVATE=github.com/cldcvr/*
             rm data/cc_terrarium.sql
             make docker-init docker-run
-            make docker-seed
+            make docker-harvest
           env:
             PM_GIT_TOKEN: $(PM_GIT_TOKEN)
             GIT_TOKEN: $(GIT_TOKEN)

@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
