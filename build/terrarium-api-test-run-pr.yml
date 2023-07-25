@@ -37,10 +37,8 @@ stages:
     variables:
       - group: Terrarium-API-Automation-Staging
       - group: Common-Dev
-      - name: GIT_OWNER
-        value: cldcvr
       - name: GIT_REPO
-        value: terrarium
+        value: https://github.com/cldcvr/terrarium
     jobs:
     - job: Run_Tests
       displayName: Run Test
