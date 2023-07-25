@@ -116,7 +116,7 @@ stages:
             ArtifactName: "reports"
             publishLocation: "Container"
         - script: |
-            docker logs terrarium-api-1 >& terrarium.log
+            docker logs terrarium-api >& terrarium.log
           condition: succeededOrFailed()
           workingDirectory: $(Build.ArtifactStagingDirectory)
           displayName: "Gather Docker Logs"
