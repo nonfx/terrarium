@@ -26,4 +26,4 @@ jobs:
         run: rm data/cc_terrarium.sql && make docker-stop-clean
 
       - name: Run unit tests & seed script
-        run: make docker-api-test docker-seed
+        run: make docker-api-test docker-harvest

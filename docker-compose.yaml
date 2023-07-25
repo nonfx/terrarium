@@ -41,11 +41,11 @@ services:
     ports:
       - ${TR_SERVER_HTTP_PORT:-3000}:3000
 
-  seeder:
-    image: cldcvr/terrarium-seeder
+  farm-harvester:
+    image: cldcvr/terrarium-farm-harvester
     build:
       context: .
-      target: seed-runner
+      target: farm-harvester
       args:
         TERRAFORM_VERSION: ${TERRAFORM_VERSION:-latest}
     secrets:
@@ -59,8 +59,7 @@ services:
       TR_DB_SSL_MODE: ${TR_DB_SSL_MODE:-}
       TR_DB_PASSWORD: ${TR_DB_PASSWORD:-}
     volumes:
-      - ./terraform:/app/terraform
-      - ./cache_data:/app/cache_data
+      - ./examples/farm:/app/farm
     profiles:
       - tooling
 
