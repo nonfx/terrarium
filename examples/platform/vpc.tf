@@ -1,7 +1,24 @@
+provider "aws" {
+  region = var.aws_region
+}
+
+provider "random" {}
+
+data "aws_availability_zones" "available" {}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+resource "random_string" "random" {
+  length  = 8
+  special = false
+  upper   = false
+  lower   = true
+}
+
 module "core_vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "core_vpc"
+  name = random_string.random.id
   cidr = "10.0.0.0/16"
 
   azs              = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]

@@ -1,7 +1,7 @@
 locals {
   tr_component_postgres = {
     "default" : {
-      "version" : "11.12",
+      "version" : 11,
       "db_name" : "default_db"
     }
   }
