@@ -53,7 +53,7 @@ services:
 
   farm-harvester:
     image: cldcvr/terrarium-farm-harvester
-    container_name: terrarium-seeder
+    container_name: terrarium-farm-harvester
     networks: [terrarium]
     build:
       context: .
