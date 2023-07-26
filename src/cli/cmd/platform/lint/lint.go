@@ -3,11 +3,15 @@ package lint
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	"github.com/cldcvr/terrarium/src/pkg/tf/parser"
 	"github.com/hashicorp/hcl/v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/spf13/cobra"
 )
@@ -36,22 +40,47 @@ func GetCmd() *cobra.Command {
 }
 
 func lintPlatform(dir string) error {
-	log.Println("Linting platform Terraform...")
-	if err := lintPlatformTerraform(dir); err != nil {
+	log.Println("Linting terrarium platform template...")
+
+	log.Printf("Loading Terraform modules to lint from '%s'...\n", dir)
+	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
+
+	log.Println("Validating Terraform modules...")
+	if err := validatePlatformTerraform(module); err != nil {
 		log.Printf("Following Terraform issues were found: %v\n", err)
 		return fmt.Errorf("platform lint: %w", err)
 	}
 	log.Println("Platform is valid.")
-	return nil
-}
 
-func lintPlatformTerraform(dir string) error {
-	log.Printf("Loading Terraform modules to lint from '%s'...\n", dir)
-	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
-	log.Println("Validating Terraform modules...")
-	if err := validatePlatformTerraform(module); err != nil {
-		return fmt.Errorf("terraform: %w", err)
+	metadataFile := filepath.Join(dir, "terrarium.yaml")
+	log.Printf("Loading Terrarium metadata file '%s'...\n", metadataFile)
+
+	fileData, err := os.ReadFile(metadataFile)
+	if os.IsNotExist(err) {
+		// ignore not exists error since we create the metadata file anyway in this case.
+		err = nil
 	}
+
+	pm, err := platform.NewPlatformMetadata(module, fileData)
+	if err != nil {
+		return err
+	}
+
+	pmYAML, err := yaml.Marshal(pm)
+	if err != nil {
+		return err
+	}
+
+	if string(fileData) == string(pmYAML) {
+		log.Println("No change in metadata.")
+		return nil
+	}
+
+	log.Printf("Updating metadata file at: %s", metadataFile)
+	os.WriteFile(metadataFile, pmYAML, 0644)
+
+	log.Println("Metadata updated.")
+
 	return nil
 }
 

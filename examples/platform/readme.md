@@ -8,7 +8,7 @@ The Terrarium Platform Template, henceforth referred to as the 'Platform', is a 
 
 ### Terrarium Dependency Interface
 
-Terrarium dependency interfaces act as a contract between application developers and DevOps professionals, enabling the specification of application dependencies. They streamline the process of injecting Infrastructure as Code (IaC) dependencies, significantly simplifying app development. For Dependency interface documentation, [click here](../../src/pkg/metadata/interface), and for the app dependency format, [click here](../../src/pkg/metadata/dependency).
+Terrarium dependency interfaces act as a contract between application developers and DevOps professionals, enabling the specification of application dependencies. They streamline the process of injecting Infrastructure as Code (IaC) dependencies, significantly simplifying app development. For Dependency interface format, refer the component heading in platform metadata documentation [here](../../src/pkg/metadata/platform), and for the app dependency format, [click here](../../src/pkg/metadata/app).
 
 ## Terrarium Platform Framework
 
@@ -34,7 +34,7 @@ In the framework, dependency interface outputs are provided via Terraform output
 
 The platform metadata contains detailed information about the Terrarium dependency interfaces implemented within the platform. This metadata is contained within the `terrarium.yaml` file, which is saved alongside the platform HCL code.
 
-The Terrarium tools (cli & vs-code) provide commands that parse the Terrarium Platform Template, show lint errors, and generate the `terrarium.yaml` metadata file. The platform author should review this file to add any missing descriptions or other information to the interface attributes. The metadata file format can be found [here](../../src/pkg/metadata/platform).
+The Terrarium tools (cli & vs-code) provide commands that parse the Terrarium Platform Template, show lint errors, and generate the `terrarium.yaml` metadata file. The platform author should review this file to add any missing descriptions or other information to the interface attributes. The metadata file format specification can be found [here](../../src/pkg/metadata/platform).
 
 Using the platform metadata and the app dependency data, the Terrarium tools can determine whether the required app dependencies are implemented within a given Terrarium platform template.
 

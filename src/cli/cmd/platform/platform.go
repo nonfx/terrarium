@@ -11,8 +11,8 @@ func GetCmd() *cobra.Command {
 
 var platformCmd = &cobra.Command{
 	Use:   "platform",
-	Short: "Defines reusable infrastructure components",
-	Long:  "Commands to manage platform definitions.",
+	Short: "Terrarium platform template commands",
+	Long:  "Commands to manage Terrarium platform template definitions",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
