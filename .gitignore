@@ -42,3 +42,4 @@ src/pkg/pb/protoc-gen-openapiv2/*
 # Output of the go coverage tool
 *.out
 *coverage*.txt
+coverage

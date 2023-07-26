@@ -20,6 +20,7 @@ db:
   name: "cc_terrarium"
   port: 5432
   ssl_mode: false
+  type: postgres
 
 log:
   format: "JSON"

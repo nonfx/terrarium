@@ -4,8 +4,11 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper"
+	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
 	"github.com/rotisserie/eris"
 )
+
+var mockdb = &mocks.DB{}
 
 // DBHost returns the database host
 func DBHost() string {
@@ -37,19 +40,28 @@ func DBSSLMode() bool {
 	return confighelper.MustGetBool("db.ssl_mode")
 }
 
+// DBType returns the database type chosen. Default is postgres
+func DBType() string {
+	return confighelper.MustGetString("db.type")
+}
+
 // DBConnect establishes a connection to the database using the connection parameters from the environment.
 func DBConnect() (db.DB, error) {
-	g, err := dbhelper.ConnectPG(
-		DBHost(),
-		DBUser(),
-		DBPassword(),
-		DBName(),
-		DBPort(),
-		DBSSLMode(),
-	)
-	if err != nil {
-		return nil, eris.Wrap(err, "could not establish a connection to the database")
+	switch DBType() {
+	case "mock":
+		return mockdb, nil
+	default:
+		g, err := dbhelper.ConnectPG(
+			DBHost(),
+			DBUser(),
+			DBPassword(),
+			DBName(),
+			DBPort(),
+			DBSSLMode(),
+		)
+		if err != nil {
+			return nil, eris.Wrap(err, "could not establish a connection to the database")
+		}
+		return db.AutoMigrate(g)
 	}
-
-	return db.AutoMigrate(g)
 }

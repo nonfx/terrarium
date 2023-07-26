@@ -62,7 +62,7 @@ type CLITest struct {
 	// A Context object that can be used to maintain context between tests/test cases
 	Ctx context.Context
 	// newCmd function to test
-	CmdToTest  func() *cobra.Command
+	CmdToTest  *cobra.Command
 	ParentCmds []func() *cobra.Command
 	// function to initialize the command specific CmdOptions structure
 	CmdOptionsInit func() CmdOpts
@@ -209,7 +209,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 		t.Run(tt.Name, func(t *testing.T) {
 			var cmd *cobra.Command
 			if clitest.ParentCmds != nil {
-				subCmd := clitest.CmdToTest()
+				subCmd := clitest.CmdToTest
 				var nextCmd *cobra.Command
 				for i, cmdFunc := range clitest.ParentCmds {
 					if i == 0 {
@@ -223,7 +223,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 				}
 				nextCmd.AddCommand(subCmd)
 			} else {
-				cmd = clitest.CmdToTest()
+				cmd = clitest.CmdToTest
 			}
 			if tt.PseudoTTY != nil {
 				cmd.SetOut(clitest.console.Tty())

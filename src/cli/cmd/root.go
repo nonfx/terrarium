@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest"
 	"github.com/cldcvr/terrarium/src/cli/cmd/platform"
+	"github.com/cldcvr/terrarium/src/cli/cmd/query"
 	"github.com/cldcvr/terrarium/src/cli/cmd/version"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	homedir "github.com/mitchellh/go-homedir"
@@ -29,6 +30,7 @@ func init() {
 	rootCmd.AddCommand(harvest.GetCmd())
 	rootCmd.AddCommand(platform.GetCmd())
 	rootCmd.AddCommand(version.GetCmd())
+	rootCmd.AddCommand(query.GetCmd())
 	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
 }
 

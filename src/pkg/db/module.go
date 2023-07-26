@@ -69,6 +69,12 @@ func ModuleSearchFilter(query string) FilterOption {
 	}
 }
 
+func ModuleNamespaceFilter(namespace []string) FilterOption {
+	return func(g *gorm.DB) *gorm.DB {
+		return g.Where("namespace IN ?", namespace)
+	}
+}
+
 func ModuleByIDsFilter(ids ...uuid.UUID) FilterOption {
 	if len(ids) == 0 {
 		return NoOpFilter
@@ -136,6 +142,7 @@ func (m TFModule) ToProto() *terrariumpb.Module {
 		Version:         string(m.Version),
 		Description:     m.Description,
 		InputAttributes: inp.ToProto(),
+		Namespace:       m.Namespace,
 	}
 }
 
