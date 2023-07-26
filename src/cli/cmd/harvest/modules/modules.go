@@ -14,6 +14,7 @@ import (
 )
 
 var moduleDirectoryFlag string
+var includeLocalFlag bool
 
 var resourceTypeByName map[string]*db.TFResourceType
 
@@ -39,7 +40,8 @@ func GetCmd() *cobra.Command {
 }
 
 func addFlags() {
-	modulesCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "terraform", "farm directory path")
+	modulesCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "", "farm directory path")
+	modulesCmd.Flags().BoolVarP(&includeLocalFlag, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
 }
 
 func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {
@@ -109,7 +111,12 @@ func main() {
 	// load modules
 	log.Println("Loading modules...")
 
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(moduleDirectoryFlag, constants.ModuleSchemaFilePath), tfconfig.FilterModulesOmitLocal, tfconfig.FilterModulesOmitHidden)
+	filters := []tfconfig.ResolvedModuleSchemaFilter{tfconfig.FilterModulesOmitHidden}
+	if !includeLocalFlag {
+		filters = append(filters, tfconfig.FilterModulesOmitLocal)
+	}
+
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(moduleDirectoryFlag, constants.ModuleSchemaFilePath), filters...)
 	if err != nil {
 		panic(err)
 	}
@@ -161,6 +168,11 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 	if config.Metadata != nil {
 		record.ModuleName = config.Metadata.Name
 		record.Source = config.Metadata.Source
+		if strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
+			// identify this as local module
+			// populate namespace
+			record.Namespace = config.Path
+		}
 		record.Version = db.Version(config.Metadata.Version)
 	}
 	return &record

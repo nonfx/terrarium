@@ -9,9 +9,9 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/src/cli/main.go",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
-        "farm",
+        "harvest",
         "resources"
       ],
       "envFile": "${workspaceFolder}/.env",
@@ -22,10 +22,13 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/src/cli/main.go",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
-        "farm",
-        "modules"
+        "harvest",
+        "modules",
+        "-d",
+        "examples/farm/modules", // terraform directory
+        "-l" // include local
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -35,10 +38,12 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/src/cli/main.go",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
-        "farm",
-        "mappings"
+        "harvest",
+        "mappings",
+        "-d",
+        "examples/farm/modules", // terraform directory
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -48,7 +53,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/src/cli/main.go",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
         "platform",
         "lint",
