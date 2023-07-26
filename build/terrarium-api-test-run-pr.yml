@@ -37,10 +37,8 @@ stages:
     variables:
       - group: Terrarium-API-Automation-Staging
       - group: Common-Dev
-      - name: GIT_OWNER
-        value: cldcvr
       - name: GIT_REPO
-        value: terrarium
+        value: https://github.com/cldcvr/terrarium
     jobs:
     - job: Run_Tests
       displayName: Run Test
@@ -103,10 +101,13 @@ stages:
             cd terrarium-api-automation
             cat .env.tests
             docker ps -a
-            TEST_REGEX=$(TEST_REGEX) TEST_ENV=${ENVIRONMENT} TEST_REGEX=${TEST_REGEX} TEST_USER=${TEST_USER} TEST_PASSWORD=${TEST_PASSWORD} TEST_VERSION=${TEST_VERSION} TEST_AZURE_BUILD_BRANCH=$(Build.SourceBranch) TEST_AZURE_BUILD_URL='$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)&_a=summary' make test-terrarium
+            TEST_REGEX=${TEST_REGEX} make test-terrarium-api
           env:
             PM_GIT_TOKEN: $(PM_GIT_TOKEN)
             GIT_TOKEN: $(GIT_TOKEN)
+            BUILD_BRANCH: $(Build.SourceBranch)
+            TEST_ENV: ${ENVIRONMENT}
+            GIT_REPO: ${GIT_REPO}
           displayName: Run Test Suite
         - task: PublishBuildArtifacts@1
           condition: always()
@@ -115,7 +116,7 @@ stages:
             ArtifactName: "reports"
             publishLocation: "Container"
         - script: |
-            docker logs terrarium-api-1 >& terrarium.log
+            docker logs terrarium-api >& terrarium.log
           condition: succeededOrFailed()
           workingDirectory: $(Build.ArtifactStagingDirectory)
           displayName: "Gather Docker Logs"
