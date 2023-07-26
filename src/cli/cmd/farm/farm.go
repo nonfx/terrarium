@@ -1,6 +1,7 @@
 package farm
 
 import (
+	"github.com/cldcvr/terrarium/src/cli/cmd/farm/dependecies"
 	"github.com/cldcvr/terrarium/src/cli/cmd/farm/mappings"
 	"github.com/cldcvr/terrarium/src/cli/cmd/farm/modules"
 	"github.com/cldcvr/terrarium/src/cli/cmd/farm/resources"
@@ -25,4 +26,5 @@ func init() {
 	farmCmd.AddCommand(resources.GetCmd())
 	farmCmd.AddCommand(modules.GetCmd())
 	farmCmd.AddCommand(mappings.GetCmd())
+	farmCmd.AddCommand(dependecies.GetCmd())
 }
