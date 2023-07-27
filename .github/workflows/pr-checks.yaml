@@ -14,16 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start API
-        run: make docker-init docker-run
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check default Setup
+        run: |
+          make docker-init
+          make farm-release-pull || echo "Terrarium farm release not found. Skipping farm DB check"
+          make docker-build docker-run
+          sleep 10
+          curl --fail -s http://localhost:3000/v0/healthcheck
+          make docker-stop-clean
 
-      - name: Run API Health Check
-        run: sleep 10 && curl --fail -s http://localhost:3000/v0/healthcheck && make docker-stop-clean
+      - name: Run unit tests
+        run: |
+          rm -f data/cc_terrarium.psql
+          make docker-stop-clean docker-api-test
 
-      - name: Clean DB
-        run: rm data/cc_terrarium.sql && make docker-stop-clean
-
-      - name: Run unit tests & seed script
-        run: make docker-api-test docker-harvest
+      - name: Check harvest script
+        run: |
+          rm -f data/cc_terrarium.psql
+          make docker-stop-clean docker-harvest
