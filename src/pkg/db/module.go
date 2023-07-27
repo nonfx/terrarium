@@ -21,6 +21,7 @@ type TFModule struct {
 	Version     Version `gorm:"uniqueIndex:module_unique"`
 	Description string
 	TaxonomyID  uuid.UUID `gorm:"default:null"`
+	Namespace   string    `gorm:"default:farm_repo"`
 
 	Taxonomy   *Taxonomy           `gorm:"foreignKey:TaxonomyID"`
 	Attributes []TFModuleAttribute `gorm:"foreignKey:ModuleID"` // Attributes of the module

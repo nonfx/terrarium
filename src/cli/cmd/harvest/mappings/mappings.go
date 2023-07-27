@@ -32,7 +32,7 @@ var mappingsCmd = &cobra.Command{
 }
 
 func addFlags() {
-	mappingsCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "terraform", "farm directory path")
+	mappingsCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "", "farm directory path")
 }
 
 func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
