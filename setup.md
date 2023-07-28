@@ -6,6 +6,7 @@ Before you begin, ensure you have the following installed:
 
 - Go version >= 1.20
 - Docker & Docker Compose CLI
+- GitHub cli (gh)
 
 ## Environment Variables
 
