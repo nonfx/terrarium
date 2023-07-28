@@ -67,11 +67,12 @@ func TestParseWithNestedModules(t *testing.T) {
 		ModuleCalls: map[string]*tfconfig.ModuleCall{
 			"tr_component_module1": {
 				Inputs: map[string]tfconfig.AttributeReference{
-					"data_ref":    tfconfig.ResourceAttributeReference{ResourceType: "resource_type", ResourceName: "label2"},
-					"module_ref":  tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
-					"local_ref":   tfconfig.ResourceAttributeReference{ResourceType: "local", ResourceName: "local1"},
-					"var_ref":     tfconfig.ResourceAttributeReference{ResourceType: "var", ResourceName: "var1"},
-					"unknown_ref": tfconfig.ResourceAttributeReference{ResourceType: "unknown_type", ResourceName: "unknown_name"},
+					"data_ref":             tfconfig.ResourceAttributeReference{ResourceType: "resource_type", ResourceName: "label2"},
+					"module_ref":           tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
+					"module_redundant_ref": tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
+					"local_ref":            tfconfig.ResourceAttributeReference{ResourceType: "local", ResourceName: "local1"},
+					"var_ref":              tfconfig.ResourceAttributeReference{ResourceType: "var", ResourceName: "var1"},
+					"unknown_ref":          tfconfig.ResourceAttributeReference{ResourceType: "unknown_type", ResourceName: "unknown_name"},
 				},
 			},
 			"module2": {

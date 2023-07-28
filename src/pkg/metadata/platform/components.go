@@ -123,5 +123,15 @@ func extractSchema(existingSchema *jsonschema.Node, value cty.Value) {
 		existingSchema.Type = gojsonschema.TYPE_BOOLEAN
 		existingSchema.Default = value.True()
 		return
+	case "tuple":
+		listVal := value.AsValueSlice()
+		existingSchema.Type = gojsonschema.TYPE_ARRAY
+		if existingSchema.Items == nil {
+			existingSchema.Items = &jsonschema.Node{}
+		}
+
+		if len(listVal) > 0 {
+			extractSchema(existingSchema.Items, listVal[0])
+		}
 	}
 }

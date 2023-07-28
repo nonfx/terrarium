@@ -1,4 +1,4 @@
-name: Run CI Checks
+name: Checks
 
 on:
   pull_request:
@@ -10,13 +10,13 @@ env:
   TR_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
-  checks:
+  run:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Check default Setup
+      - name: Run default Setup
         run: |
           make farm-release-pull
           make docker-init docker-build docker-run
@@ -30,6 +30,15 @@ jobs:
           max-attempts: 60
           retry-delay: 1s
           retry-all: true
+
+      - name: Print container logs
+        if: failure()
+        run: |
+          echo Printing terrarium-api container logs
+          docker logs terrarium-api || echo ""
+
+          echo Printing postgres container logs
+          docker logs postgres || echo ""
 
       - name: Run unit tests
         run: |

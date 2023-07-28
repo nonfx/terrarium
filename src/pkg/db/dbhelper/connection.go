@@ -62,5 +62,5 @@ func retry(maxRetries int, retryIntervalSec, jitterLimitSec int, fu func() error
 // ConnectPG establishes a connection to a postgres database using the provided connection parameters.
 func ConnectPG(host, user, password, dbName string, port int, sslMode bool) (*gorm.DB, error) {
 	dsn := createDSN(host, user, password, dbName, port, sslMode)
-	return Connect(postgres.Open(dsn), 10, 3, 3)
+	return Connect(postgres.Open(dsn), 20, 3, 3)
 }
