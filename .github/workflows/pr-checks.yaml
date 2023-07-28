@@ -3,9 +3,11 @@ name: Run CI Checks
 on:
   pull_request:
     branches: ["main"]
+  push:
+    branches: ["main"]
 
 env:
-  TR_DB_PASSWORD: a_super_secret_sequence_of_ordinary_characters
+  TR_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
   checks:
@@ -16,12 +18,18 @@ jobs:
 
       - name: Check default Setup
         run: |
-          make docker-init
-          make farm-release-pull || echo "Terrarium farm release not found. Skipping farm DB check"
-          make docker-build docker-run
-          sleep 10
-          curl --fail -s http://localhost:3000/v0/healthcheck
-          make docker-stop-clean
+          make farm-release-pull
+          make docker-init docker-build docker-run
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: API Health Check
+        uses: jtalk/url-health-check-action@v3
+        with:
+          url: http://localhost:3000/v0/healthcheck
+          max-attempts: 60
+          retry-delay: 1s
+          retry-all: true
 
       - name: Run unit tests
         run: |
