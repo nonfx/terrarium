@@ -29,7 +29,7 @@ override.tf.json
 # example: *tfplan*
 
 .env
-cache_data
+data/*.*sql
 __debug_bin
 .bin
 **/tr-private-sources.tf

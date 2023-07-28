@@ -1,44 +1,85 @@
 # Setup
 
-## Env
+## Prerequisites
 
-Following env vars are required:
+Before you begin, ensure you have the following installed:
+
+- Go version >= 1.20
+- Docker & Docker Compose CLI
+
+## Environment Variables
+
+The following environment variables are required:
 
 ```sh
-TR_DB_PASSWORD= # Choose a custom password. This variable is used by docker-compose to set password in postgres local server and is used in API to connect to the database
+TR_DB_PASSWORD= # Choose a custom password. This variable is used by docker-compose to set the password in the local Postgres server and is used in the API to connect to the database.
 ```
 
-## Run tests
+For the list of available configurations, refer to [the CLI config package](src/cli/internal/config) & [the API config package](src/api/internal/config).
+
+API config is set in the `.env` file in the current folder. While the CLI config is to be set in `~/.terrarium.yaml` file or by exporting the environment variables.
+
+## CLI Installation & Setup
+
+1. Install CLI
+
+   ```sh
+   make install
+   ```
+
+2. Pull Latest Farm Data and Run Containers
+
+   ```sh
+   echo "TR_DB_PASSWORD=<choose a password>" > .env
+   make farm-release-pull start-db
+   ```
+
+3. Setup Configuration
+
+   Configure the DB password chosen above in the CLI as well. You can set the environment variable using:
+
+   ```sh
+   export TR_DB_PASSWORD=<your_password>
+   ```
+
+   Alternatively, you can write it into the configuration file in the home directory:
+
+   ```sh
+   echo "db:\n  password: <your_password>" > ~/.terrarium.yaml
+   ```
+
+   For the list of available configurations, refer to [the config package](src/cli/internal/config).
+
+## Farm Database Updates
+
+To update the farm data when a new farm repo release is available, use the following command:
+
+```sh
+make farm-release-pull db-update
+```
+
+## Run Tests
 
 ```sh
 make test
 ```
 
-## Start containers
-
-```sh
-make docker-run
-```
-
-Or to re-build the containers with latest code and run:
+## Re-build and Run API Containers
 
 ```sh
 make docker-build docker-run
 ```
 
-## Stop containers
+### Stop Containers
+
+To stop containers, you have two options:
 
 ```sh
 make docker-stop
-
-OR
-
-make docker-stop-clean # deletes database
 ```
 
-## Seed database
+or
 
-1. Setup `~/.netrc` with git credentials if using private repository as terraform dependency.
-2. Run `make docker-seed` to run terraform init and all seed commands.
-3. If you want to make a fresh seed, then truncate the db tables manually, and then run `make clean_tf docker-seed`. To delete the .terraform directory and lock files and start fresh.
-4. In order to take backup of the newly seeded database, run `make db-dump`. The backup will be saved in `data/cc_terrarium.sql` directory.
+```sh
+make docker-stop-clean # This will also delete the database.
+```
