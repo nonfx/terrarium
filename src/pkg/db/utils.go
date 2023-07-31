@@ -34,6 +34,8 @@ type DB interface {
 
 	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
+
+	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB

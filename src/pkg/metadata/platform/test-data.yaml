@@ -1,0 +1,43 @@
+components:
+  - id: postgres
+    inputs:
+      type: object
+      properties:
+        db_name:
+          type: string
+          default: default_db
+        version:
+          type: number
+          default: 11
+    outputs:
+      type: object
+      properties:
+        host: {}
+        port: {}
+graph:
+  - id: data.data.aws_availability_zones.available
+    requirements: []
+  - id: module.core_vpc
+    requirements:
+      - resource.random_string.random
+  - id: module.postgres_security_group
+    requirements:
+      - module.core_vpc
+  - id: module.tr_component_postgres
+    requirements:
+      - module.core_vpc
+      - module.postgres_security_group
+  - id: output.data_az
+    requirements:
+      - data.data.aws_availability_zones.available
+  - id: output.tr_component_postgres_host
+    requirements:
+      - module.tr_component_postgres
+  - id: output.tr_component_postgres_port
+    requirements:
+      - module.tr_component_postgres
+  - id: output.vpc_id
+    requirements:
+      - module.core_vpc
+  - id: resource.random_string.random
+    requirements: []

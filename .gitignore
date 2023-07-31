@@ -1,5 +1,5 @@
 # Local .terraform directories
-**/.terraform/*
+**/.terraform
 
 # .tfstate files
 *.tfstate
@@ -32,7 +32,7 @@ override.tf.json
 cache_data
 __debug_bin
 .bin
-terraform/tr-private-sources.tf
+**/tr-private-sources.tf
 
 ### Protobuf Dependencies ###
 src/pkg/pb/google/*
