@@ -22,6 +22,12 @@ func createTestPlatformModule() *tfconfig.Module {
 					"input1": cty.StringVal("value1"),
 					"input2": cty.NumberFloatVal(42.0),
 					"input3": cty.BoolVal(true),
+					"input4": cty.TupleVal([]cty.Value{
+						cty.StringVal("list_value1"),
+					}),
+					"input5": cty.ObjectVal(map[string]cty.Value{
+						"obj_key1": cty.StringVal("obj_value1"),
+					}),
 				}),
 			})},
 			"random_local": nil,
@@ -99,6 +105,7 @@ func TestComponent_fetchInputs(t *testing.T) {
 	assert.Equal(t, "value1", component.Inputs.Properties["input1"].Default, "Default value for input1 should be 'value1'")
 	assert.Equal(t, 42.0, component.Inputs.Properties["input2"].Default, "Default value for input2 should be 42")
 	assert.Equal(t, true, component.Inputs.Properties["input3"].Default, "Default value for input3 should be true")
+	assert.Equal(t, "array", component.Inputs.Properties["input4"].Type, "Type value for input4 should be array")
 }
 
 func TestComponent_fetchOutputs(t *testing.T) {
