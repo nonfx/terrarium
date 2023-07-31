@@ -32,7 +32,7 @@ API config is set in the `.env` file in the current folder. While the CLI config
 
    ```sh
    echo "TR_DB_PASSWORD=<choose a password>" > .env
-   make farm-release-pull start-db
+   make farm-release-pull docker-run
    ```
 
 3. Setup Configuration
