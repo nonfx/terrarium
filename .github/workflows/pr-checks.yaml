@@ -1,29 +1,51 @@
-name: Run CI Checks
+name: Checks
 
 on:
   pull_request:
     branches: ["main"]
+  push:
+    branches: ["main"]
 
 env:
-  TR_DB_PASSWORD: a_super_secret_sequence_of_ordinary_characters
+  TR_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
-  checks:
+  run:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start API
-        run: make docker-init docker-run
+      - name: Run default Setup
+        run: |
+          make farm-release-pull
+          make docker-init docker-build docker-run
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-      - name: Run API Health Check
-        run: sleep 10 && curl --fail -s http://localhost:3000/v0/healthcheck && make docker-stop-clean
+      - name: API Health Check
+        uses: jtalk/url-health-check-action@v3
+        with:
+          url: http://localhost:3000/v0/healthcheck
+          max-attempts: 60
+          retry-delay: 1s
+          retry-all: true
 
-      - name: Clean DB
-        run: rm data/cc_terrarium.sql && make docker-stop-clean
+      - name: Print container logs
+        if: failure()
+        run: |
+          echo Printing terrarium-api container logs
+          docker logs terrarium-api || echo ""
 
-      - name: Run unit tests & seed script
-        run: make docker-api-test docker-harvest
+          echo Printing postgres container logs
+          docker logs postgres || echo ""
+
+      - name: Run unit tests
+        run: |
+          rm -f data/cc_terrarium.psql
+          make docker-stop-clean docker-api-test
+
+      - name: Check harvest script
+        run: |
+          rm -f data/cc_terrarium.psql
+          make docker-stop-clean docker-harvest

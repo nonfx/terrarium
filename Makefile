@@ -7,6 +7,7 @@
 POSTGRES_CONTAINER := postgres
 POSTGRES_DB := cc_terrarium
 POSTGRES_USER := postgres
+FARM_DB_DUMP_FILE := $(POSTGRES_DB).psql
 
 # Define variables for pg_dump command
 DUMP_DIR := ./data
@@ -16,8 +17,12 @@ docker-init:  ## Initialize the environment before running docker commands
 	@touch ${HOME}/.netrc
 
 .PHONY: db-dump
-db-dump:  ## Target for dumping PostgreSQL database to a file
-	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) | dos2unix > data/$(POSTGRES_DB).sql
+db-dump: start-db  ## Target for dumping PostgreSQL database to a file
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump --column-inserts -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE) -Fc $(POSTGRES_DB)
+
+.PHONY: db-update  ## Restore database from the database bump file. Ignore errors for existing rows.
+db-update: data/$(FARM_DB_DUMP_FILE) start-db
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_restore -a -d $(POSTGRES_DB) -U $(POSTGRES_USER) /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE) || echo ignore errors for already existing rows.
 
 .PHONY: docker-build
 docker-build:  ## Build API container image
@@ -194,8 +199,24 @@ farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
 farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
 	terrarium farm mappings --dir $(FARM_MODULES_DIR)
 
-include ./scripts/mocks.mak
-include ./scripts/protoc.mak
+######################################################
+# Farm releases pull
+# Needs access to the farm repo
+######################################################
+
+FARM_REPO := github.com/cldcvr/terrarium-farm
+
+ifeq ($(FARM_VERSION),)
+FARM_VERSION := latest
+endif
+
+data/$(FARM_DB_DUMP_FILE):
+	$(call farm-release-pull)
+
+.PHONY: farm-release-pull
+farm-release-pull:
+	@echo "Downloading db dump from the latest terrarium-farm release..."
+	@gh release download $(FARM_VERSION) --clobber -p 'terrarium_farm.psql' -O data/$(FARM_DB_DUMP_FILE) -R $(FARM_REPO)
 
 .PHONY: help
 help:

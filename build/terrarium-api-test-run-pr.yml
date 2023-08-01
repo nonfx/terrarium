@@ -87,7 +87,6 @@ stages:
             cd terrarium
             go env -w GO111MODULE=on
             go env -w GOPRIVATE=github.com/cldcvr/*
-            rm data/cc_terrarium.sql
             make docker-init docker-run
             make docker-harvest
           env:

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"golang.org/x/exp/constraints"
 )
 
 func (bid BlockID) Parse() (t BlockType, name string) {
@@ -164,32 +165,44 @@ func (b BlockID) findInputReq(inputs map[string]tfconfig.AttributeReference, m *
 		case "":
 		case "module":
 			if _, ok := m.ModuleCalls[v.Name()]; ok {
-				requirements = append(requirements, NewBlockID(BlockType_ModuleCall, v.Name()))
+				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_ModuleCall, v.Name()))
 			}
 		case "local":
 			if _, ok := m.Locals[v.Name()]; ok {
-				requirements = append(requirements, NewBlockID(BlockType_Local, v.Name()))
+				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Local, v.Name()))
 			}
 		case "var":
 			if _, ok := m.Variables[v.Name()]; ok {
-				requirements = append(requirements, NewBlockID(BlockType_Variable, v.Name()))
+				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Variable, v.Name()))
 			}
 		default:
 			resName := fmt.Sprintf("%s.%s", v.Type(), v.Name())
 			if _, ok := m.ManagedResources[resName]; ok {
-				requirements = append(requirements, NewBlockID(BlockType_Resource, resName))
+				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Resource, resName))
 			}
 
 			dataName := "data." + resName
 			if _, ok := m.DataResources[dataName]; ok {
-				requirements = append(requirements, NewBlockID(BlockType_Data, dataName))
+				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Data, dataName))
 			}
 		}
 	}
 
-	sort.Slice(requirements, func(i, j int) bool {
-		return requirements[i] < requirements[j]
+	return requirements
+}
+
+func appendSortedUnique[T constraints.Ordered](arr []T, val T) []T {
+	idx := sort.Search(len(arr), func(i int) bool {
+		return arr[i] >= val
 	})
 
-	return requirements
+	// return original array if value already exists
+	if idx < len(arr) && arr[idx] == val {
+		return arr
+	}
+
+	// Insert the value at the correct position in the sorted array
+	arr = append(arr[:idx], append([]T{val}, arr[idx:]...)...)
+
+	return arr
 }

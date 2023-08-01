@@ -1,0 +1,39 @@
+name: Build and Push to DockerHub
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  TR_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker Push terrarium-api
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          target: api-runner
+          tags: |
+            cldcvr/terrarium-api:latest,
+            cldcvr/terrarium-api:${{ github.sha }}
+
+      - name: Docker Push terrarium-farm-harvester
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          target: farm-harvester
+          tags: |
+            cldcvr/terrarium-farm-harvester:latest,
+            cldcvr/terrarium-farm-harvester:${{ github.sha }}

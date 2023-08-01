@@ -36,6 +36,8 @@ services:
     build:
       context: .
       target: api-runner
+      cache_from:
+        - "cldcvr/terrarium-api:latest"
     environment:
       # DB config
       TR_DB_HOST: ${TR_DB_HOST:-postgres}
@@ -50,6 +52,8 @@ services:
       TR_LOG_PRETTY_PRINT: ${TR_LOG_PRETTY_PRINT:-true}
     ports:
       - ${TR_SERVER_HTTP_PORT:-3000}:3000
+    depends_on:
+      - postgres
 
   farm-harvester:
     image: cldcvr/terrarium-farm-harvester
@@ -60,6 +64,8 @@ services:
       target: farm-harvester
       args:
         TERRAFORM_VERSION: ${TERRAFORM_VERSION:-latest}
+      cache_from:
+        - "cldcvr/terrarium-farm-harvester:latest"
     secrets:
       - source: netrc
         target: /root/.netrc
@@ -74,6 +80,8 @@ services:
       - ./examples/farm:/app/farm
     profiles:
       - tooling
+    depends_on:
+      - postgres
 
   terrarium-unit-test:
     image: cldcvr/terrarium-unit-test
