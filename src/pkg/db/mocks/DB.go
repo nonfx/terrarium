@@ -381,3 +381,29 @@ func NewDB(t mockConstructorTestingTNewDB) *DB {
 
 	return mock
 }
+
+// CreateDependencyInterface provides a mock function with given fields: e
+func (_m *DB) CreateDependencyInterface(e *db.Dependency) (uuid.UUID, error) {
+	ret := _m.Called(e)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.Dependency) (uuid.UUID, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.Dependency) uuid.UUID); ok {
+		r0 = rf(e)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.Dependency) error); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -68,6 +69,7 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 
 	err := g.Clauses(c).Create(e).Error
 	if err != nil {
+		fmt.Printf("Error in createOrUpdate: %v\n", err)
 		return uuid.Nil, err
 	}
 

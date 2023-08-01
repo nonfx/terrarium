@@ -1,6 +1,7 @@
-package dependecies
+package dependencies
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -34,12 +35,16 @@ func addFlags() {
 }
 
 func main() error {
-	g, err := config.DBConnect()
+	err := processYAMLFiles(depIfaceDirectoryFlag)
 	if err != nil {
 		return err
 	}
 
-	err = filepath.Walk(depIfaceDirectoryFlag, func(path string, info os.FileInfo, err error) error {
+	return nil
+}
+
+func processYAMLFiles(directory string) error {
+	return filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -50,30 +55,88 @@ func main() error {
 			if err != nil {
 				return err
 			}
-			// Parse the YAML data
-			var yamlData map[string][]db.Dependency
-			err = yaml.Unmarshal(data, &yamlData)
+
+			// Process the YAML data and insert into the database
+			err = processYAMLData(path, data)
 			if err != nil {
 				return err
-			}
-			// Loop through each dependency entry and call CreateDependencyInterface
-			for _, dep := range yamlData["dependency-interface"] {
-				dep.ID = uuid.New()
-				_, err := g.CreateDependencyInterface(&dep)
-				if err != nil {
-					return err
-				} else {
-					fmt.Fprintf(os.Stdout, "Data inserted successfully!\n")
-				}
 			}
 		}
 
 		return nil
 	})
+}
 
+func processYAMLData(path string, data []byte) error {
+	g, err := config.DBConnect()
 	if err != nil {
-		// fmt.Printf("Error: %s\n", err)
 		return err
 	}
+	var yamlData map[string][]db.Dependency
+
+	err = yaml.Unmarshal(data, &yamlData)
+	if err != nil {
+		return fmt.Errorf("error parsing YAML file %s: %w", path, err)
+	}
+
+	for _, dep := range yamlData["dependency-interface"] {
+		dep.ID = uuid.New()
+
+		// Convert inputs and outputs to JSON before insertion
+		inputsJSON, err := toJSONString(dep.Inputs)
+		if err != nil {
+			return fmt.Errorf("error converting inputs to JSON: %w", err)
+		}
+		dep.InputsJSON = inputsJSON
+
+		outputsJSON, err := toJSONString(dep.Outputs)
+		if err != nil {
+			return fmt.Errorf("error converting outputs to JSON: %w", err)
+		}
+		dep.OutputsJSON = outputsJSON
+
+		// Call CreateDependencyInterface with the updated Dependency object
+		_, err = g.CreateDependencyInterface(&dep)
+		if err != nil {
+			return fmt.Errorf("error updating the database: %w", err)
+		}
+		fmt.Fprintf(os.Stdout, "Data inserted successfully!\n")
+	}
+
 	return nil
+}
+
+func toJSONString(data interface{}) (string, error) {
+	switch v := data.(type) {
+	case map[string]interface{}:
+		jsonData := make(map[string]interface{})
+		for key, val := range v {
+			valJSON, err := toJSONString(val)
+			if err != nil {
+				return "", err
+			}
+			jsonData[key] = valJSON
+		}
+		jsonBytes, err := json.Marshal(jsonData)
+		if err != nil {
+			return "", err
+		}
+		return string(jsonBytes), nil
+	case []interface{}:
+		jsonData := make([]interface{}, len(v))
+		for i, val := range v {
+			valJSON, err := toJSONString(val)
+			if err != nil {
+				return "", err
+			}
+			jsonData[i] = valJSON
+		}
+		jsonBytes, err := json.Marshal(jsonData)
+		if err != nil {
+			return "", err
+		}
+		return string(jsonBytes), nil
+	default:
+		return fmt.Sprintf("%v", v), nil
+	}
 }

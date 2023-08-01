@@ -7,9 +7,12 @@ import (
 type Dependency struct {
 	Model
 
-	Title   string                 `json:"id" gorm:"uniqueIndex:dependency_unique"`
-	Inputs  map[string]interface{} `json:"inputs" gorm:"type:json"`
-	Outputs map[string]interface{} `json:"outputs" gorm:"type:json"`
+	Title       string                 `json:"title" gorm:"uniqueIndex:dependency_unique"`
+	Inputs      map[string]interface{} `gorm:"-"`
+	InputsJSON  string                 `json:"inputs" gorm:"type:json"`
+	Outputs     map[string]interface{} `gorm:"-"`
+	OutputsJSON string                 `json:"outputs" gorm:"type:json"`
+	ExtendsID   string                 `json:"extends_id" gorm:"-"`
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
