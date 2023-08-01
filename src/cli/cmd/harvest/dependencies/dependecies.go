@@ -19,8 +19,8 @@ var dependencyCmd = &cobra.Command{
 	Use:   "dependencies",
 	Short: "Harvests dependencies from the given directory",
 	Long:  "Harvests dependencies from all the yaml/yml files in the directory provided and adds it to the database.",
-	Run: func(cmd *cobra.Command, args []string) {
-		main()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return main()
 	},
 }
 
@@ -33,10 +33,10 @@ func addFlags() {
 	dependencyCmd.Flags().StringVarP(&depIfaceDirectoryFlag, "dir", "d", "", "path to dependency directory")
 }
 
-func main() {
+func main() error {
 	g, err := config.DBConnect()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = filepath.Walk(depIfaceDirectoryFlag, func(path string, info os.FileInfo, err error) error {
@@ -54,17 +54,16 @@ func main() {
 			var yamlData map[string][]db.Dependency
 			err = yaml.Unmarshal(data, &yamlData)
 			if err != nil {
-				fmt.Printf("Error parsing YAML file %s: %s\n", path, err)
-				return nil
+				return err
 			}
 			// Loop through each dependency entry and call CreateDependencyInterface
 			for _, dep := range yamlData["dependency-interface"] {
 				dep.ID = uuid.New()
 				_, err := g.CreateDependencyInterface(&dep)
 				if err != nil {
-					fmt.Printf("Error updating the database: %s\n", err)
+					return err
 				} else {
-					fmt.Println("Data inserted successfully!")
+					fmt.Fprintf(os.Stdout, "Data inserted successfully!\n")
 				}
 			}
 		}
@@ -73,6 +72,8 @@ func main() {
 	})
 
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		// fmt.Printf("Error: %s\n", err)
+		return err
 	}
+	return nil
 }

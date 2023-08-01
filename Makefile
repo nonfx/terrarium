@@ -194,6 +194,9 @@ farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
 farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
 	terrarium farm mappings --dir $(FARM_MODULES_DIR)
 
+include ./scripts/mocks.mak
+include ./scripts/protoc.mak
+
 .PHONY: help
 help:
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
