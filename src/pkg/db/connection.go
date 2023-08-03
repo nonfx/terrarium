@@ -6,12 +6,7 @@ import (
 )
 
 func AutoMigrate(db *gorm.DB) (DB, error) {
-	err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error
-	if err != nil {
-		return nil, eris.Wrap(err, "failed to perform database migration")
-	}
-
-	err = db.AutoMigrate(
+	err := db.AutoMigrate(
 		TFProvider{},
 		TFResourceType{},
 		TFResourceAttribute{},
@@ -24,6 +19,8 @@ func AutoMigrate(db *gorm.DB) (DB, error) {
 	if err != nil {
 		return nil, eris.Wrap(err, "failed to perform database migration")
 	}
+
+	db.Exec("insert into taxonomies(id) values('00000000-0000-0000-0000-000000000000')")
 
 	return (*gDB)(db), nil
 }

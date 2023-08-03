@@ -2,6 +2,7 @@ package modules
 
 import (
 	"path"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/charmbracelet/log"
@@ -104,6 +105,11 @@ func loadFrom(g db.DB, dir string) error {
 		log.Info("Processing module", "path", config.Path)
 
 		moduleDB := toTFModule(config)
+		// terraform generated schema file has an empty value.
+		// check to avoid persisting empty values
+		if len(strings.TrimSpace(moduleDB.ModuleName)) == 0 || len(strings.TrimSpace(moduleDB.Source)) == 0 {
+			continue
+		}
 		if _, err := g.CreateTFModule(moduleDB); err != nil {
 			return eris.Wrapf(err, "error creating module record")
 		}

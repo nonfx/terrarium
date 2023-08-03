@@ -5,6 +5,7 @@ import (
 
 	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -45,4 +46,8 @@ func createDSN(host, user, password, dbName string, port int, sslMode bool) stri
 func ConnectPG(host, user, password, dbName string, port int, sslMode bool, options ...ConnOption) (*gorm.DB, error) {
 	dsn := createDSN(host, user, password, dbName, port, sslMode)
 	return Connect(postgres.Open(dsn), options...)
+}
+
+func ConnectSQLite(dsn string, options ...ConnOption) (*gorm.DB, error) {
+	return Connect(sqlite.Open(dsn), options...)
 }

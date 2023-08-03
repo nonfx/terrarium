@@ -6,6 +6,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
 	"github.com/rotisserie/eris"
+	"gorm.io/gorm"
 )
 
 var mockdb = &mocks.DB{}
@@ -45,13 +46,25 @@ func DBType() string {
 	return confighelper.MustGetString("db.type")
 }
 
+// DB_DSN returns the SQLite Data Source Name. Default is "embedded.db"
+func DBDSN() string {
+	return confighelper.MustGetString("db.dsn")
+}
+
 // DBConnect establishes a connection to the database using the connection parameters from the environment.
 func DBConnect() (db.DB, error) {
+	var g *gorm.DB
+	var err error
 	switch DBType() {
 	case "mock":
 		return mockdb, nil
+	case "sqlite":
+		g, err = dbhelper.ConnectSQLite(DBDSN())
+		if err != nil {
+			return nil, eris.Wrap(err, "could not establish a connection to the database")
+		}
 	default:
-		g, err := dbhelper.ConnectPG(
+		g, err = dbhelper.ConnectPG(
 			DBHost(),
 			DBUser(),
 			DBPassword(),
@@ -62,6 +75,6 @@ func DBConnect() (db.DB, error) {
 		if err != nil {
 			return nil, eris.Wrap(err, "could not establish a connection to the database")
 		}
-		return db.AutoMigrate(g)
 	}
+	return db.AutoMigrate(g)
 }
