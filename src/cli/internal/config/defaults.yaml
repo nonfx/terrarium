@@ -20,3 +20,7 @@ db:
   name: "cc_terrarium"
   port: 5432
   ssl_mode: false
+
+log:
+  format: "text"
+  level: "info" # debug | info | warn | error | fatal

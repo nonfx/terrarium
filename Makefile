@@ -189,15 +189,15 @@ farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  ##
 
 .PHONY: farm-resource-harvest
 farm-resource-harvest: $(FARM_MODULES_DIR)/.terraform/providers/schema.json  ## Harvest terraform provider resources from the farm directory
-	terrarium farm resources -f $(FARM_MODULES_DIR)/.terraform/providers/schema.json
+	terrarium harvest resources -f $(FARM_MODULES_DIR)/.terraform/providers/schema.json
 
 .PHONY: farm-module-harvest  ## Harvest terraform modules from the farm directory
 farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium farm modules --dir $(FARM_MODULES_DIR)
+	terrarium harvest modules --dir $(FARM_MODULES_DIR)
 
 .PHONY: farm-mapping-harvest  ## Harvest attribute mappings from the farm directory
 farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium farm mappings --dir $(FARM_MODULES_DIR)
+	terrarium harvest mappings --dir $(FARM_MODULES_DIR)
 
 ######################################################
 # Farm releases pull
