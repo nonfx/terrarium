@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest"
 	"github.com/cldcvr/terrarium/src/cli/cmd/platform"
 	"github.com/cldcvr/terrarium/src/cli/cmd/version"
@@ -13,15 +14,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	flagCfgFile string
+)
+
 var rootCmd = &cobra.Command{
-	Use:   "terrarium",
+	Use:   "terrarium [command]",
 	Short: "Terrarium is a set of tools for cloud infrastructure provisioning",
 	Long:  `Terrarium is a set of tools meant to simplify cloud infrastructure provisioning. It provides tools for both app developers and DevOps teams. Terrarium helps DevOps teams in writing Terraform code and helps app developer teams in declaring app dependencies to generate working Terraform code.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Display help or default action
-		cmd.Help()
-	},
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	rootCmd.AddCommand(harvest.GetCmd())
+	rootCmd.AddCommand(platform.GetCmd())
+	rootCmd.AddCommand(version.GetCmd())
+	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
 }
 
 func Execute() {
@@ -31,19 +39,11 @@ func Execute() {
 	}
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
-	rootCmd.AddCommand(harvest.GetCmd())
-	rootCmd.AddCommand(platform.GetCmd())
-	rootCmd.AddCommand(version.GetCmd())
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
-}
-
 func initConfig() {
 	// Don't forget to read config either from cfgFile or from home directory!
-	if cfgFile != "" {
+	if flagCfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(flagCfgFile)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -59,7 +59,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintf(rootCmd.OutOrStderr(), "Using config file: %s\n", viper.ConfigFileUsed())
+		log.Info("Using config file", "file", viper.ConfigFileUsed())
 	}
 
 	config.LoadDefaults()

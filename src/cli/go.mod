@@ -5,6 +5,7 @@ go 1.20
 replace github.com/cldcvr/terrarium/src/pkg => ../pkg
 
 require (
+	github.com/charmbracelet/log v0.2.3
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230712113351-2a570a430e38
 	github.com/cldcvr/terrarium/src/pkg v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
@@ -18,7 +19,17 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec // indirect
+require (
+	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
+	github.com/charmbracelet/lipgloss v0.7.1 // indirect
+	github.com/go-logfmt/logfmt v0.6.0 // indirect
+	github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+)
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6 // indirect

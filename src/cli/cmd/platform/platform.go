@@ -5,19 +5,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetCmd() *cobra.Command {
-	return platformCmd
-}
-
-var platformCmd = &cobra.Command{
-	Use:   "platform",
-	Short: "Terrarium platform template commands",
-	Long:  "Commands to manage Terrarium platform template definitions",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+var cmd = &cobra.Command{
+	Use:     "platform",
+	Aliases: []string{"p"},
+	Short:   "Terrarium platform template commands",
+	Long:    "Commands to manage Terrarium platform template definitions",
 }
 
 func init() {
-	platformCmd.AddCommand(lint.GetCmd())
+	cmd.AddCommand(lint.GetCmd())
+}
+
+func GetCmd() *cobra.Command {
+	return cmd
 }

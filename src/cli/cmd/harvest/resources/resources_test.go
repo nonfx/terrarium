@@ -16,7 +16,11 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 		name            string
 		providersSchema *schema.ProvidersSchema
 		mocks           func(*mocks.DB)
-		panicFu         func(t assert.TestingT, f assert.PanicTestFunc, msgAndArgs ...interface{}) bool
+
+		wantErr           bool
+		wantProviderCount int
+		wantAllResCount   int
+		wantAllAttrCount  int
 	}{
 		{
 			name: "success",
@@ -49,7 +53,9 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 				dbMocks.On("CreateTFResourceType", mock.Anything).Return(uuid.New(), nil).Once()
 				dbMocks.On("CreateTFResourceAttribute", mock.Anything).Return(uuid.New(), nil).Times(3)
 			},
-			panicFu: assert.NotPanics,
+			wantProviderCount: 1,
+			wantAllResCount:   1,
+			wantAllAttrCount:  3,
 		},
 		{
 			name: "panic",
@@ -61,7 +67,7 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 			mocks: func(dbMocks *mocks.DB) {
 				dbMocks.On("GetOrCreateTFProvider", mock.Anything).Return(uuid.Nil, false, fmt.Errorf("mocked error")).Once()
 			},
-			panicFu: assert.Panics,
+			wantErr: true,
 		},
 	}
 
@@ -70,9 +76,16 @@ func Test_pushProvidersSchemaToDB(t *testing.T) {
 			dbMocks := &mocks.DB{}
 			tt.mocks(dbMocks)
 
-			tt.panicFu(t, func() {
-				pushProvidersSchemaToDB(tt.providersSchema, dbMocks)
-			})
+			providerCount, allResCount, allAttrCount, err := pushProvidersSchemaToDB(tt.providersSchema, dbMocks)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Equal(t, tt.wantProviderCount, providerCount)
+			assert.Equal(t, tt.wantAllResCount, allResCount)
+			assert.Equal(t, tt.wantAllAttrCount, allAttrCount)
 
 			dbMocks.AssertExpectations(t)
 
