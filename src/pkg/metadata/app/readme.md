@@ -24,10 +24,10 @@ The `App` section represents the main application configuration. It contains the
 
 ### Dependency
 
-The `Dependency` section represents a single dependency of the application. It includes the following fields:
+The `dependencies` section represents a single dependency of the application. It includes the following fields:
 
 - `ID`: A required identifier for the dependency in the project. It must start with an alphabet character, can only contain alphanumeric characters, and must not exceed 20 characters in length.
-- `Type`: Indicates the specific taxon in the taxonomy hierarchy for the dependency. It includes the version if necessary.
+- `Use`: Indicates the specific taxon that is used as a dependency. It includes the version if necessary.
 - `EnvPrefix`: Used to prefix the output environment variables related to this dependency. If not set, it defaults to the dependency ID in uppercase.
 - `Inputs`: Represents customization options for the selected dependency interface. It is a key-value map where the keys represent the input names, and the values represent the corresponding input values.
 - `Outputs`: Maps dependency outputs to environment variables. Each entry in this map consists of an environment variable name as key and dependency output name in the value. The format for the environment variable name gets the prefix later automatically.
@@ -41,16 +41,16 @@ name: Banking App
 env_prefix: BA
 
 service:
-  type: service.web
+  use: compute/server/web
   inputs:
     port: 3000
 
 dependencies:
   - id: user_db
-    type: database.postgres@11
+    use: storage/database/rdbms/postgres@11
     env_prefix: USER
   - id: ledger_db
-    type: database.postgres
+    use: storage/database/rdbms/postgres
     env_prefix: LEDGER
     inputs:
       db_name: ledger
@@ -58,10 +58,10 @@ dependencies:
     outputs:
       PG_CON: "host={{host}} user={{username}} password={{password}} dbname={{dbname}} port={{port}} sslmode={{sslmode}}"
   - id: user_cache
-    type: database.redis
+    use: storage/database/redis
   - id: auth_app
     no_provision: true
-    type: service.web
+    use: compute/server/web
     outputs:
       URL: "{{endpoint}}"
 ```

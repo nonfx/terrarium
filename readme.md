@@ -4,9 +4,10 @@ The Terrarium project aims to empower DevOps professionals by providing a compre
 
 ## Concepts
 
-- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a curated collection of content that enables essential features such as generalization of infrastructure dependency interfaces, taxonomy management and auto-complete suggestions for terraform and app-dependencies. Cloud Cover owned Farm repo is maintained at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm)
+- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a repository containing curated collection of content that enables essential features such as generalization of infrastructure dependency interfaces, taxonomy management and auto-complete suggestions for terraform and app-dependencies. Cloud Cover owned Farm repo is maintained at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm).
+- [Terrarium Dependency Interface](./src/pkg/metadata/dependency/readme.md) - The Terrarium Dependency Interface is a contract that defines the inputs and outputs of an infrastructure dependency, facilitating communication between applications and Infrastructure as Code (IaC).
 - [Terrarium Platform Framework](./examples/platform/readme.md) - The Terrarium Platform Framework facilitates the creation of reusable Infrastructure as Code configurations using Terraform. Templates built using this framework are referred to as Terrarium Platform templates.
-- [Terrarium App Metadata](./src/pkg/metadata/app/readme.md) - Terrarium App metadata provides a standardized way for applications to declare their infrastructure dependencies.
+- [Terrarium App Metadata](./src/pkg/metadata/app/readme.md) - Terrarium App metadata provides a way for applications to declare their infrastructure dependencies.
 
 ## Tools
 

@@ -1,0 +1,78 @@
+dependency-interfaces:
+  - taxonomy: compute/server/web
+    title: Web Server
+    description: A server that hosts web applications and handles HTTP requests.
+    inputs:
+      type: object
+      properties:
+          port:
+              title: Port
+              description: The port number on which the server should listen.
+              type: number
+              default: 80
+    outputs:
+      properties:
+          host:
+              title: Host
+              description: The host address of the web server.
+              type: string
+
+  - taxonomy: compute/server/static
+    title: Static Server
+    description: A server that hosts and serves static files.
+    inputs:
+      type: object
+      properties:
+          port:
+              title: Port
+              description: The port number on which the server should listen.
+              type: number
+              default: 80
+    outputs:
+      properties:
+          host:
+              title: Host
+              description: The host address of the static server.
+              type: string
+
+  - taxonomy: compute/server/private
+    title: Private Server
+    description: A server that is not exposed to the public internet.
+    inputs:
+      type: object
+      properties:
+          port:
+              title: Port
+              description: The port number on which the server should listen.
+              type: number
+              default: 80
+    outputs:
+      properties:
+          host:
+              title: Host
+              description: The host address of the private server.
+              type: string
+
+  - taxonomy: compute/job/queue
+    title: Queue Job
+    description: A job that performs tasks in the queue.
+    inputs: {}
+    outputs:
+      type: object
+      properties:
+          task_queue:
+              title: Task Queue URL
+              description: The queue from which the job pulls tasks.
+              type: string
+
+  - taxonomy: compute/job/scheduled
+    title: Scheduled Job
+    description: A job that is run at scheduled intervals.
+    inputs:
+      type: object
+      properties:
+          schedule:
+              title: Schedule
+              description: The schedule on which the job should run, in cron format.
+              type: string
+    outputs: {}

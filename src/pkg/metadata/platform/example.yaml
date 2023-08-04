@@ -1,6 +1,6 @@
 components:
   - id: postgres
-    taxonomy: [storage, database, rdbms]
+    implements: storage/database/rdbms/postgres
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:

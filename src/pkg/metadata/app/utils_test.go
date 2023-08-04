@@ -4,7 +4,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/stretchr/testify/assert"
+)
+
+const (
+	taxonWeb      = taxonomy.Taxon("compute/server/web")
+	taxonPostgres = taxonomy.Taxon("storage/database/postgres")
+	taxonRedis    = taxonomy.Taxon("storage/cache/redis")
 )
 
 // initializing test data
@@ -13,17 +20,17 @@ func getAppsTest() Apps {
 		{
 			ID: "testapp1",
 			Service: Dependency{
-				ID:   "testapp1",
-				Type: "service.web",
+				ID:  "testapp1",
+				Use: taxonWeb,
 			},
 			Dependencies: Dependencies{
 				{
-					ID:   "testdep2",
-					Type: "database",
+					ID:  "testdep2",
+					Use: taxonPostgres,
 				},
 				{
 					ID:          "testdep3",
-					Type:        "cache",
+					Use:         taxonRedis,
 					NoProvision: true,
 				},
 			},
@@ -31,21 +38,21 @@ func getAppsTest() Apps {
 		{
 			ID: "testapp2",
 			Service: Dependency{
-				ID:   "testapp2",
-				Type: "service.web",
+				ID:  "testapp2",
+				Use: taxonWeb,
 			},
 			Dependencies: Dependencies{
 				{
-					ID:   "testdep3",
-					Type: "cache",
+					ID:  "testdep3",
+					Use: taxonRedis,
 				},
 				{
-					ID:   "testdep4",
-					Type: "database",
+					ID:  "testdep4",
+					Use: taxonPostgres,
 				},
 				{
-					ID:   "testdep5",
-					Type: "cache",
+					ID:  "testdep5",
+					Use: taxonRedis,
 				},
 			},
 		},
@@ -138,7 +145,7 @@ func TestGetDependenciesByAppID(t *testing.T) {
 func TestGetDependenciesByType(t *testing.T) {
 	apps := getAppsTest()
 
-	deps := apps.GetDependenciesByType("database")
+	deps := apps.GetDependenciesByType(taxonPostgres)
 	assert.Len(t, deps, 2)
 	assert.Equal(t, "testdep2", deps[0].ID)
 	assert.Equal(t, "testdep4", deps[1].ID)
@@ -149,7 +156,7 @@ func TestGetUniqueDependencyTypes(t *testing.T) {
 
 	types := apps.GetUniqueDependencyTypes()
 	assert.Len(t, types, 3)
-	assert.Contains(t, types, "service.web")
-	assert.Contains(t, types, "cache")
-	assert.Contains(t, types, "database")
+	assert.Contains(t, types, taxonomy.Taxon(taxonWeb))
+	assert.Contains(t, types, taxonomy.Taxon(taxonRedis))
+	assert.Contains(t, types, taxonomy.Taxon(taxonPostgres))
 }
