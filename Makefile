@@ -8,6 +8,7 @@ POSTGRES_CONTAINER := postgres
 POSTGRES_DB := cc_terrarium
 POSTGRES_USER := postgres
 FARM_DB_DUMP_FILE := $(POSTGRES_DB).psql
+COVERAGE_FILE = coverage/coverage.txt
 
 # Define variables for pg_dump command
 DUMP_DIR := ./data
@@ -113,7 +114,9 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 
 .PHONY: test
 test:  ## Run go unit tests
-	go test github.com/cldcvr/terrarium/...
+	go test -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
+	@echo "-- Test coverage for terrarium --"
+	@go tool cover -func=$(COVERAGE_FILE)|grep "total:"
 
 define make_binary
 	@echo "-- Building application binary $(1) for $(2)-$(3)"
