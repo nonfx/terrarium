@@ -91,6 +91,6 @@ services:
       context: .
       target: unit-test
     volumes:
-      - ./:/usr/src/app/coverage
+      - ./coverage:/usr/src/app/coverage
     profiles:
       - tooling
