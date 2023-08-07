@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report
-          path: coverage.txt
+          path: coverage
       - name: Check harvest script
         run: |
           rm -f data/cc_terrarium.psql
@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: code-coverage-report
-          path: coverage.txt
+          path: coverage
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
