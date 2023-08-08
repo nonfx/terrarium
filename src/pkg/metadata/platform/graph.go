@@ -1,65 +1,17 @@
 package platform
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
-	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/slices"
 )
-
-func (bid BlockID) Parse() (t BlockType, name string) {
-	spl := strings.SplitN(string(bid), ".", 2)
-	if len(spl) < 2 {
-		return
-	}
-
-	t = NewBlockType(spl[0])
-	name = spl[1]
-	return
-}
-
-func NewBlockID(t BlockType, name string) BlockID {
-	return BlockID(fmt.Sprintf("%s.%s", t, name))
-}
-
-func NewBlockType(t string) BlockType {
-	bt := BlockType(t)
-	switch bt {
-	case BlockType_ModuleCall,
-		BlockType_Resource,
-		BlockType_Data,
-		BlockType_Local,
-		BlockType_Variable,
-		BlockType_Output,
-		BlockType_Provider:
-
-		return bt
-	default:
-		return BlockType_Undefined
-	}
-}
 
 func NewGraph(platformModule *tfconfig.Module) Graph {
 	g := Graph{}
 	g.Parse(platformModule)
 	return g
-}
-
-func (g Graph) GetByID(id BlockID) *GraphNode {
-	for i, v := range g {
-		if v.ID == id {
-			return &g[i]
-		}
-	}
-
-	return nil
-}
-
-func (g *Graph) Append(bID BlockID, requirements []BlockID) *GraphNode {
-	(*g) = append((*g), GraphNode{ID: bID, Requirements: requirements})
-	return &(*g)[len(*g)-1]
 }
 
 func (g *Graph) Parse(srcModule *tfconfig.Module) {
@@ -100,109 +52,93 @@ func (g *Graph) Parse(srcModule *tfconfig.Module) {
 	})
 }
 
-func (b BlockID) FindRequirements(m *tfconfig.Module) []BlockID {
-	t, _ := b.Parse()
-	switch t {
-	case BlockType_ModuleCall:
-		return b.findModuleCallReq(m)
-	case BlockType_Resource:
-		return b.findResourceReq(m)
-	case BlockType_Data:
-		return b.findResourceDataReq(m)
-	case BlockType_Output:
-		return b.findOutputReq(m)
-	}
-
-	return []BlockID{}
-}
-
-func (b BlockID) findModuleCallReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	mc := m.ModuleCalls[name]
-	if mc == nil {
-		return []BlockID{}
-	}
-
-	return b.findInputReq(mc.Inputs, m)
-}
-
-func (b BlockID) findResourceReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	mr := m.ManagedResources[name]
-	if mr == nil {
-		return []BlockID{}
-	}
-
-	return b.findInputReq(mr.Inputs, m)
-
-}
-
-func (b BlockID) findResourceDataReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	dr := m.DataResources[name]
-	if dr == nil {
-		return []BlockID{}
-	}
-
-	return b.findInputReq(dr.Inputs, m)
-}
-
-func (b BlockID) findOutputReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	op := m.Outputs[name]
-	if op == nil {
-		return []BlockID{}
-	}
-
-	return b.findInputReq(map[string]tfconfig.AttributeReference{"": op.Value}, m)
-}
-
-func (b BlockID) findInputReq(inputs map[string]tfconfig.AttributeReference, m *tfconfig.Module) []BlockID {
-	requirements := []BlockID{}
-
-	for _, v := range inputs {
-		switch v.Type() {
-		case "":
-		case "module":
-			if _, ok := m.ModuleCalls[v.Name()]; ok {
-				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_ModuleCall, v.Name()))
-			}
-		case "local":
-			if _, ok := m.Locals[v.Name()]; ok {
-				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Local, v.Name()))
-			}
-		case "var":
-			if _, ok := m.Variables[v.Name()]; ok {
-				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Variable, v.Name()))
-			}
-		default:
-			resName := fmt.Sprintf("%s.%s", v.Type(), v.Name())
-			if _, ok := m.ManagedResources[resName]; ok {
-				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Resource, resName))
-			}
-
-			dataName := "data." + resName
-			if _, ok := m.DataResources[dataName]; ok {
-				requirements = appendSortedUnique(requirements, NewBlockID(BlockType_Data, dataName))
-			}
+func (g Graph) GetByID(id BlockID) *GraphNode {
+	for i, v := range g {
+		if v.ID == id {
+			return &g[i]
 		}
 	}
 
-	return requirements
+	return nil
 }
 
-func appendSortedUnique[T constraints.Ordered](arr []T, val T) []T {
-	idx := sort.Search(len(arr), func(i int) bool {
-		return arr[i] >= val
-	})
+func (g *Graph) Append(bID BlockID, requirements []BlockID) *GraphNode {
+	(*g) = append((*g), GraphNode{ID: bID, Requirements: requirements})
+	return &(*g)[len(*g)-1]
+}
 
-	// return original array if value already exists
-	if idx < len(arr) && arr[idx] == val {
-		return arr
+type GraphWalkerCB func(blockId BlockID) error
+
+func (g *Graph) Walk(roots []BlockID, fu GraphWalkerCB) error {
+	roots = slices.Compact(roots)
+	traverser := make([]BlockID, len(roots)) // nodes before `i` are visited and after `i` are queued
+	copy(traverser, roots)
+
+	err := g.traverseRootBlocks(&traverser, fu)
+	if err != nil {
+		return err
 	}
 
-	// Insert the value at the correct position in the sorted array
-	arr = append(arr[:idx], append([]T{val}, arr[idx:]...)...)
+	err = g.traverseOutputBlocks(&traverser, fu)
+	if err != nil {
+		return err
+	}
 
-	return arr
+	return nil
+}
+
+func (g *Graph) traverseRootBlocks(traverser *[]BlockID, fu GraphWalkerCB) error {
+	for i := 0; i < len(*traverser); i++ {
+		node := g.GetByID((*traverser)[i])
+		if node == nil {
+			continue
+		}
+
+		err := fu(node.ID)
+		if err != nil {
+			return err
+		}
+
+		g.appendRequirements(traverser, node.Requirements)
+	}
+
+	return nil
+}
+
+func (g *Graph) appendRequirements(traverser *[]BlockID, requirements []BlockID) {
+	for _, bID := range requirements {
+		if !slices.Contains(*traverser, bID) {
+			*traverser = append(*traverser, bID)
+		}
+	}
+}
+
+func (g *Graph) traverseOutputBlocks(traverser *[]BlockID, fu GraphWalkerCB) error {
+	for _, node := range *g {
+		bt, _ := node.ID.Parse()
+		if bt != BlockType_Output {
+			continue
+		}
+
+		if !g.allDependenciesTraversed(traverser, node.Requirements) {
+			continue
+		}
+
+		err := fu(node.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Graph) allDependenciesTraversed(traverser *[]BlockID, requirements []BlockID) bool {
+	for _, bId := range requirements {
+		if !slices.Contains(*traverser, bId) {
+			return false
+		}
+	}
+
+	return true
 }

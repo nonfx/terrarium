@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2
-	github.com/cldcvr/terraform-config-inspect v0.0.0-20230712113351-2a570a430e38
+	github.com/cldcvr/terraform-config-inspect v0.0.0-20230808162456-0c67e81936ae
 	github.com/creack/pty v1.1.18
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/go-kit/kit v0.12.0

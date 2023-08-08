@@ -33,6 +33,7 @@ data/*.*sql
 __debug_bin
 .bin
 **/tr-private-sources.tf
+.terrarium
 
 ### Protobuf Dependencies ###
 src/pkg/pb/google/*
