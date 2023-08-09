@@ -25,7 +25,8 @@
       "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
         "harvest",
-        "resources"
+        "resources",
+        "-f${workspaceFolder}/examples/farm/modules/.terraform/providers/schema.json"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

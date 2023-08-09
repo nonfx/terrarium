@@ -70,16 +70,16 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 	for name, expr := range module.Locals {
 		// Find all auto-generated inputs and assert they are iterable.
 		if strings.HasPrefix(name, terrariumComponentModulePrefix) && !strings.HasSuffix(name, terrariumComponentModuleEnabledSuffix) {
-			if !parser.IsObject(expr) {
-				return fmt.Errorf("dependency input declaration '%s' %s must be iterable", name, fmtExpressionPosition(expr))
+			if !parser.IsObject(expr.Expression) {
+				return fmt.Errorf("dependency input declaration '%s' %s must be iterable", name, fmtExpressionPosition(expr.Expression))
 			}
 			requiredModuleNames = append(requiredModuleNames, name)
 		}
 
 		// Assert taxon switch variables are boolean.
 		if strings.HasPrefix(name, terrariumTaxonEnabledPrefix) && strings.HasSuffix(name, terrariumTaxonEnabledSuffix) {
-			if !parser.IsBool(expr) {
-				return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean", name, fmtExpressionPosition(expr))
+			if !parser.IsBool(expr.Expression) {
+				return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean", name, fmtExpressionPosition(expr.Expression))
 			}
 		}
 	}
@@ -88,8 +88,8 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 		switchVarName := name + terrariumComponentModuleEnabledSuffix
 		if expr, found := module.Locals[switchVarName]; !found {
 			return fmt.Errorf("terraform must declare a local boolean variable '%s' set to true if at least one component instance would be created: %s = length(local.%s) > 0", switchVarName, switchVarName, name)
-		} else if !parser.IsBool(expr) {
-			return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean: %s = length(local.%s) > 0", switchVarName, fmtExpressionPosition(expr), switchVarName, name)
+		} else if !parser.IsBool(expr.Expression) {
+			return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean: %s = length(local.%s) > 0", switchVarName, fmtExpressionPosition(expr.Expression), switchVarName, name)
 		}
 
 		// Verify that a module exists for each input map,

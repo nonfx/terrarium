@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/stretchr/testify/assert"
 	"github.com/zclconf/go-cty/cty"
@@ -16,20 +15,23 @@ func createTestPlatformModule() *tfconfig.Module {
 		ModuleCalls: map[string]*tfconfig.ModuleCall{
 			"tr_component_test": {},
 		},
-		Locals: map[string]hcl.Expression{
-			"tr_component_test": &hclsyntax.LiteralValueExpr{Val: cty.MapVal(map[string]cty.Value{
-				"default": cty.ObjectVal(map[string]cty.Value{
-					"input1": cty.StringVal("value1"),
-					"input2": cty.NumberFloatVal(42.0),
-					"input3": cty.BoolVal(true),
-					"input4": cty.TupleVal([]cty.Value{
-						cty.StringVal("list_value1"),
+		Locals: map[string]*tfconfig.Local{
+			"tr_component_test": &tfconfig.Local{
+				Name: "tr_component_test",
+				Expression: &hclsyntax.LiteralValueExpr{Val: cty.MapVal(map[string]cty.Value{
+					"default": cty.ObjectVal(map[string]cty.Value{
+						"input1": cty.StringVal("value1"),
+						"input2": cty.NumberFloatVal(42.0),
+						"input3": cty.BoolVal(true),
+						"input4": cty.TupleVal([]cty.Value{
+							cty.StringVal("list_value1"),
+						}),
+						"input5": cty.ObjectVal(map[string]cty.Value{
+							"obj_key1": cty.StringVal("obj_value1"),
+						}),
 					}),
-					"input5": cty.ObjectVal(map[string]cty.Value{
-						"obj_key1": cty.StringVal("obj_value1"),
-					}),
-				}),
-			})},
+				})},
+			},
 			"random_local": nil,
 		},
 		Outputs: map[string]*tfconfig.Output{

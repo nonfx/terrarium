@@ -6,7 +6,7 @@ replace github.com/cldcvr/terrarium/src/pkg => ../pkg
 
 require (
 	github.com/charmbracelet/log v0.2.3
-	github.com/cldcvr/terraform-config-inspect v0.0.0-20230808162456-0c67e81936ae
+	github.com/cldcvr/terraform-config-inspect v0.0.0-20230810200222-6378f89431b6
 	github.com/cldcvr/terrarium/src/pkg v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.17.0
@@ -16,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
+	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -32,10 +32,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 )
 
-require (
-	github.com/AlecAivazis/survey/v2 v2.3.6 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
-)
+require github.com/AlecAivazis/survey/v2 v2.3.6 // indirect
 
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
@@ -78,7 +75,7 @@ require (
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	google.golang.org/genproto v0.0.0-20230629202037-9506855d4529 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230629202037-9506855d4529 // indirect
