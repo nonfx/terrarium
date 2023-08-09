@@ -5,6 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "modules list",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "query",
+        "modules"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
       "name": "Seed Resources",
       "type": "go",
       "request": "launch",

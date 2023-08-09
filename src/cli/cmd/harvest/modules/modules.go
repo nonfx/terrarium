@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
@@ -81,10 +82,14 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 	if config.Metadata != nil {
 		record.ModuleName = config.Metadata.Name
 		record.Source = config.Metadata.Source
-		if strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
-			// identify this as local module
-			// populate namespace
-			record.Namespace = config.Path
+		// filter local module
+		if flagIncludeLocal && strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
+			if flagTFDir == "" {
+				cmd := exec.Command("pwd")
+				dir, _ := cmd.CombinedOutput()
+				flagTFDir = string(dir)
+			}
+			record.Namespace = flagTFDir
 		}
 		record.Version = db.Version(config.Metadata.Version)
 	}
