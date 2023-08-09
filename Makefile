@@ -8,6 +8,7 @@ POSTGRES_CONTAINER := postgres
 POSTGRES_DB := cc_terrarium
 POSTGRES_USER := postgres
 FARM_DB_DUMP_FILE := $(POSTGRES_DB).psql
+COVERAGE_FILE = coverage/coverage.txt
 
 # Define variables for pg_dump command
 DUMP_DIR := ./data
@@ -55,6 +56,9 @@ docker-seed: docker-harvest  ## DEPRECATED. alias to docker-harvest target
 
 docker-api-test: docker-tools-build ## Run API unit tests in a containerized environment
 	docker compose run --rm terrarium-unit-test
+
+proto:
+	make proto -f scripts/protoc.mak
 
 ######################################################
 # Go Targets
@@ -113,7 +117,10 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 
 .PHONY: test
 test:  ## Run go unit tests
-	go test github.com/cldcvr/terrarium/...
+	mkdir -p coverage
+	go test -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
+	@echo "-- Test coverage for terrarium --"
+	@go tool cover -func=$(COVERAGE_FILE)|grep "total:"
 
 define make_binary
 	@echo "-- Building application binary $(1) for $(2)-$(3)"
@@ -189,15 +196,15 @@ farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  ##
 
 .PHONY: farm-resource-harvest
 farm-resource-harvest: $(FARM_MODULES_DIR)/.terraform/providers/schema.json  ## Harvest terraform provider resources from the farm directory
-	terrarium farm resources -f $(FARM_MODULES_DIR)/.terraform/providers/schema.json
+	terrarium harvest resources -f $(FARM_MODULES_DIR)/.terraform/providers/schema.json
 
 .PHONY: farm-module-harvest  ## Harvest terraform modules from the farm directory
 farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium farm modules --dir $(FARM_MODULES_DIR)
+	terrarium harvest modules --dir $(FARM_MODULES_DIR)
 
 .PHONY: farm-mapping-harvest  ## Harvest attribute mappings from the farm directory
 farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium farm mappings --dir $(FARM_MODULES_DIR)
+	terrarium harvest mappings --dir $(FARM_MODULES_DIR)
 
 ######################################################
 # Farm releases pull

@@ -1,0 +1,28 @@
+components:
+    - id: postgres
+      inputs:
+        type: object
+        properties:
+            db_name:
+                type: string
+                default: default_db
+            version:
+                type: string
+                default: "11.12"
+      outputs:
+        type: object
+        properties:
+            host: {}
+            port: {}
+graph:
+    - id: module.postgres_security_group
+      requirements: []
+    - id: module.tr_component_postgres
+      requirements:
+        - module.postgres_security_group
+    - id: output.tr_component_postgres_host
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_postgres_port
+      requirements:
+        - module.tr_component_postgres

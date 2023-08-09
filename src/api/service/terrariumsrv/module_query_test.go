@@ -18,7 +18,7 @@ func TestService_ListModules(t *testing.T) {
 		{
 			name: "Successful retrieval of modules",
 			preCall: func(t *testing.T, tc TestCase[terrariumpb.ListModulesRequest, terrariumpb.ListModulesResponse]) {
-				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
+				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
 					Return(db.TFModules{
 						{
 							Model:       db.Model{ID: mockUuid1},
@@ -58,7 +58,7 @@ func TestService_ListModules(t *testing.T) {
 		{
 			name: "Error retrieving modules",
 			preCall: func(t *testing.T, tc TestCase[terrariumpb.ListModulesRequest, terrariumpb.ListModulesResponse]) {
-				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
+				tc.mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
 					Return(nil, tc.wantErr)
 			},
 			req: &terrariumpb.ListModulesRequest{

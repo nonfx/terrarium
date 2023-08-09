@@ -2,18 +2,16 @@ package lint
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	"github.com/cldcvr/terrarium/src/pkg/tf/parser"
 	"github.com/hashicorp/hcl/v2"
 	"gopkg.in/yaml.v3"
-
-	"github.com/spf13/cobra"
 )
 
 const terrariumComponentModulePrefix = "tr_component_"
@@ -21,39 +19,21 @@ const terrariumComponentModuleEnabledSuffix = "_enabled"
 const terrariumTaxonEnabledPrefix = "tr_taxon_"
 const terrariumTaxonEnabledSuffix = "_enabled"
 
-type PlatformLintOptions struct {
-	Dir string `json:"dir"`
-}
-
-func GetCmd() *cobra.Command {
-	opts := &PlatformLintOptions{}
-	cmd := &cobra.Command{
-		Use:   "lint",
-		Short: "Check a given directory is valid platform definition",
-		Long:  "Analyze the directory and verify it constitutes a valid platform definition.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return lintPlatform(opts.Dir)
-		},
-	}
-	cmd.Flags().StringVar(&opts.Dir, "dir", ".", "Path to platform directory to validate.")
-	return cmd
-}
-
 func lintPlatform(dir string) error {
-	log.Println("Linting terrarium platform template...")
+	log.Info("Linting terrarium platform template...")
 
-	log.Printf("Loading Terraform modules to lint from '%s'...\n", dir)
+	log.Infof("Loading Terraform modules to lint from '%s'...\n", dir)
 	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
 
-	log.Println("Validating Terraform modules...")
+	log.Info("Validating Terraform modules...")
 	if err := validatePlatformTerraform(module); err != nil {
-		log.Printf("Following Terraform issues were found: %v\n", err)
+		log.Infof("Following Terraform issues were found: %v\n", err)
 		return fmt.Errorf("platform lint: %w", err)
 	}
-	log.Println("Platform is valid.")
+	log.Info("Platform is valid.")
 
 	metadataFile := filepath.Join(dir, "terrarium.yaml")
-	log.Printf("Loading Terrarium metadata file '%s'...\n", metadataFile)
+	log.Infof("Loading Terrarium metadata file '%s'...\n", metadataFile)
 
 	fileData, err := os.ReadFile(metadataFile)
 	if os.IsNotExist(err) {
@@ -72,14 +52,14 @@ func lintPlatform(dir string) error {
 	}
 
 	if string(fileData) == string(pmYAML) {
-		log.Println("No change in metadata.")
+		log.Info("No change in metadata.")
 		return nil
 	}
 
-	log.Printf("Updating metadata file at: %s", metadataFile)
+	log.Infof("Updating metadata file at: %s", metadataFile)
 	os.WriteFile(metadataFile, pmYAML, 0644)
 
-	log.Println("Metadata updated.")
+	log.Info("Metadata updated.")
 
 	return nil
 }

@@ -2,19 +2,12 @@ package modules
 
 import (
 	"fmt"
-	"log"
-	"path/filepath"
+	"os/exec"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
-	"github.com/cldcvr/terrarium/src/cli/internal/config"
-	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/spf13/cobra"
 )
-
-var moduleDirectoryFlag string
-var includeLocalFlag bool
 
 var resourceTypeByName map[string]*db.TFResourceType
 
@@ -23,25 +16,6 @@ type tfValue interface {
 	GetDescription() string
 	IsRequired() bool
 	IsComputed() bool
-}
-
-var modulesCmd = &cobra.Command{
-	Use:   "modules",
-	Short: "Scrapes Terraform modules and attributes from the farm directory",
-	Long:  "The 'modules' command scrapes all Terraform modules and their attributes from the specified farm directory.",
-	Run: func(cmd *cobra.Command, args []string) {
-		main()
-	},
-}
-
-func GetCmd() *cobra.Command {
-	addFlags()
-	return modulesCmd
-}
-
-func addFlags() {
-	modulesCmd.Flags().StringVarP(&moduleDirectoryFlag, "dir", "d", "", "farm directory path")
-	modulesCmd.Flags().BoolVarP(&includeLocalFlag, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
 }
 
 func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {
@@ -100,66 +74,6 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 	return moduleAttrDB, nil
 }
 
-func main() {
-	g, err := config.DBConnect()
-	if err != nil {
-		panic(err)
-	}
-
-	resourceTypeByName = make(map[string]*db.TFResourceType)
-
-	// load modules
-	log.Println("Loading modules...")
-
-	filters := []tfconfig.ResolvedModuleSchemaFilter{tfconfig.FilterModulesOmitHidden}
-	if !includeLocalFlag {
-		filters = append(filters, tfconfig.FilterModulesOmitLocal)
-	}
-
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(moduleDirectoryFlag, constants.ModuleSchemaFilePath), filters...)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Printf("Loaded %d modules\n", len(configs))
-
-	for _, config := range configs {
-		log.Printf("Processing module '%s'...\n", config.Path)
-
-		moduleDB := toTFModule(config)
-		if _, err := g.CreateTFModule(moduleDB); err != nil {
-			log.Println("Error creating module record:", err)
-			return
-		}
-
-		for varName, v := range config.Variables {
-			if varAttrReferences, ok := config.Inputs[varName]; ok { // found a resolution for this variable to resource attribute
-				for varAttributePath, resourceReferences := range varAttrReferences {
-					for _, res := range resourceReferences {
-						if attr, err := createAttributeRecord(g, moduleDB, v, varAttributePath, res); err != nil {
-							log.Println("Error creating module input-attribute:", err)
-							return
-						} else if attr == nil {
-							continue
-						}
-					}
-				}
-			}
-		}
-
-		for _, o := range config.Outputs {
-			if attr, err := createAttributeRecord(g, moduleDB, o, "", o.Value); err != nil {
-				log.Println("Error creating module output-attribute:", err)
-				return
-			} else if attr == nil {
-				continue
-			}
-		}
-		log.Printf("Module '%s' done processing\n", config.Path)
-	}
-
-}
-
 func toTFModule(config *tfconfig.Module) *db.TFModule {
 	record := db.TFModule{
 		ModuleName: config.Path,
@@ -168,10 +82,14 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 	if config.Metadata != nil {
 		record.ModuleName = config.Metadata.Name
 		record.Source = config.Metadata.Source
-		if strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
-			// identify this as local module
-			// populate namespace
-			record.Namespace = config.Path
+		// filter local module
+		if flagIncludeLocal && strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
+			if flagTFDir == "" {
+				cmd := exec.Command("pwd")
+				dir, _ := cmd.CombinedOutput()
+				flagTFDir = string(dir)
+			}
+			record.Namespace = flagTFDir
 		}
 		record.Version = db.Version(config.Metadata.Version)
 	}

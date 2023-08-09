@@ -3,71 +3,50 @@ package resources
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/tf/schema"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
+	"github.com/rotisserie/eris"
 )
-
-var moduleSchemaFilePathFlag string
 
 const DefaultSchemaPath = ".terraform/providers/schema.json"
 
-var resourcesCmd = &cobra.Command{
-	Use:   "resources",
-	Short: "Harvests Terraform resources and attributes using the provider schema json",
-	Long: heredoc.Docf(`
-		This command requires terraform provider schema already generated. To do that, run:
-			terraform providers schema -json > %s
-	`, DefaultSchemaPath),
-	Run: func(cmd *cobra.Command, args []string) {
-		main()
-	},
-}
-
-func GetCmd() *cobra.Command {
-	addFlags()
-	return resourcesCmd
-}
-
-func addFlags() {
-	resourcesCmd.Flags().StringVarP(&moduleSchemaFilePathFlag, "file", "f", DefaultSchemaPath, "terraform provider schema json file path")
-}
-
-func main() {
-	// Connect to the database
-	db, err := config.DBConnect()
-	mustNotErr(err, "Error connecting to the database")
-
-	// Load providers schema from file
-	providersSchema, err := loadProvidersSchema(moduleSchemaFilePathFlag)
-	mustNotErr(err, "Error loading providers schema")
-
-	pushProvidersSchemaToDB(providersSchema, db)
-}
-
-func pushProvidersSchemaToDB(providersSchema *schema.ProvidersSchema, dbConn db.DB) {
+func pushProvidersSchemaToDB(providersSchema *schema.ProvidersSchema, dbConn db.DB) (providerCount, allResCount, allAttrCount int, err error) {
 	// Process each provider in the schema
 	for providerName, resources := range providersSchema.ProviderSchemas {
 		providerID, isNew, err := dbConn.GetOrCreateTFProvider(&db.TFProvider{Name: providerName})
-		mustNotErr(err, "Error creating provider: %s", providerName)
+		if err != nil {
+			return providerCount, allResCount, allAttrCount, eris.Wrapf(err, "error creating provider: %s", providerName)
+		}
 
 		if !isNew {
-			log.Printf("Provider already exists, skipping resource seed: %s | %s\n", providerID, providerName)
+			log.Info("Provider already exists, skipping", "name", providerName, "id", providerID)
 			continue
 		}
 
-		log.Printf("Provider created: %s | %s\n", providerID, providerName)
+		log.Info("Provider created", "name", providerName, "id", providerID)
+		providerCount++
 
 		// Process each resource and data-resource type in the provider
-		pushSchemasToDB(dbConn, providerID, resources.ResourceSchemas)
-		pushSchemasToDB(dbConn, providerID, resources.DataSourceSchemas)
+		resCount, attrCount, err := pushSchemasToDB(dbConn, providerID, resources.ResourceSchemas)
+		if err != nil {
+			return providerCount, allResCount, allAttrCount, err
+		}
+		allResCount += resCount
+		allAttrCount += attrCount
+
+		resCount, attrCount, err = pushSchemasToDB(dbConn, providerID, resources.DataSourceSchemas)
+		if err != nil {
+			return providerCount, allResCount, allAttrCount, err
+		}
+		allResCount += resCount
+		allAttrCount += attrCount
 	}
+
+	return
 }
 
 // loadProvidersSchema loads the providers schema from a file
@@ -88,24 +67,21 @@ func loadProvidersSchema(filename string) (*schema.ProvidersSchema, error) {
 	return &providersSchema, nil
 }
 
-// mustNotErr checks if the error is non-nil and panics if it is, logging the provided message
-func mustNotErr(err error, msg string, args ...interface{}) {
-	if err != nil {
-		log.Printf(msg, args...)
-		panic(err)
-	}
-}
-
-func pushSchemasToDB(dbConn db.DB, providerID uuid.UUID, schemas map[string]schema.SchemaRepresentation) {
+func pushSchemasToDB(dbConn db.DB, providerID uuid.UUID, schemas map[string]schema.SchemaRepresentation) (resCount, attrCount int, err error) {
 	for resourceType, resourceSchema := range schemas {
 		// Create a new TFResourceType instance
 		resource := &db.TFResourceType{
 			ProviderID:   providerID,
 			ResourceType: resourceType,
 		}
+
 		resourceID, err := dbConn.CreateTFResourceType(resource)
-		mustNotErr(err, "Error creating resource type: %s", resourceType)
-		log.Printf("\tResource type created: %s | %s\n", resourceID, resourceType)
+		if err != nil {
+			return resCount, attrCount, eris.Wrapf(err, "error creating resource type: %s", resourceType)
+		}
+
+		log.Debug("Resource type created", "name", resourceType, "id", resourceID)
+		resCount++
 
 		// Process each attribute in the resource type
 		attributes := resourceSchema.Block.ListLeafNodes()
@@ -120,9 +96,16 @@ func pushSchemasToDB(dbConn db.DB, providerID uuid.UUID, schemas map[string]sche
 				Optional:       attribute.Optional,
 				Computed:       attribute.Computed,
 			}
+
 			attrID, err := dbConn.CreateTFResourceAttribute(attr)
-			mustNotErr(err, "Error creating attribute: %s", attributePath)
-			log.Printf("\t\tAttribute created: %s | %s\n", attrID, attributePath)
+			if err != nil {
+				return resCount, attrCount, eris.Wrapf(err, "error creating attribute: %s", attributePath)
+			}
+
+			log.Debug("Attribute created", "name", attributePath, "id", attrID)
+			attrCount++
 		}
 	}
+
+	return
 }

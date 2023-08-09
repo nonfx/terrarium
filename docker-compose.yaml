@@ -90,5 +90,7 @@ services:
     build:
       context: .
       target: unit-test
+    volumes:
+      - ./coverage:/usr/src/app/coverage
     profiles:
       - tooling

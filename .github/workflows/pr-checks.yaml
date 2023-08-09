@@ -44,18 +44,28 @@ jobs:
         run: |
           rm -f data/cc_terrarium.psql
           make docker-stop-clean docker-api-test
-
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage
       - name: Check harvest script
         run: |
           rm -f data/cc_terrarium.psql
           make docker-stop-clean docker-harvest
   sonarcloud:
     name: SonarCloud
+    needs: run
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Download code coverage results
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

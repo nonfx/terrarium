@@ -28,6 +28,7 @@ message Module {
   string version = 5;
   string description = 6;
   repeated ModuleAttribute inputAttributes = 7;
+  string namespace = 8;
 }
 
 message CompletionRequest {
@@ -40,7 +41,7 @@ message CompletionResponse {
 }
 
 message Page {
-  int32 size = 1; // default 10, maximum no limit
+  int32 size = 1; // default 100, maximum no limit
   int32 index = 2; // 0 indexed, default 0
   int32 total = 3; // READ-ONLY. Total number of pages available. ceil(record_count/page_size)
 }
@@ -48,7 +49,8 @@ message Page {
 message ListModulesRequest {
   Page page = 1;
   string search = 2; // optional search text
-  bool populateMappings = 3; // optional. include input-output attribute mappings of the module as well. page size cannot be higher then 10 in order to enable this option.
+  bool populateMappings = 3; // optional. include input-output attribute mappings of the module as well. page size cannot be higher then 100 in order to enable this option.
+  repeated string namespaces = 4;
 }
 
 message ListModulesResponse {
