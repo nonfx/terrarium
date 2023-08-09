@@ -55,7 +55,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	page := terrariumpb.Page{
+	page := &terrariumpb.Page{
 		Size:  flagPageSize,
 		Index: flagPageIndex,
 	}
@@ -71,9 +71,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 	}
 
 	pbRes := &terrariumpb.ListModulesResponse{
-		Page: &terrariumpb.Page{
-			Size: flagPageSize,
-		},
+		Page:    page,
 		Modules: result.ToProto(),
 	}
 
