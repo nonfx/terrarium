@@ -1,8 +1,10 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,6 +22,8 @@ type DB interface {
 	CreateTFModule(e *TFModule) (uuid.UUID, error)
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
+	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
+	GetByUniqueFields(g *gorm.DB, uniqueFields map[string]interface{}, result interface{}) error
 
 	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
 	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)
@@ -35,8 +39,6 @@ type DB interface {
 
 	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
-
-	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB
@@ -74,6 +76,27 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 	}
 
 	return e.GetID(), nil
+}
+
+func getByUniqueFields[T entity](g *gorm.DB, uniqueFields map[string]interface{}, result interface{}) error {
+	var whereClause []string
+	var values []interface{}
+
+	for field, value := range uniqueFields {
+		whereClause = append(whereClause, fmt.Sprintf("%s = ?", field))
+		values = append(values, value)
+	}
+
+	err := g.Where(strings.Join(whereClause, " AND "), values...).First(result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		fmt.Printf("Error in getByUniqueFields: %v\n", err)
+		return err
+	}
+
+	return nil
 }
 
 func get[T entity](g *gorm.DB, e T, where T) error {

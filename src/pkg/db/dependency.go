@@ -1,18 +1,21 @@
 package db
 
 import (
+	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/google/uuid"
 )
 
 type Dependency struct {
 	Model
 
-	Title       string                 `json:"title" gorm:"uniqueIndex:dependency_unique"`
-	Inputs      map[string]interface{} `gorm:"-"`
-	InputsJSON  string                 `json:"inputs" gorm:"type:json"`
-	Outputs     map[string]interface{} `gorm:"-"`
-	OutputsJSON string                 `json:"outputs" gorm:"type:json"`
-	ExtendsID   string                 `json:"extends_id" gorm:"-"`
+	TaxonomyID  uuid.UUID        `json:"-" gorm:"unique"`
+	Title       string           `json:"title" gorm:"unique"`
+	Description string           `json:"description"`
+	Inputs      *jsonschema.Node `gorm:"type:json"`
+	Outputs     *jsonschema.Node `gorm:"type:json"`
+	ExtendsID   string           `json:"extends_id" gorm:"-"` //This is yet to be finalized
+
+	Taxonomy *Taxonomy `gorm:"foreignKey:TaxonomyID"`
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
@@ -20,8 +23,12 @@ func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"id"})
 }
 
-// MarshalInputOutput serializes the input and output properties to JSON format.
-func (c *Dependency) MarshalInputOutput() error {
-	// No need to unmarshal, since Inputs and Outputs are already of type json.RawMessage.
-	return nil
+// GetDependencyByUniqueFields retrieves a Dependency record based on unique fields
+func (db *gDB) GetDependencyByUniqueFields(uniqueFields map[string]interface{}) (*Dependency, error) {
+	var result Dependency
+	err := getByUniqueFields(db.g(), uniqueFields, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
