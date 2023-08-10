@@ -1256,6 +1256,8 @@ func (m *ModuleAttribute) validate(all bool) error {
 
 	}
 
+	// no validation rules for Optional
+
 	if len(errors) > 0 {
 		return ModuleAttributeMultiError(errors)
 	}

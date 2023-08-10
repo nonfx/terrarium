@@ -75,6 +75,7 @@ message ModuleAttribute {
   string description = 2;
   Module parentModule = 3;
   repeated ModuleAttribute outputModuleAttributes = 4;
+  bool optional = 5;
 }
 
 service TerrariumService {
