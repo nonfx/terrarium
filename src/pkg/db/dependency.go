@@ -20,15 +20,5 @@ type Dependency struct {
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"id"})
-}
-
-// GetDependencyByUniqueFields retrieves a Dependency record based on unique fields
-func (db *gDB) GetDependencyByUniqueFields(uniqueFields map[string]interface{}) (*Dependency, error) {
-	var result Dependency
-	// err := getByUniqueFields(db.g(), uniqueFields, &result)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return &result, nil
+	return createOrUpdate(db.g(), e, []string{"title"})
 }

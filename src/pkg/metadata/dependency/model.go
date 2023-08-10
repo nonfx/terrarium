@@ -9,11 +9,11 @@ import (
 type Taxonomy string
 
 type Dependency struct {
-	Taxonomy    Taxonomy
-	Title       string
-	Description string
-	Inputs      *jsonschema.Node
-	Outputs     *jsonschema.Node
+	Taxonomy    Taxonomy         `yaml:"taxonomy"`
+	Title       string           `yaml:"title"`
+	Description string           `yaml:"description"`
+	Inputs      *jsonschema.Node `yaml:"inputs"`
+	Outputs     *jsonschema.Node `yaml:"outputs"`
 }
 
 func (t Taxonomy) Parse() (taxons []string) {

@@ -28,13 +28,12 @@ func (_m *FilterOption) Execute(_a0 *gorm.DB) *gorm.DB {
 	return r0
 }
 
-type mockConstructorTestingTNewFilterOption interface {
+// NewFilterOption creates a new instance of FilterOption. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewFilterOption(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// NewFilterOption creates a new instance of FilterOption. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func NewFilterOption(t mockConstructorTestingTNewFilterOption) *FilterOption {
+}) *FilterOption {
 	mock := &FilterOption{}
 	mock.Mock.Test(t)
 
