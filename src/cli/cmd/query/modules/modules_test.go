@@ -67,6 +67,17 @@ func Test_CmdModules(t *testing.T) {
 				return assert.Equal(t, expectedOutput, string(output))
 			},
 		},
+		{
+			Name: "list modules with pagesize",
+			PreExecute: func(ctx context.Context, t *testing.T, cmd *cobra.Command, cmdOpts clitesting.CmdOpts) {
+				args := []string{"-o", "json", "-n", "/Users/xyz/abc/tf-dir", "--pageSize", "5"}
+				cmd.SetArgs(args)
+			},
+			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
+				expectedOutput := "{\n \"modules\": [\n  {\n   \"id\": \"" + mockUuid1.String() + "\",\n   \"taxonomy_id\": \"00000000-0000-0000-0000-000000000000\",\n   \"module_name\": \"Rds\",\n   \"source\": \"/Users/xyz/abc/tf-dir\",\n   \"version\": \"1\",\n   \"namespace\": \"farm_repo\"\n  }\n ],\n \"page\": {\n  \"size\": 5\n }\n}"
+				return assert.Equal(t, expectedOutput, string(output))
+			},
+		},
 	}
 	clitest.RunTests(t, tests)
 }

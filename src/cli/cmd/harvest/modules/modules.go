@@ -84,7 +84,7 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 		record.Source = config.Metadata.Source
 		// filter local module
 		if flagIncludeLocal && strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
-			if flagTFDir == "" {
+			if strings.TrimSpace(flagTFDir) == "." || strings.TrimSpace(flagTFDir) == "" {
 				cmd := exec.Command("pwd")
 				dir, _ := cmd.CombinedOutput()
 				flagTFDir = string(dir)

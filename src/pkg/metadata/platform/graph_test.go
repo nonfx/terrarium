@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
@@ -66,17 +67,16 @@ func TestParseWithNestedModules(t *testing.T) {
 	module := &tfconfig.Module{
 		ModuleCalls: map[string]*tfconfig.ModuleCall{
 			"tr_component_module1": {
-				Inputs: map[string]tfconfig.AttributeReference{
-					"data_ref":             tfconfig.ResourceAttributeReference{ResourceType: "resource_type", ResourceName: "label2"},
-					"module_ref":           tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
-					"module_redundant_ref": tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
-					"local_ref":            tfconfig.ResourceAttributeReference{ResourceType: "local", ResourceName: "local1"},
-					"var_ref":              tfconfig.ResourceAttributeReference{ResourceType: "var", ResourceName: "var1"},
-					"unknown_ref":          tfconfig.ResourceAttributeReference{ResourceType: "unknown_type", ResourceName: "unknown_name"},
+				Dependencies: map[string]tfconfig.AttributeReference{
+					"resource_type.label2":      tfconfig.ResourceAttributeReference{ResourceType: "resource_type", ResourceName: "label2"},
+					"module.module2":            tfconfig.ResourceAttributeReference{ResourceType: "module", ResourceName: "module2"},
+					"local.local1":              tfconfig.ResourceAttributeReference{ResourceType: "local", ResourceName: "local1"},
+					"var.var1":                  tfconfig.ResourceAttributeReference{ResourceType: "var", ResourceName: "var1"},
+					"unknown_type.unknown_name": tfconfig.ResourceAttributeReference{ResourceType: "unknown_type", ResourceName: "unknown_name"},
 				},
 			},
 			"module2": {
-				Inputs: map[string]tfconfig.AttributeReference{
+				Dependencies: map[string]tfconfig.AttributeReference{
 					"resource_ref": tfconfig.ResourceAttributeReference{ResourceType: "resource_type", ResourceName: "label1"},
 				},
 			},
@@ -109,4 +109,77 @@ func TestParseWithNestedModules(t *testing.T) {
 		{"resource.resource_type.label1", []BlockID{}},
 		{"var.var1", []BlockID{}},
 	}, graph)
+}
+
+func TestWalk(t *testing.T) {
+	defaultG := Graph{
+		GraphNode{ID: "A", Requirements: []BlockID{"B", "C"}},
+		GraphNode{ID: "B", Requirements: []BlockID{"C", "D"}},
+		GraphNode{ID: "D", Requirements: []BlockID{}},
+		GraphNode{ID: "X", Requirements: []BlockID{"Y", "Z"}},
+		GraphNode{ID: "Y", Requirements: []BlockID{"Z"}},
+		GraphNode{ID: "Z", Requirements: []BlockID{}},
+		GraphNode{ID: "output.A", Requirements: []BlockID{"A"}},
+		GraphNode{ID: "output.B", Requirements: []BlockID{"B"}},
+		GraphNode{ID: "output.Y", Requirements: []BlockID{"Y", "A"}},
+	}
+
+	tests := []struct {
+		name          string
+		graph         Graph
+		roots         []BlockID
+		walkerCB      GraphWalkerCB
+		expectedPath  []BlockID
+		expectedError error
+	}{
+		{
+			name:         "should walk through the graph without error",
+			graph:        defaultG,
+			roots:        []BlockID{"A", "A", "Z"},
+			expectedPath: []BlockID{"A", "Z", "B", "D", "output.A", "output.B"},
+		},
+		{
+			name:  "should return error if walker function returns error",
+			graph: defaultG,
+			roots: []BlockID{"A"},
+			walkerCB: func(blockId BlockID) error {
+				return errors.New("error in walker function")
+			},
+			expectedError: errors.New("error in walker function"),
+		},
+		{
+			name:  "should return error if walker function returns error in output block",
+			graph: defaultG,
+			roots: []BlockID{"A"},
+			walkerCB: func(blockId BlockID) error {
+				if t, _ := blockId.Parse(); t == BlockType_Output {
+					return errors.New("error in output function")
+				}
+				return nil
+			},
+			expectedError: errors.New("error in output function"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			traversed := []BlockID{}
+			cb := func(blockId BlockID) error {
+				traversed = append(traversed, blockId)
+
+				if tt.walkerCB != nil {
+					return tt.walkerCB(blockId)
+				}
+
+				return nil
+			}
+
+			err := tt.graph.Walk(tt.roots, cb)
+
+			assert.Equal(t, tt.expectedError, err)
+			if tt.expectedError == nil {
+				assert.Equal(t, tt.expectedPath, traversed)
+			}
+		})
+	}
 }

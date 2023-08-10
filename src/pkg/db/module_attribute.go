@@ -108,7 +108,6 @@ func (db *gDB) QueryTFModuleAttributes(filterOps ...FilterOption) (result TFModu
 	if err != nil {
 		return nil, eris.Wrap(err, "query module attribute")
 	}
-
 	return
 }
 
@@ -116,6 +115,7 @@ func (dbAttr TFModuleAttribute) ToProto() *terrariumpb.ModuleAttribute {
 	resp := &terrariumpb.ModuleAttribute{
 		Name:        dbAttr.ModuleAttributeName,
 		Description: dbAttr.Description,
+		Optional:    dbAttr.Optional,
 	}
 
 	if dbAttr.Module != nil {
