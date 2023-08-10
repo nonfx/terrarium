@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
+	"github.com/cldcvr/terrarium/src/cli/cmd/generate"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest"
 	"github.com/cldcvr/terrarium/src/cli/cmd/platform"
 	"github.com/cldcvr/terrarium/src/cli/cmd/query"
@@ -29,6 +30,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(harvest.GetCmd())
 	rootCmd.AddCommand(platform.GetCmd())
+	rootCmd.AddCommand(generate.GetCmd())
 	rootCmd.AddCommand(version.GetCmd())
 	rootCmd.AddCommand(query.GetCmd())
 	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")

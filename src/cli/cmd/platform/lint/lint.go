@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	"github.com/cldcvr/terrarium/src/pkg/tf/parser"
 	"github.com/hashicorp/hcl/v2"
@@ -57,7 +58,7 @@ func lintPlatform(dir string) error {
 	}
 
 	log.Infof("Updating metadata file at: %s", metadataFile)
-	os.WriteFile(metadataFile, pmYAML, 0644)
+	os.WriteFile(metadataFile, pmYAML, constants.ReadWritePermissions)
 
 	log.Info("Metadata updated.")
 

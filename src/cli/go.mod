@@ -6,7 +6,7 @@ replace github.com/cldcvr/terrarium/src/pkg => ../pkg
 
 require (
 	github.com/charmbracelet/log v0.2.3
-	github.com/cldcvr/terraform-config-inspect v0.0.0-20230712113351-2a570a430e38
+	github.com/cldcvr/terraform-config-inspect v0.0.0-20230808162456-0c67e81936ae
 	github.com/cldcvr/terrarium/src/pkg v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.17.0
