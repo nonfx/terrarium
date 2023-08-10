@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	"github.com/rotisserie/eris"
 )
 
-func getTFBlockPos(bId platform.BlockID, m *tfconfig.Module) *tfconfig.SourcePos {
-	t, bn := bId.Parse()
+func getTFBlockPos(bID platform.BlockID, m *tfconfig.Module) *tfconfig.SourcePos {
+	t, bn := bID.Parse()
 
 	switch t {
 	case platform.BlockType_ModuleCall:
@@ -58,18 +59,18 @@ func fetchBlockString(pos *tfconfig.SourcePos) ([]byte, error) {
 }
 
 func blocksToPull(g platform.Graph, components ...string) []platform.BlockID {
-	blockIds := []platform.BlockID{}
+	blockIDs := []platform.BlockID{}
 	for _, comp := range components {
-		bId := platform.NewBlockID(platform.BlockType_ModuleCall, platform.ComponentPrefix+comp)
-		blockIds = append(blockIds, bId)
+		bID := platform.NewBlockID(platform.BlockType_ModuleCall, platform.ComponentPrefix+comp)
+		blockIDs = append(blockIDs, bID)
 	}
 
-	return blockIds
+	return blockIDs
 }
 
 func writeTF(g platform.Graph, destDir string, blocks []platform.BlockID, tfModule *tfconfig.Module) (blockCount int, err error) {
-	return blockCount, g.Walk(blocks, func(bId platform.BlockID) error {
-		pos := getTFBlockPos(bId, tfModule)
+	return blockCount, g.Walk(blocks, func(bID platform.BlockID) error {
+		pos := getTFBlockPos(bID, tfModule)
 		if pos == nil {
 			return nil
 		}
@@ -128,7 +129,7 @@ func writeBlockToFile(destRootDir, srcDir string, tfBlockPos *tfconfig.SourcePos
 	finalLines := append(beforeLines, curBlockLines...)
 	finalLines = append(finalLines, afterLines...)
 
-	err = os.WriteFile(destFilePath, bytes.Join(finalLines, nl), 0644)
+	err = os.WriteFile(destFilePath, bytes.Join(finalLines, nl), constants.ReadWritePermissions)
 	if err != nil {
 		return eris.Wrapf(err, "failed to write file at %s", destFilePath)
 	}

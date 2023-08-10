@@ -69,17 +69,21 @@ func (g *Graph) Append(bID BlockID, requirements []BlockID) *GraphNode {
 
 type GraphWalkerCB func(blockId BlockID) error
 
-func (g *Graph) Walk(roots []BlockID, fu GraphWalkerCB) error {
+// Walk a function to traverse all requirements starting from the given nodes
+// and call cb exactly once for each node that is connected to the given set of nodes.
+// Terraform Outputs are traversed differently in the end, such that, each
+// output that is able to resolve with the blocks been traversed, are selected.
+func (g *Graph) Walk(roots []BlockID, cb GraphWalkerCB) error {
 	roots = slices.Compact(roots)
 	traverser := make([]BlockID, len(roots)) // nodes before `i` are visited and after `i` are queued
 	copy(traverser, roots)
 
-	err := g.traverseRootBlocks(&traverser, fu)
+	err := g.traverseRootBlocks(&traverser, cb)
 	if err != nil {
 		return err
 	}
 
-	err = g.traverseOutputBlocks(&traverser, fu)
+	err = g.traverseOutputBlocks(&traverser, cb)
 	if err != nil {
 		return err
 	}
@@ -87,14 +91,15 @@ func (g *Graph) Walk(roots []BlockID, fu GraphWalkerCB) error {
 	return nil
 }
 
-func (g *Graph) traverseRootBlocks(traverser *[]BlockID, fu GraphWalkerCB) error {
+// traverse all requirements starting from the given nodes
+func (g *Graph) traverseRootBlocks(traverser *[]BlockID, cb GraphWalkerCB) error {
 	for i := 0; i < len(*traverser); i++ {
 		node := g.GetByID((*traverser)[i])
 		if node == nil {
 			continue
 		}
 
-		err := fu(node.ID)
+		err := cb(node.ID)
 		if err != nil {
 			return err
 		}
@@ -113,7 +118,8 @@ func (g *Graph) appendRequirements(traverser *[]BlockID, requirements []BlockID)
 	}
 }
 
-func (g *Graph) traverseOutputBlocks(traverser *[]BlockID, fu GraphWalkerCB) error {
+// traverse outputs whose requirements are already traversed.
+func (g *Graph) traverseOutputBlocks(traverser *[]BlockID, cb GraphWalkerCB) error {
 	for _, node := range *g {
 		bt, _ := node.ID.Parse()
 		if bt != BlockType_Output {
@@ -124,7 +130,7 @@ func (g *Graph) traverseOutputBlocks(traverser *[]BlockID, fu GraphWalkerCB) err
 			continue
 		}
 
-		err := fu(node.ID)
+		err := cb(node.ID)
 		if err != nil {
 			return err
 		}

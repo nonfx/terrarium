@@ -13,7 +13,9 @@ func NewBlockID(t BlockType, name string) BlockID {
 	return BlockID(fmt.Sprintf("%s.%s", t, name))
 }
 
-func NewBlockType(t string) BlockType {
+// GetBlockType returns a BlockType from pre-defined set of constants.
+// This would be similar to typecast except, it changes unrecognized values to BlockType_Undefined
+func GetBlockType(t string) BlockType {
 	bt := BlockType(t)
 	switch bt {
 	case BlockType_ModuleCall,
@@ -36,7 +38,7 @@ func (bid BlockID) Parse() (t BlockType, name string) {
 		return
 	}
 
-	t = NewBlockType(spl[0])
+	t = GetBlockType(spl[0])
 	name = spl[1]
 	return
 }

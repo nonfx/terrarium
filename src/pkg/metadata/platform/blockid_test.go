@@ -29,7 +29,7 @@ func TestNewBlockID(t *testing.T) {
 	}
 }
 
-func TestNewBlockType(t *testing.T) {
+func TestGetBlockType(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -49,7 +49,7 @@ func TestNewBlockType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := NewBlockType(tt.input)
+			result := GetBlockType(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
