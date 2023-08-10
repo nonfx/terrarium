@@ -93,17 +93,8 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 		}
 
 		// Verify that a module exists for each input map,
-		mc, ok := module.ModuleCalls[name]
-		if !ok {
+		if _, ok := module.ModuleCalls[name]; !ok {
 			return fmt.Errorf("terraform must implement '%s' component by declaring a module call with matching label: module \"%s\" { for_each = local.%s }", name, name, name)
-		}
-
-		// Check that each component module has for_each.
-		// This is to allow creating multiple instances of each dependency.
-		// Terraform itself enforces the type of the value to be iterable.
-		_, ok = mc.Inputs["for_each"]
-		if !ok {
-			return fmt.Errorf("component module '%s' %s must have for_each attribute creating an instance for each item in 'local.%s': module \"%s\" { for_each = local.%s }", name, fmtModuleCallPosition(mc), name, name, name)
 		}
 	}
 
