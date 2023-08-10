@@ -65,8 +65,8 @@ func (app *App) SetDefaults() {
 		app.EnvPrefix = strings.ToUpper(app.ID)
 	}
 
-	if app.Service.ID == "" {
-		app.Service.ID = app.ID
+	if app.Compute.ID == "" {
+		app.Compute.ID = app.ID
 	}
 
 	for i, dep := range app.Dependencies {
@@ -89,7 +89,7 @@ func (apps Apps) GetAppByID(id string) *App {
 
 // GetDependencies returns the dependencies for the app including it's deployment dependency.
 func (app App) GetDependencies() Dependencies {
-	allDeps := append(app.Dependencies, app.Service)
+	allDeps := append(app.Dependencies, app.Compute)
 
 	return allDeps
 }

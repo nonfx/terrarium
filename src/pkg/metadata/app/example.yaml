@@ -2,7 +2,7 @@ id: banking_app # REQUIRED. no special chars, start with alpha, contains alpha-n
 name: Banking App
 env_prefix: BA # defaults to empty string.
 
-service: # dependency of type `service.*` with id = app id, and can be defined only one of this
+compute: # dependency of type `compute/*` with id = app id, and can be defined only one of this
   use: compute/server/web
   inputs:
     port: 3000

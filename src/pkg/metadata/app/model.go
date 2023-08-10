@@ -19,12 +19,12 @@ type App struct {
 	// If not set, defaults to an empty string.
 	EnvPrefix string `yaml:"env_prefix"`
 
-	// Service denotes a specific dependency that best classifies the app itself,
-	// it can only be of the type `service.*`.
+	// Compute denotes a specific dependency that best classifies the app itself,
+	// it can only be of the type `compute/*`.
 	// id of this dependency is automatically set to app id.
 	// it is used to setup deployment pipeline in Code Pipes and allow other
 	// apps to use this app as dependency.
-	Service Dependency `yaml:"service"`
+	Compute Dependency `yaml:"compute"`
 
 	// Dependencies lists the required services, databases, and other components that the application relies on.
 	Dependencies Dependencies `yaml:"dependencies"`

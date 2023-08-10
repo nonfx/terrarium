@@ -19,7 +19,7 @@ func getAppsTest() Apps {
 	return Apps{
 		{
 			ID: "testapp1",
-			Service: Dependency{
+			Compute: Dependency{
 				ID:  "testapp1",
 				Use: taxonWeb,
 			},
@@ -37,7 +37,7 @@ func getAppsTest() Apps {
 		},
 		{
 			ID: "testapp2",
-			Service: Dependency{
+			Compute: Dependency{
 				ID:  "testapp2",
 				Use: taxonWeb,
 			},
@@ -62,12 +62,12 @@ func getAppsTest() Apps {
 func TestSetDefaults(t *testing.T) {
 	apps := getAppsTest()
 
-	apps[0].Service.ID = ""
+	apps[0].Compute.ID = ""
 
 	apps.SetDefaults()
 	for _, app := range apps {
 		assert.Equal(t, strings.ToUpper(app.ID), app.EnvPrefix)
-		assert.Equal(t, app.ID, app.Service.ID)
+		assert.Equal(t, app.ID, app.Compute.ID)
 		for _, dep := range app.Dependencies {
 			assert.Equal(t, strings.ToUpper(dep.ID), dep.EnvPrefix)
 		}
