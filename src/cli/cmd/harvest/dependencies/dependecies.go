@@ -10,7 +10,6 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -120,7 +119,6 @@ func processYAMLData(path string, data []byte) error {
 		}
 
 		// Create a db.Dependency instance
-		// Create a db.Dependency instance
 		dbDep := &db.Dependency{
 			Model:       db.Model{ID: depID},
 			TaxonomyID:  taxonomyID,
@@ -156,18 +154,18 @@ func processYAMLData(path string, data []byte) error {
 
 func getTaxonomyID(t string) (uuid.UUID, error) {
 	// Split the taxonomy string
-	levels := dependency.Taxonomy(t).Parse()
+	// levels := dependency.Taxonomy(t).Parse()
 
 	// Query the Taxonomy table based on the levels
 	// and retrieve the matching Taxonomy ID
 	var taxonomy db.Taxonomy
-	result := config.DBInstance().Where(
-		"level1 = ? AND level2 = ? AND level3 = ? AND level4 = ? AND level5 = ? AND level6 = ? AND level7 = ?",
-		levels[0], levels[1], levels[2], levels[3], levels[4], levels[5], levels[6],
-	).First(&taxonomy)
-	if result.Error != nil {
-		return uuid.UUID{}, result.Error
-	}
+	// result := config.DBInstance().Where(
+	// 	"level1 = ? AND level2 = ? AND level3 = ? AND level4 = ? AND level5 = ? AND level6 = ? AND level7 = ?",
+	// 	levels[0], levels[1], levels[2], levels[3], levels[4], levels[5], levels[6],
+	// ).First(&taxonomy)
+	// if result.Error != nil {
+	// 	return uuid.UUID{}, result.Error
+	// }
 
 	return taxonomy.ID, nil
 }
@@ -214,10 +212,10 @@ func getTaxonomyIDByLevels(g *gorm.DB, levels []string) (uuid.UUID, error) {
 	}
 
 	var taxonomy db.Taxonomy
-	err := getByUniqueFields(g, uniqueFields, &taxonomy)
-	if err != nil {
-		return uuid.Nil, err
-	}
+	// err := getByUniqueFields(g, uniqueFields, &taxonomy)
+	// if err != nil {
+	// 	return uuid.Nil, err
+	// }
 
 	return taxonomy.ID, nil
 }

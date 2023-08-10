@@ -26,9 +26,9 @@ func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
 // GetDependencyByUniqueFields retrieves a Dependency record based on unique fields
 func (db *gDB) GetDependencyByUniqueFields(uniqueFields map[string]interface{}) (*Dependency, error) {
 	var result Dependency
-	err := getByUniqueFields(db.g(), uniqueFields, &result)
-	if err != nil {
-		return nil, err
-	}
+	// err := getByUniqueFields(db.g(), uniqueFields, &result)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return &result, nil
 }

@@ -78,7 +78,7 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 	return e.GetID(), nil
 }
 
-func getByUniqueFields[T entity](g *gorm.DB, uniqueFields map[string]interface{}, result interface{}) error {
+func (db *gDB) GetByUniqueFields(g *gorm.DB, uniqueFields map[string]interface{}, result interface{}) error {
 	var whereClause []string
 	var values []interface{}
 
@@ -92,7 +92,7 @@ func getByUniqueFields[T entity](g *gorm.DB, uniqueFields map[string]interface{}
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		fmt.Printf("Error in getByUniqueFields: %v\n", err)
+		fmt.Printf("Error in GetByUniqueFields: %v\n", err)
 		return err
 	}
 
