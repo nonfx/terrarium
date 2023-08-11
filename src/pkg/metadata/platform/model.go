@@ -7,50 +7,61 @@ import (
 )
 
 const (
-	ComponentPrefix = "tr_component_"
+	ComponentPrefix = "tr_component_" // Prefix for component identifiers in terraform code
 )
 
+// Component represents an implementation of a dependency in the Terrarium platform.
 type Component struct {
-	ID          string           `yaml:",omitempty"`
-	Taxonomy    []string         `yaml:",omitempty"`
-	Title       string           `yaml:",omitempty"`
-	Description string           `yaml:",omitempty"`
-	Inputs      *jsonschema.Node `yaml:",omitempty"`
-	Outputs     *jsonschema.Node `yaml:",omitempty"`
+	ID          string           `yaml:",omitempty"` // Unique identifier for the component
+	Title       string           `yaml:",omitempty"` // Descriptive title for the component
+	Description string           `yaml:",omitempty"` // Detailed description of the component's functionality
+	Inputs      *jsonschema.Node `yaml:",omitempty"` // Input parameters required by the component
+	Outputs     *jsonschema.Node `yaml:",omitempty"` // Output properties produced by the component
 }
 
+// Components is a slice of Component objects.
 type Components []Component
 
+// PlatformMetadata represents the metadata for the Terrarium platform.
+// It includes the components and the graph that defines the relationships between terraform blocks.
 type PlatformMetadata struct {
-	Components Components
-	Graph      Graph
+	Components Components // Components in the Terrarium platform
+	Graph      Graph      // Graph defining the relationships between terraform blocks
 }
 
+// BlockID represents a unique identifier for a terraform block.
 type BlockID string
 
+// GraphNode represents a single node in the graph.
+// It includes the node's ID and the IDs of the nodes it depends on.
 type GraphNode struct {
-	ID           BlockID
-	Requirements []BlockID
+	ID           BlockID   // Unique identifier for the graph node
+	Requirements []BlockID // IDs of other graph nodes that the current node depends on
 }
 
+// Graph defines the relationships between terraform blocks.
 type Graph []GraphNode
 
+// BlockType represents the type of a terraform block.
 type BlockType string
 
 const (
-	BlockType_Undefined  BlockType = ""
-	BlockType_ModuleCall BlockType = "module"
-	BlockType_Resource   BlockType = "resource"
-	BlockType_Data       BlockType = "data"
-	BlockType_Local      BlockType = "local"
-	BlockType_Variable   BlockType = "var"
-	BlockType_Output     BlockType = "output"
-	BlockType_Provider   BlockType = "provider"
+	BlockType_Undefined  BlockType = ""         // Undefined block type
+	BlockType_ModuleCall BlockType = "module"   // Module call block type
+	BlockType_Resource   BlockType = "resource" // Resource block type
+	BlockType_Data       BlockType = "data"     // Data block type
+	BlockType_Local      BlockType = "local"    // Local block type
+	BlockType_Variable   BlockType = "var"      // Variable block type
+	BlockType_Output     BlockType = "output"   // Output block type
+	BlockType_Provider   BlockType = "provider" // Provider block type
 )
 
+// NewPlatformMetadata creates a new PlatformMetadata object.
+// It parses the platform module and existing YAML to create the components and the graph.
 func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (*PlatformMetadata, error) {
 	p := PlatformMetadata{Components: Components{}, Graph: Graph{}}
 
+	// If there is existing YAML, unmarshal it into the PlatformMetadata object
 	if len(existingYaml) > 0 {
 		err := yaml.Unmarshal(existingYaml, &p)
 		if err != nil {
@@ -58,6 +69,7 @@ func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (
 		}
 	}
 
+	// Parse the platform module to create the components and the graph
 	p.Components.Parse(platformModule)
 	p.Graph.Parse(platformModule)
 	return &p, nil

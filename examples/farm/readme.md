@@ -27,7 +27,9 @@ module "tr-hide-banking-demo" {
 
 ## Terrarium Farm Dependency Interfaces
 
-The `dependency-interfaces` directory contains dependency interfaces for Terrarium. These interfaces are harvested into the database and used to provide boilerplate code for platform implementation. They are also utilized in the app dependency specification.
+The Terrarium Dependency Interface is a contract that defines the inputs and outputs of an infrastructure dependency, facilitating communication between applications and Infrastructure as Code (IaC). It enables multi-platform implementation and is a key component in the Terrarium project architecture.
+
+Read more - [src/pkg/metadata/dependency/readme.md](./src/pkg/metadata/dependency/readme.md)
 
 ---
 

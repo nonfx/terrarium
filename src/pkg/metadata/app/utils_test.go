@@ -7,45 +7,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	depWeb      = "compute_web"
+	depPostgres = "postgres"
+	depRedis    = "redis"
+)
+
 // initializing test data
 func getAppsTest() Apps {
 	return Apps{
 		{
 			ID: "testapp1",
-			Service: Dependency{
-				ID:   "testapp1",
-				Type: "service.web",
+			Compute: Dependency{
+				ID:  "testapp1",
+				Use: depWeb,
 			},
 			Dependencies: Dependencies{
 				{
-					ID:   "testdep2",
-					Type: "database",
+					ID:  "testdep2",
+					Use: depPostgres,
 				},
 				{
 					ID:          "testdep3",
-					Type:        "cache",
+					Use:         depRedis,
 					NoProvision: true,
 				},
 			},
 		},
 		{
 			ID: "testapp2",
-			Service: Dependency{
-				ID:   "testapp2",
-				Type: "service.web",
+			Compute: Dependency{
+				ID:  "testapp2",
+				Use: depWeb,
 			},
 			Dependencies: Dependencies{
 				{
-					ID:   "testdep3",
-					Type: "cache",
+					ID:  "testdep3",
+					Use: depRedis,
 				},
 				{
-					ID:   "testdep4",
-					Type: "database",
+					ID:  "testdep4",
+					Use: depPostgres,
 				},
 				{
-					ID:   "testdep5",
-					Type: "cache",
+					ID:  "testdep5",
+					Use: depRedis,
 				},
 			},
 		},
@@ -55,12 +61,12 @@ func getAppsTest() Apps {
 func TestSetDefaults(t *testing.T) {
 	apps := getAppsTest()
 
-	apps[0].Service.ID = ""
+	apps[0].Compute.ID = ""
 
 	apps.SetDefaults()
 	for _, app := range apps {
 		assert.Equal(t, strings.ToUpper(app.ID), app.EnvPrefix)
-		assert.Equal(t, app.ID, app.Service.ID)
+		assert.Equal(t, app.ID, app.Compute.ID)
 		for _, dep := range app.Dependencies {
 			assert.Equal(t, strings.ToUpper(dep.ID), dep.EnvPrefix)
 		}
@@ -138,7 +144,7 @@ func TestGetDependenciesByAppID(t *testing.T) {
 func TestGetDependenciesByType(t *testing.T) {
 	apps := getAppsTest()
 
-	deps := apps.GetDependenciesByType("database")
+	deps := apps.GetDependenciesByType(depPostgres)
 	assert.Len(t, deps, 2)
 	assert.Equal(t, "testdep2", deps[0].ID)
 	assert.Equal(t, "testdep4", deps[1].ID)
@@ -149,7 +155,7 @@ func TestGetUniqueDependencyTypes(t *testing.T) {
 
 	types := apps.GetUniqueDependencyTypes()
 	assert.Len(t, types, 3)
-	assert.Contains(t, types, "service.web")
-	assert.Contains(t, types, "cache")
-	assert.Contains(t, types, "database")
+	assert.Contains(t, types, depWeb)
+	assert.Contains(t, types, depRedis)
+	assert.Contains(t, types, depPostgres)
 }

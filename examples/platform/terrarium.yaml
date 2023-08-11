@@ -1,12 +1,8 @@
 components:
-    - id: background_service
-      taxonomy:
-        - compute
+    - id: job_queue
       title: Background Service
       description: A compute resource that listens to queues and performs background tasks.
-    - id: cron_jobs
-      taxonomy:
-        - compute
+    - id: job_scheduled
       title: Cron Jobs
       description: Scheduled tasks that run at specific intervals.
       inputs:
@@ -20,11 +16,6 @@ components:
                     - 0 0 * * MON
                 pattern: ^(\S+\s+){4}\S+$
     - id: postgres
-      taxonomy:
-        - storage
-        - database
-        - rdbms
-        - sql
       title: PostgreSQL Database
       description: A relational database management system using SQL.
       inputs:
@@ -54,9 +45,7 @@ components:
                 title: Username
                 description: The username for accessing the PostgreSQL database.
                 type: string
-    - id: private_service
-      taxonomy:
-        - compute
+    - id: server_private
       title: Private Service
       description: A compute resource accessible only within a private network.
       inputs:
@@ -68,10 +57,6 @@ components:
                 description: The protocol used by the service (e.g., TCP, UDP).
                 type: string
     - id: redis
-      taxonomy:
-        - storage
-        - cache
-        - in_memory
       title: Redis Cache
       description: An in-memory data structure store used as a cache or message broker.
       inputs:
@@ -90,9 +75,7 @@ components:
                 title: Port
                 description: The port number on which the Redis server is listening.
                 type: string
-    - id: static_site
-      taxonomy:
-        - compute
+    - id: server_static
       title: Static Website
       description: A static website hosted on a Content Delivery Network (CDN) with SSL support.
       inputs:
@@ -122,9 +105,7 @@ components:
                 title: CDN URL
                 description: The URL of the static website on the CDN.
                 type: string
-    - id: web_service
-      taxonomy:
-        - compute
+    - id: server_web
       title: Web Service
       description: A compute resource that provides SSL, HTTP, and GRPC endpoints.
       inputs:
