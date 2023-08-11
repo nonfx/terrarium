@@ -1,6 +1,6 @@
 # Terrarium Dependency Interface
 
-The Dependency Interface is a crucial Architecture Building Block in the Terrarium project. It defines the necessary information about an infrastructure dependency, such as the schema of inputs, schema of outputs, display title, description, and its categorization using taxonomy. The format for Inputs and Outputs schema is based on the JSON schema spec.
+The Dependency Interface is a crucial Architecture Building Block in the Terrarium project. It defines the necessary information about an infrastructure dependency, such as the schema of inputs, schema of outputs, title and description. The format for Inputs and Outputs schema is based on the JSON schema spec.
 
 ## Overview
 
@@ -23,7 +23,7 @@ A Dependency Interface can be implemented across multiple platforms. This featur
 
 Each Dependency Interface is defined using several YAML attributes:
 
-- `taxonomy`: A list of categories that the dependency falls under. This helps in organizing and finding dependencies.
+- `id`: Identifier of the dependency interface. This identifier is referred by the app manifest in order to "use" the dependency interface. And it is also used in the Terrarium Platform Template to "implement" the dependency interface as a IaC component.
 - `title`: A human-readable title for the dependency.
 - `description`: A detailed description of what the dependency is and what it does.
 - `inputs`: The schema for the inputs that the dependency requires. This schema is defined based on the [JSON Schema specification](https://json-schema.org/)
@@ -35,7 +35,7 @@ Below is an example of a Dependency Interface for a PostgreSQL database:
 
 ```yaml
 dependency-interfaces:
-  - taxonomy: storage/database/rdbms/postgres
+  - id: postgres
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:

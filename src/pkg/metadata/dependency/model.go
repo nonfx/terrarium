@@ -2,7 +2,6 @@ package dependency
 
 import (
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/rotisserie/eris"
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
@@ -19,8 +18,8 @@ type Interfaces []Interface
 
 // Interface represents a single Dependency Interface.
 type Interface struct {
-	// Taxonomy is the identifier for the dependency represented by a Taxon.
-	Taxonomy taxonomy.Taxon `yaml:",omitempty"`
+	// ID is the identifier for the dependency represented by a Taxon.
+	ID string `yaml:",omitempty"`
 	// Title is the display title of the dependency.
 	Title string `yaml:",omitempty"`
 	// Description provides detailed information about the dependency.

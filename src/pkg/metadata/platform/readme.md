@@ -6,8 +6,7 @@ The Terrarium Platform Metadata YAML format is used to declare information about
 
 The `components` section in the metadata defines the different dependency interfaces that are implemented in the Terrarium platform template. Each component is represented as a YAML object with the following properties:
 
-- `id` (string): A unique identifier for the component. It helps in referencing the component in other parts of the metadata or code.
-- `implements` (strings): Represents the taxonomy and dependency to which the component belongs. This helps in organizing components based on their functionalities or roles. There can only be one implementation of a dependency in one platform.
+- `id` (string): A unique identifier for the component. It helps in referencing the component in other parts of the metadata or code. It also represents the dependency interface ID which is been implemented by this component. This helps in generalizing the inputs and outputs for the component. There can only be one implementation of a dependency in one platform.
 - `title` (string): A descriptive title for the component, providing a brief overview of its purpose.
 - `description` (string): A detailed description of the component's functionality and its significance within the platform.
 - `inputs` (JSON Schema): Defines the input parameters required by the component. It follows the JSON Schema format to specify the input properties, their data types, titles, and descriptions.
@@ -27,7 +26,6 @@ Below is an example of a Terrarium Platform Metadata YAML file:
 ```yaml
 components:
   - id: postgres
-    implements: storage/database/rdbms
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:
@@ -70,6 +68,6 @@ graph:
       requirements: []
 ```
 
-In this example, the metadata defines a "postgres" component with its taxonomy, title, description, inputs, and outputs. Additionally, the graph section establishes the relationships between different terraform blocks using their IDs and their corresponding requirements.
+In this example, the metadata defines a "postgres" component with its title, description, inputs, and outputs. Additionally, the graph section establishes the relationships between different terraform blocks using their IDs and their corresponding requirements.
 
 By using the Terrarium Platform Metadata YAML format, DevOps professionals can create well-structured and organized Terrarium platforms with clear component definitions and their dependencies, facilitating better collaboration and understanding among team members.

@@ -1,7 +1,5 @@
 package app
 
-import "github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
-
 // App multiple apps configuration
 type Apps []App
 
@@ -40,8 +38,8 @@ type Dependency struct {
 	// and must not be longer than 20 characters.
 	ID string `yaml:"id"`
 
-	// Use indicates the specific taxon in the taxonomy hierarchy.
-	Use taxonomy.Taxon `yaml:"type"`
+	// Use indicates the specific dependency interface ID that is used to provision an app dependency.
+	Use string `yaml:"type"`
 
 	// EnvPrefix is used to prefix the output env vars in order to avoid collision
 	// Defaults to dependency id upper case.

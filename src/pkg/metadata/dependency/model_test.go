@@ -17,7 +17,7 @@ func TestNewFile(t *testing.T) {
 		{
 			name: "Valid YAML data",
 			data: []byte(`dependency-interfaces:
-  - taxonomy: storage/database/rdbms/postgres
+  - id: postgres
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:
@@ -54,7 +54,7 @@ func TestNewFile(t *testing.T) {
 			expected: &File{
 				DependencyInterfaces: Interfaces{
 					Interface{
-						Taxonomy:    "storage/database/rdbms/postgres",
+						ID:          "postgres",
 						Title:       "PostgreSQL Database",
 						Description: "A relational database management system using SQL.",
 						Inputs: &jsonschema.Node{

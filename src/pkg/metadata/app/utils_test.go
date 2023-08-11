@@ -4,14 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	taxonWeb      = taxonomy.Taxon("compute/server/web")
-	taxonPostgres = taxonomy.Taxon("storage/database/postgres")
-	taxonRedis    = taxonomy.Taxon("storage/cache/redis")
+	depWeb      = "compute_web"
+	depPostgres = "postgres"
+	depRedis    = "redis"
 )
 
 // initializing test data
@@ -21,16 +20,16 @@ func getAppsTest() Apps {
 			ID: "testapp1",
 			Compute: Dependency{
 				ID:  "testapp1",
-				Use: taxonWeb,
+				Use: depWeb,
 			},
 			Dependencies: Dependencies{
 				{
 					ID:  "testdep2",
-					Use: taxonPostgres,
+					Use: depPostgres,
 				},
 				{
 					ID:          "testdep3",
-					Use:         taxonRedis,
+					Use:         depRedis,
 					NoProvision: true,
 				},
 			},
@@ -39,20 +38,20 @@ func getAppsTest() Apps {
 			ID: "testapp2",
 			Compute: Dependency{
 				ID:  "testapp2",
-				Use: taxonWeb,
+				Use: depWeb,
 			},
 			Dependencies: Dependencies{
 				{
 					ID:  "testdep3",
-					Use: taxonRedis,
+					Use: depRedis,
 				},
 				{
 					ID:  "testdep4",
-					Use: taxonPostgres,
+					Use: depPostgres,
 				},
 				{
 					ID:  "testdep5",
-					Use: taxonRedis,
+					Use: depRedis,
 				},
 			},
 		},
@@ -145,7 +144,7 @@ func TestGetDependenciesByAppID(t *testing.T) {
 func TestGetDependenciesByType(t *testing.T) {
 	apps := getAppsTest()
 
-	deps := apps.GetDependenciesByType(taxonPostgres)
+	deps := apps.GetDependenciesByType(depPostgres)
 	assert.Len(t, deps, 2)
 	assert.Equal(t, "testdep2", deps[0].ID)
 	assert.Equal(t, "testdep4", deps[1].ID)
@@ -156,7 +155,7 @@ func TestGetUniqueDependencyTypes(t *testing.T) {
 
 	types := apps.GetUniqueDependencyTypes()
 	assert.Len(t, types, 3)
-	assert.Contains(t, types, taxonomy.Taxon(taxonWeb))
-	assert.Contains(t, types, taxonomy.Taxon(taxonRedis))
-	assert.Contains(t, types, taxonomy.Taxon(taxonPostgres))
+	assert.Contains(t, types, depWeb)
+	assert.Contains(t, types, depRedis)
+	assert.Contains(t, types, depPostgres)
 }

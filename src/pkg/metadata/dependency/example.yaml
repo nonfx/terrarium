@@ -1,5 +1,5 @@
 dependency-interfaces: # file header
-  - taxonomy: storage/database/rdbms/postgres # identifier for the dependency represented by a Taxon
+  - id: postgres # identifier for the dependency represented by a Taxon
     title: PostgreSQL Database # Display title of the dependency
     description: A relational database management system using SQL. #Description of the dependency
     inputs: # JSON Schema spec (https://json-schema.org/) defining structure of input attributes

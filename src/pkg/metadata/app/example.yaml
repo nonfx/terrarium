@@ -3,16 +3,16 @@ name: Banking App
 env_prefix: BA # defaults to empty string.
 
 compute: # dependency of type `compute/*` with id = app id, and can be defined only one of this
-  use: compute/server/web
+  use: server_web
   inputs:
     port: 3000
 
 dependencies:
   - id: user_db # REQUIRED. no special chars, start with alpha, contains alpha-num, and cannot be gt 20 chars. used by IaC to uniquely identify the dependency in the project.
-    use: storage/database/rdbms/postgres@11 # points to one specific taxon in the taxonomy hierarchy. Interface available on this taxon is used in inputs and outputs blocks below.
+    use: postgres@11 # points to one specific dependency interface ID to identify inputs and outputs of the `user_db`.
     env_prefix: USER # defaults to dependency ID upper case.
   - id: ledger_db
-    use: storage/database/postgres
+    use: postgres
     env_prefix: LEDGER
     inputs: # use available customization options for the selected dependency interface.
       db_name: ledger
@@ -20,9 +20,9 @@ dependencies:
     outputs: # map env variables to dependency outputs. default to `<app_env_prefix>_<dependency_env_prefix>_<dependency_output_name_to_upper>`
       PG_CON: "host={{host}} user={{username}} password={{password}} dbname={{dbname}} port={{port}} sslmode={{sslmode}}"
   - id: user_cache
-    use: storage/database/redis
+    use: redis
   - id: auth_app
     no_provision: true # shared dependency. this is provisioned in another app, and it's outputs are made available here.
-    use: compute/server/web
+    use: server_web
     outputs:
       URL: "{{endpoint}}"

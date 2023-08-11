@@ -3,7 +3,6 @@ package platform
 import (
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,7 +13,6 @@ const (
 // Component represents an implementation of a dependency in the Terrarium platform.
 type Component struct {
 	ID          string           `yaml:",omitempty"` // Unique identifier for the component
-	Implements  taxonomy.Taxon   `yaml:",omitempty"` // Dependency taxon that is implemented by the component
 	Title       string           `yaml:",omitempty"` // Descriptive title for the component
 	Description string           `yaml:",omitempty"` // Detailed description of the component's functionality
 	Inputs      *jsonschema.Node `yaml:",omitempty"` // Input parameters required by the component

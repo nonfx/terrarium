@@ -3,7 +3,6 @@ package app
 import (
 	"strings"
 
-	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/rotisserie/eris"
 )
 
@@ -118,7 +117,7 @@ func (apps Apps) GetDependenciesByAppID(appID string) Dependencies {
 }
 
 // GetDependenciesByType returns all dependencies of a given type across all apps.
-func (apps Apps) GetDependenciesByType(depType taxonomy.Taxon) Dependencies {
+func (apps Apps) GetDependenciesByType(depType string) Dependencies {
 	var deps Dependencies
 	for _, app := range apps {
 		for _, dep := range app.GetDependencies() {
@@ -132,15 +131,15 @@ func (apps Apps) GetDependenciesByType(depType taxonomy.Taxon) Dependencies {
 }
 
 // GetUniqueDependencyTypes returns a list of unique dependency types across all apps.
-func (apps Apps) GetUniqueDependencyTypes() []taxonomy.Taxon {
-	seenTypes := make(map[taxonomy.Taxon]struct{})
+func (apps Apps) GetUniqueDependencyTypes() []string {
+	seenTypes := make(map[string]struct{})
 	for _, app := range apps {
 		for _, dep := range app.GetDependencies() {
 			seenTypes[dep.Use] = struct{}{}
 		}
 	}
 
-	var types []taxonomy.Taxon
+	var types []string
 	for depType := range seenTypes {
 		types = append(types, depType)
 	}
