@@ -9,8 +9,6 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/db"
 )
 
-var resourceTypeByName map[string]*db.TFResourceType
-
 type tfValue interface {
 	GetName() string
 	GetDescription() string
@@ -18,7 +16,7 @@ type tfValue interface {
 	IsComputed() bool
 }
 
-func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference) (*db.TFModuleAttribute, error) {
+func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttributePath string, res tfconfig.AttributeReference, resourceTypeByNameCache map[string]*db.TFResourceType) (*db.TFModuleAttribute, error) {
 	if res.Type() == "module" {
 		return nil, nil // module reference was not resolved - the parser does not support remote module references
 	} else if res.Type() == "var" {
@@ -27,7 +25,7 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 		return nil, nil // returning the entire resource
 	}
 
-	resDB, ok := resourceTypeByName[res.Type()]
+	resDB, ok := resourceTypeByNameCache[res.Type()]
 	if !ok {
 		resDB = &db.TFResourceType{}
 		if err := g.GetTFResourceType(resDB, &db.TFResourceType{
@@ -36,7 +34,7 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 		}); err != nil {
 			return nil, nil // skip unkown resources (e.g. need to populate more resource types)
 		}
-		resourceTypeByName[res.Type()] = resDB
+		resourceTypeByNameCache[res.Type()] = resDB
 	}
 
 	resourceAttrDB := &db.TFResourceAttribute{}

@@ -118,7 +118,7 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 .PHONY: test
 test:  ## Run go unit tests
 	mkdir -p coverage
-	go test -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
+	go test -v -tags=mock -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
 	@echo "-- Test coverage for terrarium --"
 	@go tool cover -func=$(COVERAGE_FILE)|grep "total:"
 
@@ -196,7 +196,7 @@ farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  ##
 
 .PHONY: farm-resource-harvest
 farm-resource-harvest: $(FARM_MODULES_DIR)/.terraform/providers/schema.json  ## Harvest terraform provider resources from the farm directory
-	terrarium harvest resources -f $(FARM_MODULES_DIR)/.terraform/providers/schema.json
+	terrarium harvest resources -s $(FARM_MODULES_DIR)/.terraform/providers/schema.json
 
 .PHONY: farm-module-harvest  ## Harvest terraform modules from the farm directory
 farm-module-harvest: $(FARM_MODULES_DIR)/.terraform

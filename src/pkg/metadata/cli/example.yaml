@@ -1,0 +1,8 @@
+farm:
+  - name: vpc # REQUIRED: unique user-defined module name (will be used as name for exported modules)
+    source: "terraform-aws-modules/vpc/aws" # REQUIRED: Terraform module source
+    version: "4.0.2" # OPTIONAL: Terraform module version
+    export: true # OPTIONAL: if true the module can be imported to the module library, otherwise it will be used only in discovery of resource attributes and mappings
+  - name: voting-demo
+    source: "github.com/cldcvr/codepipes-tutorials//voting/infra/aws/eks?ref=terrarium-sources"
+    export: false # this modules will only be used to discover resource attributes and mappings between resources

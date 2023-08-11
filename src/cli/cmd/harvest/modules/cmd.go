@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"path/filepath"
+	"path"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/charmbracelet/log"
@@ -9,13 +9,16 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
+	"github.com/cldcvr/terrarium/src/pkg/tf/runner"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
 
 var (
-	flagTFDir        string
-	flagIncludeLocal bool
+	flagTFDir          string
+	flagIncludeLocal   bool
+	flagModuleListFile string
 )
 
 var cmd = &cobra.Command{
@@ -33,6 +36,7 @@ func init() {
 	cmd.RunE = cmdRunE
 	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
 	cmd.Flags().BoolVarP(&flagIncludeLocal, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
+	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
 }
 
 func GetCmd() *cobra.Command {
@@ -45,17 +49,51 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 		panic(err)
 	}
 
-	resourceTypeByName = make(map[string]*db.TFResourceType)
+	if flagModuleListFile == "" {
+		cmd.Printf("Loading modules from provided directory '%s'...\n", flagTFDir)
+		return loadFrom(g, flagTFDir)
+	}
+
+	cmd.Printf("Loading modules from provided list file '%s'...\n", flagModuleListFile)
+	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
+	if err != nil {
+		return err
+	}
+
+	tfRunner := runner.NewTerraformRunner()
+	for _, item := range moduleList.Farm {
+		if item.Export {
+			dir, _, err := item.CreateTerraformFile()
+			if err != nil {
+				return err
+			}
+
+			if err := runner.TerraformInit(tfRunner, dir); err != nil {
+				return err
+			}
+
+			if err := loadFrom(g, dir); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func loadFrom(g db.DB, dir string) error {
+	resourceTypeByName := make(map[string]*db.TFResourceType)
 
 	// load modules
-	cmd.Printf("Loading modules from '%s'...\n", flagTFDir)
+	cmd.Printf("Loading modules from '%s'...\n", dir)
 
 	filters := []tfconfig.ResolvedModuleSchemaFilter{tfconfig.FilterModulesOmitHidden}
 	if !flagIncludeLocal {
 		filters = append(filters, tfconfig.FilterModulesOmitLocal)
 	}
 
-	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(flagTFDir, constants.ModuleSchemaFilePath), filters...)
+	schemaFilePath := path.Clean(path.Join(dir, constants.ModuleSchemaFilePath))
+	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(schemaFilePath, filters...)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +112,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 			if varAttrReferences, ok := config.Inputs[varName]; ok { // found a resolution for this variable to resource attribute
 				for varAttributePath, resourceReferences := range varAttrReferences {
 					for _, res := range resourceReferences {
-						if attr, err := createAttributeRecord(g, moduleDB, v, varAttributePath, res); err != nil {
+						if attr, err := createAttributeRecord(g, moduleDB, v, varAttributePath, res, resourceTypeByName); err != nil {
 							return eris.Wrapf(err, "error creating module input-attribute")
 						} else if attr == nil {
 							continue
@@ -85,7 +123,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 		}
 
 		for _, o := range config.Outputs {
-			if attr, err := createAttributeRecord(g, moduleDB, o, "", o.Value); err != nil {
+			if attr, err := createAttributeRecord(g, moduleDB, o, "", o.Value, resourceTypeByName); err != nil {
 				return eris.Wrapf(err, "error creating module output-attribute")
 			} else if attr == nil {
 				continue
