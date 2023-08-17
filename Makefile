@@ -206,6 +206,10 @@ farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
 farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
 	terrarium harvest mappings --dir $(FARM_MODULES_DIR)
 
+.PHONY: farm-dependency-harvest  ## Harvest dependency interface from the farm directory
+farm-dependency-harvest: $(FARM_MODULES_DIR)/.terraform
+	terrarium harvest dependency --dir $(FARM_MODULES_DIR)
+
 ######################################################
 # Farm releases pull
 # Needs access to the farm repo
