@@ -25,6 +25,12 @@ module "tr-hide-banking-demo" {
 }
 ```
 
+## Harvesting Multiple Modules
+
+To avoid provider version conflicts when harvesting multiple modules at once the user may provide a file containing a list of modules to be processed by the `harvest` commands. The commands then process each module in a separate workspace while performing the required Terraform initialization automatically.
+
+Read more - [src/pkg/metadata/cli/readme.md](./src/pkg/metadata/cli/readme.md)
+
 ## Terrarium Farm Dependency Interfaces
 
 The Terrarium Dependency Interface is a contract that defines the inputs and outputs of an infrastructure dependency, facilitating communication between applications and Infrastructure as Code (IaC). It enables multi-platform implementation and is a key component in the Terrarium project architecture.

@@ -26,3 +26,5 @@ log:
   format: "text"
   level: "info" # debug | info | warn | error | fatal
 
+terraform:
+  plugin_cache_dir: "~/.terraform.d/plugin-cache"
