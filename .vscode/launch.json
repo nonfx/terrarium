@@ -95,7 +95,7 @@
         "harvest",
         "dependencies",
         "-d",
-        "examples/platform/"
+        "examples/farm/dependencies/"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

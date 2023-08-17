@@ -6,9 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -19,18 +21,20 @@ var depIfaceDirectoryFlag string
 var dependencyCmd = &cobra.Command{
 	Use:   "dependencies",
 	Short: "Harvests dependencies from the given directory",
-	Long: `The 'dependencies' command is used to harvest dependency information from YAML or YML files located
-in a specified directory. It parses these files to extract dependency details and stores them in the database
-for further reference.
+	Long: heredoc.Docf(`
+		The 'dependencies' command is used to harvest dependency information from YAML or YML files located
+		in a specified directory. It parses these files to extract dependency details and stores them in the database
+		for further reference.
 
-To use this command, provide the path to the directory containing the YAML or YML files using the '--dir' flag.
-The command will recursively process all valid YAML files within the directory, extracting information such as
-taxonomy, title, description, inputs, and outputs. The extracted data is then stored in the database.
+		To use this command, provide the path to the directory containing the YAML or YML files using the '--dir' flag.
+		The command will recursively process all valid YAML files within the directory, extracting information such as
+		taxonomy, title, description, inputs, and outputs. The extracted data is then stored in the database.
 
-Example usage:
-  terrarium dependencies --dir /path/to/yaml/files
+		Example usage:
+  			terrarium dependencies --dir /path/to/yaml/files
 
-Please ensure that the provided directory contains valid YAML or YML files with the appropriate structure to avoid any errors.`,
+		Please ensure that the provided directory contains valid YAML or YML files with the appropriate structure to avoid any errors.
+`),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return main()
 	},
@@ -86,7 +90,7 @@ func processYAMLData(path string, data []byte) error {
 		return err
 	}
 
-	var yamlData map[string][]dependency.Dependency
+	var yamlData map[string][]dependency.Interface
 
 	err = yaml.Unmarshal(data, &yamlData)
 	if err != nil {
@@ -94,14 +98,17 @@ func processYAMLData(path string, data []byte) error {
 	}
 
 	for _, dep := range yamlData["dependency-interfaces"] {
+		var taxonomyID uuid.UUID
 
-		// Split the taxonomy string into levels
-		levels := dep.Taxonomy.Parse()
+		if dep.Taxonomy != "" {
+			// Split the taxonomy string into levels
+			levels := taxonomy.NewTaxonomy(dep.Taxonomy).Split()
 
-		// Retrieve the TaxonomyID based on the levels from the taxonomy table
-		taxonomyID, err := getTaxonomyID(g, levels)
-		if err != nil {
-			return fmt.Errorf("error retrieving TaxonomyID: %w", err)
+			// Retrieve the TaxonomyID based on the levels from the taxonomy table
+			taxonomyID, err = getTaxonomyID(g, levels)
+			if err != nil {
+				return fmt.Errorf("error retrieving TaxonomyID: %w", err)
+			}
 		}
 
 		// Create a db.Dependency instance
