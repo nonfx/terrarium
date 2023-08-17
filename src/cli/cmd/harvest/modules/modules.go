@@ -2,7 +2,7 @@ package modules
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
@@ -85,9 +85,8 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 		// filter local module
 		if flagIncludeLocal && strings.HasPrefix(config.Metadata.Source, ".") && config.Metadata.Name != "" {
 			if strings.TrimSpace(flagTFDir) == "." || strings.TrimSpace(flagTFDir) == "" {
-				cmd := exec.Command("pwd")
-				dir, _ := cmd.CombinedOutput()
-				flagTFDir = string(dir)
+				cwd, _ := os.Getwd()
+				flagTFDir = strings.TrimRight(cwd, "\n")
 			}
 			record.Namespace = flagTFDir
 		}

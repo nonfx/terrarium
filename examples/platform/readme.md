@@ -22,8 +22,6 @@ A Terrarium Platform Component is a Terraform module call intended to implement 
 
 In the framework, dependency interface inputs are provided via Terraform local variables. These variables are named using the convention `local.tr_component_<interface name>`. The variable contains an object that houses the app dependency instance name as the key and an object of dependency input values as the value. As a platform author, you can set default values in this object, which would be replaced at the time of Terraform generation.
 
-The framework also provides boolean flags for each taxon that is relevant from the taxonomy hierarchy. These booleans follow a specific naming convention: `tr.tr_taxon_<name of taxon>_enabled`.
-
 All component local variables must be defined in the file `tr_locals.tf` so that the Terrarium tools will be able to regenerate the component input values based on dependencies being asked for.
 
 #### Outputs
@@ -55,8 +53,6 @@ locals {
       version = 11
     },
   }
-
-  tr_taxon_database_enabled = true
 }
 
 module "tr_component_postgres" {
@@ -106,7 +102,7 @@ module "core_vpc" {
   azs              = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
   private_subnets  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets   = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
-  database_subnets = local.tr_taxon_database_enabled ? ["10.0.21.0/24", "10.0.22.0/24", "10.0.23.0/24"] : []
+  database_subnets = local.database_enabled ? ["10.0.21.0/24", "10.0.22.0/24", "10.0.23.0/24"] : []
 
   enable_nat_gateway = true
   enable_vpn_gateway = true
@@ -130,7 +126,6 @@ components:
 - id: postgres
   title: PostgreSQL Database
   description: A relational database management system using SQL.
-  taxonomy: [storage, database, rdbms]
   inputs:
     properties:
       version:

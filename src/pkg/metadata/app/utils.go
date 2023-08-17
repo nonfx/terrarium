@@ -64,8 +64,8 @@ func (app *App) SetDefaults() {
 		app.EnvPrefix = strings.ToUpper(app.ID)
 	}
 
-	if app.Service.ID == "" {
-		app.Service.ID = app.ID
+	if app.Compute.ID == "" {
+		app.Compute.ID = app.ID
 	}
 
 	for i, dep := range app.Dependencies {
@@ -88,7 +88,7 @@ func (apps Apps) GetAppByID(id string) *App {
 
 // GetDependencies returns the dependencies for the app including it's deployment dependency.
 func (app App) GetDependencies() Dependencies {
-	allDeps := append(app.Dependencies, app.Service)
+	allDeps := append(app.Dependencies, app.Compute)
 
 	return allDeps
 }
@@ -121,7 +121,7 @@ func (apps Apps) GetDependenciesByType(depType string) Dependencies {
 	var deps Dependencies
 	for _, app := range apps {
 		for _, dep := range app.GetDependencies() {
-			if dep.Type == depType && !dep.NoProvision {
+			if dep.Use == depType && !dep.NoProvision {
 				deps = append(deps, dep)
 			}
 		}
@@ -135,7 +135,7 @@ func (apps Apps) GetUniqueDependencyTypes() []string {
 	seenTypes := make(map[string]struct{})
 	for _, app := range apps {
 		for _, dep := range app.GetDependencies() {
-			seenTypes[dep.Type] = struct{}{}
+			seenTypes[dep.Use] = struct{}{}
 		}
 	}
 

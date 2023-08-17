@@ -64,7 +64,7 @@ func (c *Component) fetchInputs(m *tfconfig.Module) {
 		c.Inputs = &jsonschema.Node{}
 	}
 
-	cv, _ := v.Value(nil)
+	cv, _ := v.Expression.Value(nil)
 	valMap := cv.AsValueMap()
 	if v, ok := valMap["default"]; ok {
 		extractSchema(c.Inputs, v)

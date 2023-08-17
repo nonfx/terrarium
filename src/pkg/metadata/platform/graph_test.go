@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -87,8 +86,11 @@ func TestParseWithNestedModules(t *testing.T) {
 		DataResources: map[string]*tfconfig.Resource{
 			"data.resource_type.label2": {Mode: tfconfig.DataResourceMode, Type: "resource_type", Name: "label2"},
 		},
-		Locals: map[string]hcl.Expression{
-			"local1": nil,
+		Locals: map[string]*tfconfig.Local{
+			"local1": {
+				Name:       "local1",
+				Expression: nil,
+			},
 		},
 		Variables: map[string]*tfconfig.Variable{
 			"var1": {},

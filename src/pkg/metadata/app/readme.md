@@ -19,15 +19,15 @@ The `App` section represents the main application configuration. It contains the
 - `ID`: A required identifier for the app in the project. It must start with an alphabet character, can only contain alphanumeric characters, and must not exceed 20 characters in length.
 - `Name`: A human-friendly name for the application.
 - `EnvPrefix`: The prefix used for environment variables in this app. If not set, it defaults to an empty string.
-- `Service`: Denotes a specific dependency that best classifies the app itself. It can only be of the type `service.*`. The ID of this dependency is automatically set to the app ID, and it is used to set up the deployment pipeline in Code Pipes and allow other apps to use this app as a dependency.
+- `Compute`: Denotes a specific dependency that best classifies the the app itself. It can only be of the type `compute/*`. The ID of this dependency is automatically set to the app ID, and it is used to set up the deployment pipeline in Code Pipes and allow other apps to use this app as a dependency.
 - `Dependencies`: Lists the required services, databases, and other components that the application relies on. This field is an array of `Dependency` objects.
 
 ### Dependency
 
-The `Dependency` section represents a single dependency of the application. It includes the following fields:
+The `dependencies` section represents a single dependency of the application. It includes the following fields:
 
 - `ID`: A required identifier for the dependency in the project. It must start with an alphabet character, can only contain alphanumeric characters, and must not exceed 20 characters in length.
-- `Type`: Indicates the specific taxon in the taxonomy hierarchy for the dependency. It includes the version if necessary.
+- `Use`: Indicates the specific dependency interface  ID that is used as an app dependency. It may include version as short-hand expression instead of adding version to the inputs block.
 - `EnvPrefix`: Used to prefix the output environment variables related to this dependency. If not set, it defaults to the dependency ID in uppercase.
 - `Inputs`: Represents customization options for the selected dependency interface. It is a key-value map where the keys represent the input names, and the values represent the corresponding input values.
 - `Outputs`: Maps dependency outputs to environment variables. Each entry in this map consists of an environment variable name as key and dependency output name in the value. The format for the environment variable name gets the prefix later automatically.
@@ -40,17 +40,17 @@ id: banking_app
 name: Banking App
 env_prefix: BA
 
-service:
-  type: service.web
+compute:
+  use: server_web
   inputs:
     port: 3000
 
 dependencies:
   - id: user_db
-    type: database.postgres@11
+    use: postgres@11
     env_prefix: USER
   - id: ledger_db
-    type: database.postgres
+    use: postgres
     env_prefix: LEDGER
     inputs:
       db_name: ledger
@@ -58,21 +58,21 @@ dependencies:
     outputs:
       PG_CON: "host={{host}} user={{username}} password={{password}} dbname={{dbname}} port={{port}} sslmode={{sslmode}}"
   - id: user_cache
-    type: database.redis
+    use: redis
   - id: auth_app
     no_provision: true
-    type: service.web
+    use: server_web
     outputs:
       URL: "{{endpoint}}"
 ```
 
-In the example above, we have defined an application with the ID `banking_app` and the name `Banking App`. The environment variables in this app are prefixed with `BA`. The app itself is classified as a `service.web` and is configured with a `port` input set to `3000`.
+In the example above, we have defined an application with the ID `banking_app` and the name `Banking App`. The environment variables in this app are prefixed with `BA`. The compute base used for the app is classified as a `server_web` and is configured with a `port` input set to `3000`.
 
 The application has several dependencies:
 
-- The `user_db` dependency is of type `database.postgres@11` and has the ID `user_db`. It should generate standard postgres environment variables prefixed with `BA_USER_` (eg: `BA_USER_PGHOST`). No custom inputs or outputs are specified for this dependency.
-- The `ledger_db` dependency is of type `database.postgres` and has the ID `ledger_db`. Its environment variables are prefixed with `LEDGER`. It takes inputs for `db_name` and `version`. Additionally, it maps the `BA_LEDGER_PG_CON` output to the environment variable by resolving the Mustache template with dependency outputs.
-- The `user_cache` dependency is of type `database.redis` and has the ID `user_cache`. Its environment variables are prefixed with the default prefix for the dependency ID in uppercase.
-- The `auth_app` dependency is of type `service.web` and has the ID `auth_app`. It is marked as `no_provision`, indicating that it is provisioned in another app. It exports the `BA_AUTH_APP_URL` output, which is mapped to the environment variable by resolving the Mustache template with dependency outputs.
+- The `user_db` dependency is of type `postgres@11` and has the ID `user_db`. It should generate standard postgres environment variables prefixed with `BA_USER_` (eg: `BA_USER_PGHOST`). No custom inputs or outputs are specified for this dependency.
+- The `ledger_db` dependency is of type `postgres` and has the ID `ledger_db`. Its environment variables are prefixed with `LEDGER`. It takes inputs for `db_name` and `version`. Additionally, it maps the `BA_LEDGER_PG_CON` output to the environment variable by resolving the Mustache template with dependency outputs.
+- The `user_cache` dependency is of type `redis` and has the ID `user_cache`. Its environment variables are prefixed with the default prefix for the dependency ID in uppercase.
+- The `auth_app` dependency is of type `server_web` and has the ID `auth_app`. It is marked as `no_provision`, indicating that it is provisioned in another app. It exports the `BA_AUTH_APP_URL` output, which is mapped to the environment variable by resolving the Mustache template with dependency outputs.
 
 By following this format and providing the necessary information in the `terrarium.yaml` file, developers can effectively manage and configure their application's dependencies using the Terrarium tools.
