@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -21,9 +22,11 @@ func TestGenerateCmd(t *testing.T) {
 		},
 		{
 			args:      []string{"-p", "../../../../examples/platform/", "-c", "postgres", "-o", "./testdata/.terrarium"},
-			expectOut: "Successfully pulled 9 of 13 terraform blocks at: ./testdata/.terrarium\n",
+			expectOut: "Successfully pulled 14 of 17 terraform blocks at: ./testdata/.terrarium\n",
 		},
 	}
+
+	os.RemoveAll("./testdata/.terrarium")
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

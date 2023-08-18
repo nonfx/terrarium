@@ -9,5 +9,6 @@ const (
 
 // fs.FileMode constants
 const (
-	ReadWritePermissions fs.FileMode = 0644
+	ReadWritePermissions        fs.FileMode = 0644
+	ReadWriteExecutePermissions fs.FileMode = 0755
 )
