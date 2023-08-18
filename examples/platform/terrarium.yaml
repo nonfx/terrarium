@@ -113,7 +113,7 @@ components:
             port:
                 title: Service Port
                 description: The port number on which the service is listening.
-                type: string
+                type: number
       outputs:
         properties:
             endpoint:

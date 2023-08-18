@@ -25,7 +25,7 @@ func getAppsTest() Apps {
 			Dependencies: Dependencies{
 				{
 					ID:  "testdep2",
-					Use: depPostgres,
+					Use: depPostgres + "@11",
 				},
 				{
 					ID:          "testdep3",
@@ -71,6 +71,9 @@ func TestSetDefaults(t *testing.T) {
 			assert.Equal(t, strings.ToUpper(dep.ID), dep.EnvPrefix)
 		}
 	}
+
+	assert.Equal(t, apps[0].Dependencies[0].Use, depPostgres)
+	assert.Equal(t, apps[0].Dependencies[0].Inputs["version"], "11")
 }
 
 func TestValidate(t *testing.T) {
@@ -143,6 +146,7 @@ func TestGetDependenciesByAppID(t *testing.T) {
 
 func TestGetDependenciesByType(t *testing.T) {
 	apps := getAppsTest()
+	apps.SetDefaults()
 
 	deps := apps.GetDependenciesByType(depPostgres)
 	assert.Len(t, deps, 2)
@@ -152,10 +156,57 @@ func TestGetDependenciesByType(t *testing.T) {
 
 func TestGetUniqueDependencyTypes(t *testing.T) {
 	apps := getAppsTest()
+	apps.SetDefaults()
 
 	types := apps.GetUniqueDependencyTypes()
 	assert.Len(t, types, 3)
 	assert.Contains(t, types, depWeb)
 	assert.Contains(t, types, depRedis)
 	assert.Contains(t, types, depPostgres)
+}
+
+func TestNewApp(t *testing.T) {
+	tests := []struct {
+		name    string
+		content []byte
+		wantErr bool
+	}{
+		{
+			name:    "valid yaml content",
+			content: []byte("\nid: test_app\nname: Test App\n"),
+			wantErr: false,
+		},
+		{
+			name:    "invalid yaml content",
+			content: []byte("\nid: test_app\nname: Test App\ninvalidYAML\n"),
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			app, err := NewApp(tt.content)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, app)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, app)
+			}
+		})
+	}
+}
+
+func TestGetInputs(t *testing.T) {
+	apps := getAppsTest()
+	apps.SetDefaults()
+
+	output := apps.GetDependenciesByType(depPostgres).GetInputs()
+
+	assert.Equal(t, map[string]interface{}{
+		"testdep2": map[string]interface{}{
+			"version": "11",
+		},
+		"testdep4": map[string]interface{}{},
+	}, output)
 }

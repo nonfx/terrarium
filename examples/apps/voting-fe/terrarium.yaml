@@ -1,0 +1,11 @@
+id: voting_fe
+name: Voting Frontend
+env_prefix: VO
+
+compute:
+  use: server_static
+
+dependencies:
+  - id: voting_be
+    use: server_web
+    no_provision: true

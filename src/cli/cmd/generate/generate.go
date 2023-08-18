@@ -3,11 +3,15 @@ package generate
 import (
 	"bufio"
 	"os"
+	"path"
 	"path/filepath"
 
+	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/app"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
+	tfwriter "github.com/cldcvr/terrarium/src/pkg/tf/writer"
 	"github.com/rotisserie/eris"
 )
 
@@ -21,9 +25,28 @@ func blocksToPull(g platform.Graph, components ...string) []platform.BlockID {
 	return blockIDs
 }
 
-func writeTF(g platform.Graph, destDir string, blocks []platform.BlockID, tfModule *tfconfig.Module) (blockCount int, err error) {
+func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig.Module) (blockCount int, err error) {
+	appDeps := apps.GetUniqueDependencyTypes()
+	blocks := blocksToPull(g, appDeps...)
+
+	log.Info("found dependencies", "dependencies", appDeps)
+
+	locals := map[string]interface{}{}
+
 	fileIndex := map[string][][2]int{}
 	err = g.Walk(blocks, func(bID platform.BlockID) error {
+		compType, compName := bID.ParseComponent()
+		if compName != "" && compType == platform.BlockType_Local {
+			// skip component inputs as they needs to be generated separately
+
+			localVarName := platform.ComponentPrefix + compName
+			localVarValue := apps.GetDependenciesByType(compName).GetInputs()
+			locals[localVarName] = localVarValue
+
+			blockCount++
+			return nil
+		}
+
 		b, found := bID.GetBlock(tfModule)
 		if !found {
 			return nil
@@ -59,6 +82,21 @@ func writeTF(g platform.Graph, destDir string, blocks []platform.BlockID, tfModu
 		if err != nil {
 			return blockCount, eris.Wrapf(err, "failed to copy lines from file: %s", file)
 		}
+	}
+
+	if len(locals) == 0 {
+		return
+	}
+
+	localsFile, err := os.Create(path.Join(destDir, "tr_gen_locals.tf"))
+	if err != nil {
+		return
+	}
+	defer localsFile.Close()
+
+	err = tfwriter.WriteLocals(locals, localsFile)
+	if err != nil {
+		return
 	}
 
 	return
