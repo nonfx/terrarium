@@ -86,9 +86,7 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 
 	for _, name := range requiredModuleNames {
 		switchVarName := name + terrariumComponentModuleEnabledSuffix
-		if expr, found := module.Locals[switchVarName]; !found {
-			return fmt.Errorf("terraform must declare a local boolean variable '%s' set to true if at least one component instance would be created: %s = length(local.%s) > 0", switchVarName, switchVarName, name)
-		} else if !parser.IsBool(expr.Expression) {
+		if expr, found := module.Locals[switchVarName]; found && !parser.IsBool(expr.Expression) {
 			return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean: %s = length(local.%s) > 0", switchVarName, fmtExpressionPosition(expr.Expression), switchVarName, name)
 		}
 

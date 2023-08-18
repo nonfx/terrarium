@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
@@ -24,24 +25,43 @@ func blocksToPull(g platform.Graph, components ...string) []platform.BlockID {
 
 	return blockIDs
 }
-
 func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig.Module) (blockCount int, err error) {
 	appDeps := apps.GetUniqueDependencyTypes()
 	blocks := blocksToPull(g, appDeps...)
 
 	log.Info("found dependencies", "dependencies", appDeps)
 
-	locals := map[string]interface{}{}
+	locals, fileIndex, count, err := processBlocks(g, blocks, tfModule)
+	if err != nil {
+		return count, err
+	}
 
-	fileIndex := map[string][][2]int{}
+	err = copyFilesFromIndex(tfModule.Path, destDir, fileIndex)
+	if err != nil {
+		return count, err
+	}
+
+	if len(locals) > 0 {
+		err = writeLocalsToFile(locals, destDir, apps)
+		if err != nil {
+			return count, err
+		}
+	}
+
+	return count, nil
+}
+
+func processBlocks(g platform.Graph, blocks []platform.BlockID, tfModule *tfconfig.Module) (locals map[string]interface{}, fileIndex map[string][][2]int, blockCount int, err error) {
+	locals = map[string]interface{}{}
+	fileIndex = map[string][][2]int{}
+
 	err = g.Walk(blocks, func(bID platform.BlockID) error {
 		compType, compName := bID.ParseComponent()
 		if compName != "" && compType == platform.BlockType_Local {
 			// skip component inputs as they needs to be generated separately
 
 			localVarName := platform.ComponentPrefix + compName
-			localVarValue := apps.GetDependenciesByType(compName).GetInputs()
-			locals[localVarName] = localVarValue
+			locals[localVarName] = map[string]interface{}{}
 
 			blockCount++
 			return nil
@@ -52,54 +72,58 @@ func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig
 			return nil
 		}
 
-		pos := b.GetPos()
-		relFilePath, err := filepath.Rel(tfModule.Path, pos.Filename)
+		relFilePath, err := getRelativeFilePath(tfModule.Path, b.GetPos().Filename)
 		if err != nil {
-			return eris.Wrapf(err, "failed to get relative path of file: %s from dir: %s", pos.Filename, tfModule.Path)
+			return err
 		}
 
-		if fileIndex[relFilePath] == nil {
-			fileIndex[relFilePath] = [][2]int{}
-		}
-
-		fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pos.Line, pos.EndLine})
-
-		if parentPosGetter, ok := b.(platform.BlockParentPosGetter); ok && parentPosGetter.GetParentPos() != nil {
-			pPos := parentPosGetter.GetParentPos()
-			fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.Line, pPos.Line})       // add first line
-			fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.EndLine, pPos.EndLine}) // add last line
-		}
+		updateFileIndex(fileIndex, relFilePath, b)
 
 		blockCount++
 		return nil
 	})
-	if err != nil {
-		return blockCount, err
-	}
 
+	return locals, fileIndex, blockCount, err
+}
+
+func getRelativeFilePath(basePath, targetPath string) (string, error) {
+	return filepath.Rel(basePath, targetPath)
+}
+
+func updateFileIndex(fileIndex map[string][][2]int, relFilePath string, b platform.ParsedBlock) {
+	pos := b.GetPos()
+	fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pos.Line, pos.EndLine})
+
+	if parentPosGetter, ok := b.(platform.BlockParentPosGetter); ok && parentPosGetter.GetParentPos() != nil {
+		pPos := parentPosGetter.GetParentPos()
+		fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.Line, pPos.Line})       // add first line
+		fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.EndLine, pPos.EndLine}) // add last line
+	}
+}
+
+func copyFilesFromIndex(srcDir, destDir string, fileIndex map[string][][2]int) error {
 	for file, ranges := range fileIndex {
-		err = copyLines(tfModule.Path, destDir, file, ranges...)
+		err := copyLines(srcDir, destDir, file, ranges...)
 		if err != nil {
-			return blockCount, eris.Wrapf(err, "failed to copy lines from file: %s", file)
+			return eris.Wrapf(err, "failed to copy lines from file: %s", file)
 		}
 	}
+	return nil
+}
 
-	if len(locals) == 0 {
-		return
+func writeLocalsToFile(locals map[string]interface{}, destDir string, apps app.Apps) error {
+	for k := range locals {
+		compName := strings.TrimPrefix(k, platform.ComponentPrefix)
+		locals[k] = apps.GetDependenciesByType(compName).GetInputs()
 	}
 
 	localsFile, err := os.Create(path.Join(destDir, "tr_gen_locals.tf"))
 	if err != nil {
-		return
+		return err
 	}
 	defer localsFile.Close()
 
-	err = tfwriter.WriteLocals(locals, localsFile)
-	if err != nil {
-		return
-	}
-
-	return
+	return tfwriter.WriteLocals(locals, localsFile)
 }
 
 func readAllLines(filename string) ([]string, error) {

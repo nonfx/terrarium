@@ -22,7 +22,7 @@ func TestGenerateCmd(t *testing.T) {
 		},
 		{
 			args:      []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium"},
-			expectOut: "Successfully pulled 9 of 15 terraform blocks at: ./testdata/.terrarium\n",
+			expectOut: "Successfully pulled 13 of 22 terraform blocks at: ./testdata/.terrarium\n",
 		},
 	}
 
