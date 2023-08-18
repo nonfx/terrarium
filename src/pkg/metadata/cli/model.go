@@ -53,6 +53,8 @@ func LoadFarmModules(listFilePath string) (FarmModuleList, error) {
 	moduleList, err := loadFarmModules(listFilePath)
 	if err != nil {
 		return moduleList, fmt.Errorf("failed to load farm module list file '%s': %w", listFilePath, err)
+	} else if len(moduleList.Farm) < 1 {
+		return moduleList, fmt.Errorf("farm module list file '%s' is empty", listFilePath)
 	}
 	if err := moduleList.Validate(); err != nil {
 		return moduleList, fmt.Errorf("farm module list file '%s' has invalid items: %w", listFilePath, err)
