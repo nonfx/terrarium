@@ -95,7 +95,7 @@ func loadFrom(g db.DB, dir string) error {
 	schemaFilePath := path.Clean(path.Join(dir, constants.ModuleSchemaFilePath))
 	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(schemaFilePath, filters...)
 	if err != nil {
-		panic(err)
+		return eris.Wrapf(err, "error loading module")
 	}
 
 	log.Info("Loaded modules", "count", len(configs))
