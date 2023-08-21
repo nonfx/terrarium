@@ -79,7 +79,7 @@
         "platform",
         "lint",
         "--dir",
-        "platform/definition",
+        "examples/platform",
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
