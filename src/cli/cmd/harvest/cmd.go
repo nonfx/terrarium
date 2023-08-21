@@ -1,6 +1,7 @@
 package harvest
 
 import (
+	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/dependencies"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/mappings"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/modules"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/resources"
@@ -18,6 +19,7 @@ func init() {
 	cmd.AddCommand(resources.GetCmd())
 	cmd.AddCommand(modules.GetCmd())
 	cmd.AddCommand(mappings.GetCmd())
+	cmd.AddCommand(dependencies.GetCmd())
 }
 
 func GetCmd() *cobra.Command {

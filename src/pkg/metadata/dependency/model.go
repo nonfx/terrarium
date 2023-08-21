@@ -18,8 +18,9 @@ type Interfaces []Interface
 
 // Interface represents a single Dependency Interface.
 type Interface struct {
-	// ID is the identifier for the dependency represented by a Taxon.
-	ID string `yaml:",omitempty"`
+	ID string `yaml:"id,omitempty"`
+	// Taxonomy is the identifier for the dependency represented by a Taxon.
+	Taxonomy string `yaml:",omitempty"`
 	// Title is the display title of the dependency.
 	Title string `yaml:",omitempty"`
 	// Description provides detailed information about the dependency.

@@ -1,7 +1,10 @@
 package db
 
 import (
+	"errors"
+	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +22,8 @@ type DB interface {
 	CreateTFModule(e *TFModule) (uuid.UUID, error)
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
+	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
+	GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error)
 
 	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
 	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)
@@ -66,10 +71,44 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 
 	err := g.Clauses(c).Create(e).Error
 	if err != nil {
+		fmt.Printf("Error in createOrUpdate: %v\n", err)
 		return uuid.Nil, err
 	}
 
 	return e.GetID(), nil
+}
+
+func (db *gDB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error) {
+	var taxonomy Taxonomy
+	uniqueFields := map[string]interface{}{
+		fieldName: fieldValue,
+	}
+	err := db.GetByUniqueFields(db.g(), uniqueFields, &taxonomy)
+	if err != nil {
+		return Taxonomy{}, err
+	}
+	return taxonomy, nil
+}
+
+func (db *gDB) GetByUniqueFields(g *gorm.DB, uniqueFields map[string]interface{}, result interface{}) error {
+	var whereClause []string
+	var values []interface{}
+
+	for field, value := range uniqueFields {
+		whereClause = append(whereClause, fmt.Sprintf("%s = ?", field))
+		values = append(values, value)
+	}
+
+	err := g.Where(strings.Join(whereClause, " AND "), values...).First(result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		fmt.Printf("Error in GetByUniqueFields: %v\n", err)
+		return err
+	}
+
+	return nil
 }
 
 func get[T entity](g *gorm.DB, e T, where T) error {

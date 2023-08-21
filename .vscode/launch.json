@@ -92,5 +92,20 @@
       "program": "${workspaceFolder}/src/api/main.go",
       "envFile": "${workspaceFolder}/.env",
     },
+    {
+      "name": "Harvest Dependency-interfaces",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "harvest",
+        "dependencies",
+        "-d",
+        "examples/farm/dependencies/"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
   ]
 }
