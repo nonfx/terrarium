@@ -9,6 +9,7 @@ type Dependency struct {
 	Model
 
 	TaxonomyID  uuid.UUID        `json:"-" gorm:"default:null"` // Given taxonomy's uncertain presence in YAML, setting TaxonomyID default as NULL accommodates potential absence of taxonomy data.
+	InterfaceID string           `json:"id" gorm:"default:null"`
 	Title       string           `json:"title" gorm:"unique"`
 	Description string           `json:"description"`
 	Inputs      *jsonschema.Node `gorm:"type:json"`

@@ -114,6 +114,7 @@ func processYAMLData(path string, data []byte) error {
 		// Create a db.Dependency instance
 		dbDep := &db.Dependency{
 			TaxonomyID:  taxonomyID,
+			InterfaceID: dep.ID,
 			Title:       dep.Title,
 			Description: dep.Description,
 			Inputs:      dep.Inputs,
