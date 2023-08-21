@@ -6,60 +6,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
-var depIfaceDirectoryFlag string
-
-var dependencyCmd = &cobra.Command{
-	Use:   "dependencies",
-	Short: "Harvests dependencies from the given directory",
-	Long: heredoc.Docf(`
-		The 'dependencies' command is used to harvest dependency information from YAML or YML files located
-		in a specified directory. It parses these files to extract dependency details and stores them in the database
-		for further reference.
-
-		To use this command, provide the path to the directory containing the YAML or YML files using the '--dir' flag.
-		The command will recursively process all valid YAML files within the directory, extracting information such as
-		taxonomy, title, description, inputs, and outputs. The extracted data is then stored in the database.
-
-		Example usage:
-  			terrarium dependencies --dir /path/to/yaml/files
-
-		Please ensure that the provided directory contains valid YAML or YML files with the appropriate structure to avoid any errors.
-`),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return main()
-	},
-}
-
-func GetCmd() *cobra.Command {
-	addFlags()
-	return dependencyCmd
-}
-
-func addFlags() {
-	dependencyCmd.Flags().StringVarP(&depIfaceDirectoryFlag, "dir", "d", "", "path to dependency directory")
-}
-
-func main() error {
-	err := processYAMLFiles(depIfaceDirectoryFlag)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // processYAMLFiles recursively processes YAML files in the specified directory.
-func processYAMLFiles(directory string) error {
+func processYAMLFiles(g db.DB, directory string) error {
 	return filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -74,7 +29,7 @@ func processYAMLFiles(directory string) error {
 			return err
 		}
 		// Process the YAML data and insert into the database
-		err = processYAMLData(path, data)
+		err = processYAMLData(g, path, data)
 		if err != nil {
 			return err
 		}
@@ -84,15 +39,10 @@ func processYAMLFiles(directory string) error {
 }
 
 // processYAMLData processes the YAML data and inserts it into the database.
-func processYAMLData(path string, data []byte) error {
-	g, err := config.DBConnect()
-	if err != nil {
-		return err
-	}
-
+func processYAMLData(g db.DB, path string, data []byte) error {
 	var yamlData map[string][]dependency.Interface
 
-	err = yaml.Unmarshal(data, &yamlData)
+	err := yaml.Unmarshal(data, &yamlData)
 	if err != nil {
 		return fmt.Errorf("error parsing YAML file %s: %w", path, err)
 	}
@@ -137,16 +87,13 @@ func getTaxonomyID(g db.DB, levels []string) (uuid.UUID, error) {
 		uniqueFields[fmt.Sprintf("level%d", i+1)] = level
 	}
 
-	taxonomy, err := g.GetTaxonomyByFieldName("level1", levels[0])
-	if err != nil {
-		return uuid.UUID{}, err
-	}
-
-	for i := 1; i < len(levels); i++ {
-		taxonomy, err = g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), levels[i])
+	var taxonomy db.Taxonomy
+	for i, level := range levels {
+		tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
 		if err != nil {
 			return uuid.UUID{}, err
 		}
+		taxonomy = tax
 	}
 
 	return taxonomy.ID, nil
