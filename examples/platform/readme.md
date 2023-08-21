@@ -141,6 +141,22 @@ components:
         type: string
 ```
 
+## Command
+
+Run following commands in the platform directory.
+
+To generate working terraform code based on App dependencies:
+
+```sh
+terrarium generate -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
+```
+
+To lint platform code:
+
+```sh
+terrarium platform lint
+```
+
 ---
 
 By adhering to the conventions and principles set out in this document, DevOps professionals can streamline their development processes and facilitate better collaboration with application developers.

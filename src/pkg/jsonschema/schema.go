@@ -1,6 +1,12 @@
 package jsonschema
 
-import "github.com/xeipuuv/gojsonschema"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/rotisserie/eris"
+	"github.com/xeipuuv/gojsonschema"
+)
 
 type Node struct {
 	Title            string           `yaml:"title,omitempty" json:"title,omitempty"`
@@ -27,4 +33,74 @@ type Node struct {
 	Required         []string         `yaml:"required,omitempty" json:"required,omitempty"`
 
 	compiled *gojsonschema.Schema
+}
+
+func (n *Node) Compile() (err error) {
+	n.compiled, err = gojsonschema.NewSchema(gojsonschema.NewGoLoader(n))
+	if err != nil {
+		return eris.Wrapf(err, "failed to process json schema")
+	}
+	return
+}
+
+func (n *Node) Validate(val interface{}) error {
+	err := n.compileIfNot()
+	if err != nil {
+		return err
+	}
+
+	result, err := n.compiled.Validate(gojsonschema.NewGoLoader(val))
+	if err != nil {
+		return eris.Wrapf(err, "failed to process the input object")
+	}
+
+	if !result.Valid() {
+		return eris.Errorf("validation failed with following errors: \n%s", formatErrors(result.Errors()))
+	}
+
+	return nil
+}
+
+func (n *Node) ApplyDefaultsToMSI(inp map[string]interface{}) {
+	if inp == nil {
+		return
+	}
+
+	for k, v := range n.Properties {
+		if _, isSet := inp[k]; isSet {
+			continue
+		}
+
+		inp[k] = v.Default
+	}
+}
+
+func (n *Node) ApplyDefaultsToArr(inp []interface{}) {
+	if n.Items == nil {
+		return
+	}
+
+	for i, v := range inp {
+		if v != nil {
+			continue
+		}
+
+		inp[i] = n.Items.Default
+	}
+}
+
+func (n *Node) compileIfNot() error {
+	if n.compiled == nil {
+		return n.Compile()
+	}
+	return nil
+}
+
+func formatErrors(errs []gojsonschema.ResultError) string {
+	s := []string{}
+	for _, e := range errs {
+		s = append(s, e.String())
+	}
+
+	return fmt.Sprintf("\t%s", strings.Join(s, "\n\t"))
 }

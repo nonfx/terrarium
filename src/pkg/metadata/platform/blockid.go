@@ -54,18 +54,18 @@ func (bID BlockID) Parse() (t BlockType, bKey string) {
 	return
 }
 
-func (b BlockID) IsComponent() bool {
+func (b BlockID) ParseComponent() (bt BlockType, componentName string) {
 	bt, bn := b.Parse()
-	return bt == BlockType_ModuleCall && strings.HasPrefix(bn, ComponentPrefix)
-}
-
-func (b BlockID) GetComponentName() string {
-	if !b.IsComponent() {
-		return ""
+	if !strings.HasPrefix(bn, ComponentPrefix) {
+		return
 	}
 
-	_, bn := b.Parse()
-	return strings.TrimPrefix(bn, ComponentPrefix)
+	switch bt {
+	case BlockType_ModuleCall, BlockType_Local:
+		return bt, strings.TrimPrefix(bn, ComponentPrefix)
+	}
+
+	return bt, ""
 }
 
 func (bID BlockID) GetBlock(m *tfconfig.Module) (b ParsedBlock, found bool) {

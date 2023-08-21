@@ -1,6 +1,8 @@
 package generate
 
 import (
+	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
@@ -12,7 +14,7 @@ import (
 var (
 	flagPlatformDir string
 	flagOutDir      string
-	flagComponents  []string
+	flagApps        []string
 )
 
 var cmd = &cobra.Command{
@@ -24,8 +26,8 @@ var cmd = &cobra.Command{
 func init() {
 	cmd.RunE = cmdRunE
 	cmd.Flags().StringVarP(&flagPlatformDir, "platform-dir", "p", ".", "path to the directory containing the Terrarium platform template")
+	cmd.Flags().StringArrayVarP(&flagApps, "app", "a", nil, "path to the app directory or the app yaml file. can be more then one")
 	cmd.Flags().StringVarP(&flagOutDir, "output-dir", "o", "./.terrarium", "path to the directory where you want to generate the output")
-	cmd.Flags().StringArrayVarP(&flagComponents, "component", "c", nil, "name of the components to pull from the platform. Use one or more times.")
 }
 
 func GetCmd() *cobra.Command {
@@ -33,19 +35,31 @@ func GetCmd() *cobra.Command {
 }
 
 func cmdRunE(cmd *cobra.Command, args []string) error {
-	if len(flagComponents) == 0 {
-		return eris.New("No components provided. use -c flag to set components")
+	if len(flagApps) == 0 {
+		return eris.New("No Apps provided. use -a flag to set apps")
 	}
+
+	apps, err := fetchApps(flagApps)
+	if err != nil {
+		return err
+	}
+
 	m, diags := tfconfig.LoadModule(flagPlatformDir, &tfconfig.ResolvedModulesSchema{})
 	if diags.HasErrors() {
-		absPath, _ := filepath.Abs(flagPlatformDir) //os.Getwd()
+		absPath, _ := filepath.Abs(flagPlatformDir)
 		return eris.Wrapf(diags.Err(), "failed to parse the given platform terraform module at: '%s' (%s)", flagPlatformDir, absPath)
 	}
 
-	pm, _ := platform.NewPlatformMetadata(m, nil)
+	existingYaml, _ := os.ReadFile(path.Join(flagPlatformDir, defaultYAMLFileName))
 
-	bIds := blocksToPull(pm.Graph, flagComponents...)
-	blockCount, err := writeTF(pm.Graph, flagOutDir, bIds, m)
+	pm, _ := platform.NewPlatformMetadata(m, existingYaml)
+
+	err = matchAppAndPlatform(pm, apps)
+	if err != nil {
+		return err
+	}
+
+	blockCount, err := writeTF(pm.Graph, flagOutDir, apps, m)
 	if err != nil {
 		return eris.Wrapf(err, "failed to write terraform code to dir: %s", flagOutDir)
 	}

@@ -23,9 +23,9 @@ func (apps Apps) Validate() error {
 		}
 		seenAppIDs[app.ID] = struct{}{}
 
-		for _, dep := range app.GetDependencies() {
+		for i, dep := range app.GetDependencies() {
 			if dep.ID == "" {
-				return eris.New("dependency id must not be empty")
+				return eris.Errorf("dependency id must not be empty for: %s (%d)", dep.Use, i)
 			}
 
 			// Dependency ID to provision must be unique in a project
@@ -68,10 +68,25 @@ func (app *App) SetDefaults() {
 		app.Compute.ID = app.ID
 	}
 
-	for i, dep := range app.Dependencies {
-		if dep.EnvPrefix == "" {
-			app.Dependencies[i].EnvPrefix = strings.ToUpper(dep.ID)
-		}
+	app.Compute.SetDefaults()
+
+	for i := range app.Dependencies {
+		app.Dependencies[i].SetDefaults()
+	}
+}
+
+func (dep *Dependency) SetDefaults() {
+	if dep.EnvPrefix == "" {
+		dep.EnvPrefix = strings.ToUpper(dep.ID)
+	}
+
+	if dep.Inputs == nil {
+		dep.Inputs = map[string]interface{}{}
+	}
+
+	if strings.Contains(dep.Use, "@") {
+		split := strings.SplitN(dep.Use, "@", 2)
+		dep.Use, dep.Inputs["version"] = split[0], split[1]
 	}
 }
 
@@ -145,4 +160,14 @@ func (apps Apps) GetUniqueDependencyTypes() []string {
 	}
 
 	return types
+}
+
+// GetInputs returns a map of all inputs keyed by dependency identifier
+func (allDeps Dependencies) GetInputs() map[string]interface{} {
+	result := make(map[string]interface{}, len(allDeps))
+	for _, dep := range allDeps {
+		result[dep.ID] = dep.Inputs
+	}
+
+	return result
 }
