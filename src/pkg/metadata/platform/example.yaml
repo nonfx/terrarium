@@ -34,7 +34,7 @@ graph:
         - module.core_vpc
     - id: output.data_az
       requirements:
-        - data.data.aws_availability_zones.available
+        - data.aws_availability_zones.available
     - id: output.tr_component_postgres_host
       requirements:
         - module.tr_component_postgres
@@ -53,5 +53,5 @@ graph:
         - resource.random_string.random
     - id: resource.random_string.random
       requirements: []
-    - id: data.data.aws_availability_zones.available
+    - id: data.aws_availability_zones.available
       requirements: []

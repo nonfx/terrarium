@@ -15,12 +15,20 @@ components:
             host: {}
             port: {}
 graph:
-    - id: data.data.aws_availability_zones.available
-      requirements: []
+    - id: data.aws_availability_zones.available
+      requirements:
+        - provider.aws
     - id: local.tr_component_postgres
       requirements: []
+    - id: local.tr_component_postgres_enabled
+      requirements:
+        - local.tr_component_postgres
     - id: local.tr_taxon_database_enabled
-      requirements: []
+      requirements:
+        - local.tr_taxon_sql_enabled
+    - id: local.tr_taxon_sql_enabled
+      requirements:
+        - local.tr_component_postgres_enabled
     - id: module.core_vpc
       requirements:
         - local.tr_taxon_database_enabled
@@ -37,7 +45,7 @@ graph:
         - var.db_instance_class
     - id: output.data_az
       requirements:
-        - data.data.aws_availability_zones.available
+        - data.aws_availability_zones.available
     - id: output.tr_component_postgres_host
       requirements:
         - module.tr_component_postgres
@@ -47,8 +55,13 @@ graph:
     - id: output.vpc_id
       requirements:
         - module.core_vpc
-    - id: resource.random_string.random
+    - id: provider.aws
       requirements: []
+    - id: provider.random
+      requirements: []
+    - id: resource.random_string.random
+      requirements:
+        - provider.random
     - id: var.all_db_instance_class
       requirements: []
     - id: var.db_instance_class

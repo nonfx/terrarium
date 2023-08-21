@@ -28,6 +28,7 @@ func TestParse(t *testing.T) {
 		panic(err)
 	}
 
+	// update test data when code changes
 	// os.WriteFile("./test-data.yaml", actual, 0644)
 
 	assert.YAMLEq(t, string(expected), string(actual))

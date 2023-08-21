@@ -121,7 +121,7 @@ components:
                 description: The endpoint URL of the web service.
                 type: string
 graph:
-    - id: data.data.aws_availability_zones.available
+    - id: data.aws_availability_zones.available
       requirements: []
     - id: module.core_vpc
       requirements:
@@ -135,7 +135,7 @@ graph:
         - module.postgres_security_group
     - id: output.data_az
       requirements:
-        - data.data.aws_availability_zones.available
+        - data.aws_availability_zones.available
     - id: output.tr_component_postgres_host
       requirements:
         - module.tr_component_postgres
