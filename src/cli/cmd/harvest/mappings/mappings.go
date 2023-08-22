@@ -73,7 +73,7 @@ func fmtAttrMeta(resType string, resName string, resAttr string, resFile string,
 
 func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[string]*tfconfig.Resource, created *[]*db.TFResourceAttributesMapping, resourceTypeByNameCache map[string]*db.TFResourceType) (resourceCount int, err error) {
 	for dstResName, dstRes := range resources {
-		log.Infof("Processing resource declaration '%s'...\n", dstResName)
+		log.Infof("Processing resource declaration '%s'...", dstResName)
 		resourceMallingCount := 0
 		for dstResInputName, inputValueReferences := range dstRes.References {
 			for _, item := range inputValueReferences {
@@ -85,13 +85,13 @@ func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[
 			}
 			resourceMallingCount += len(inputValueReferences)
 		}
-		log.Infof("Created %d mappings for resource declaration '%s'\n", resourceMallingCount, dstResName)
+		log.Infof("Created %d mappings for resource declaration '%s'", resourceMallingCount, dstResName)
 	}
 	return len(resources), nil
 }
 
 func createMappingsForModule(g db.DB, config *tfconfig.Module, resourceTypeByNameCache map[string]*db.TFResourceType) (mappings []*db.TFResourceAttributesMapping, resourceCount int, err error) {
-	log.Infof("Processing module '%s'...\n", config.Path)
+	log.Infof("Processing module '%s'...", config.Path)
 	mappings = make([]*db.TFResourceAttributesMapping, 0)
 	count, err := createMappingsForResources(g, config, config.ManagedResources, &mappings, resourceTypeByNameCache)
 	if err != nil {

@@ -79,7 +79,7 @@ func loadFrom(g db.DB, dir string) error {
 		return eris.Wrapf(err, "error loading module")
 	}
 	moduleCount := len(configs)
-	log.Infof("Loaded %d modules\n", moduleCount)
+	log.Infof("Loaded %d modules", moduleCount)
 
 	totalResourceDeclarationsCount := 0
 	totalMappingsCreatedCount := 0

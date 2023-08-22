@@ -23,18 +23,18 @@ const terrariumTaxonEnabledSuffix = "_enabled"
 func lintPlatform(dir string) error {
 	log.Info("Linting terrarium platform template...")
 
-	log.Infof("Loading Terraform modules to lint from '%s'...\n", dir)
+	log.Infof("Loading Terraform modules to lint from '%s'...", dir)
 	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
 
 	log.Info("Validating Terraform modules...")
 	if err := validatePlatformTerraform(module); err != nil {
-		log.Infof("Following Terraform issues were found: %v\n", err)
+		log.Infof("Following Terraform issues were found: %v", err)
 		return fmt.Errorf("platform lint: %w", err)
 	}
 	log.Info("Platform is valid.")
 
 	metadataFile := filepath.Join(dir, "terrarium.yaml")
-	log.Infof("Loading Terrarium metadata file '%s'...\n", metadataFile)
+	log.Infof("Loading Terrarium metadata file '%s'...", metadataFile)
 
 	fileData, err := os.ReadFile(metadataFile)
 	if os.IsNotExist(err) {

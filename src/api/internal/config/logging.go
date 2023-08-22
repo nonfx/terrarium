@@ -1,10 +1,11 @@
 package config
 
 import (
+	"log"
 	"strings"
 
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // LogFormat JSON or TEXT (case insensitive)
@@ -28,21 +29,30 @@ func LogPrettyPrint() bool {
 // To update standard logger configuration, do this:
 //
 // LoggerConfig(logrus.StandardLogger())
-func LoggerConfig(logger *log.Logger) {
+func LoggerConfig(logger *logrus.Logger) {
 	// Set log formatter
 	formatter := LogFormat()
 	if strings.EqualFold(formatter, "TEXT") {
-		logger.SetFormatter(&log.TextFormatter{ForceColors: LogPrettyPrint()})
+		logger.SetFormatter(&logrus.TextFormatter{ForceColors: LogPrettyPrint()})
 	} else if strings.EqualFold(formatter, "JSON") {
-		logger.SetFormatter(&log.JSONFormatter{PrettyPrint: LogPrettyPrint()})
+		logger.SetFormatter(&logrus.JSONFormatter{PrettyPrint: LogPrettyPrint()})
 	}
 
 	// Set log level
 	levelStr := LogLevel()
-	level, err := log.ParseLevel(levelStr)
+	level, err := logrus.ParseLevel(levelStr)
 	if err != nil {
-		log.Debugf("failed to parse log level string %s: %v", levelStr, err)
+		logrus.Debugf("failed to parse log level string %s: %v", levelStr, err)
 	} else {
 		logger.SetLevel(level)
 	}
+}
+
+// LoggerConfigDefault sets up the default loggers with defined configuration.
+func LoggerConfigDefault() {
+	logger := logrus.StandardLogger()
+	LoggerConfig(logger) // setup `logger` object from config
+
+	// update default standard logger
+	log.Default().SetOutput(logger.WriterLevel(logrus.DebugLevel))
 }

@@ -13,6 +13,7 @@ import (
 
 func init() {
 	config.LoggerConfig(log.StandardLogger())
+	config.LoggerConfigDefault()
 }
 
 func main() {
