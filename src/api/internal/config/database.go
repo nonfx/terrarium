@@ -46,6 +46,7 @@ func DBConnect() (db.DB, error) {
 		DBName(),
 		DBPort(),
 		DBSSLMode(),
+		dbhelper.WithRetries(20, 3, 3),
 	)
 	if err != nil {
 		return nil, eris.Wrap(err, "could not establish a connection to the database")

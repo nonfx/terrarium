@@ -1,14 +1,15 @@
 package dbhelper
 
 import (
-	"errors"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
-	"time"
 
 	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm/logger"
 )
 
 func TestCreateDSN(t *testing.T) {
@@ -52,64 +53,25 @@ func TestCreateDSN(t *testing.T) {
 	}
 }
 
-func TestRetry(t *testing.T) {
-	testCases := []struct {
-		name           string
-		maxRetries     int
-		retryInterval  int
-		jitterLimit    int
-		funcToRetry    func() error
-		expectedErrStr string
-	}{
-		{
-			name:          "no error",
-			maxRetries:    3,
-			retryInterval: 1,
-			jitterLimit:   1,
-			funcToRetry: func() error {
-				return nil
-			},
-		},
-		{
-			name:          "retry exceeds limit",
-			maxRetries:    2,
-			retryInterval: 1,
-			jitterLimit:   1,
-			funcToRetry: func() error {
-				return errors.New("some error")
-			},
-			expectedErrStr: "failed after 2 retries: some error",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			beginTime := time.Now()
-			err := retry(tc.maxRetries, tc.retryInterval, tc.jitterLimit, tc.funcToRetry)
-			duration := time.Since(beginTime)
-			if tc.expectedErrStr != "" {
-				assert.Error(t, err)
-				assert.Equal(t, tc.expectedErrStr, err.Error())
-				assert.GreaterOrEqual(t, duration, time.Duration(tc.retryInterval*(tc.maxRetries-1))*time.Second)
-			} else {
-				assert.NoError(t, err)
-				assert.Less(t, duration, time.Second)
-			}
-		})
-	}
-}
-
 func TestConnect(t *testing.T) {
 	// Mock dialector
 	mockErr := fmt.Errorf("mocked error")
 	mockDialector := &mocks.Dialector{}
 	mockDialector.On("Initialize", mock.Anything).Return(mockErr).Times(3)
-	mockDialector.On("Initialize", mock.Anything).Return(nil)
+	mockDialector.On("Initialize", mock.Anything).Return(nil).Once()
 
-	_, err := Connect(mockDialector, 2, 0, 0) // fail
+	logData := strings.Builder{}
+	opts := []ConnOption{
+		WithRetries(1, 0, 0),
+		WithLogger(log.New(&logData, "", 0), logger.Config{LogLevel: logger.Info}),
+	}
+
+	_, err := Connect(mockDialector, opts...) // fail twice
 	assert.ErrorIs(t, err, mockErr)
 
-	db, err := Connect(mockDialector, 2, 0, 0) // succeed
+	db, err := Connect(mockDialector, opts...) // succeed on retry after failing once
 	assert.NoError(t, err)
 	assert.NotNil(t, db)
+
+	assert.Equal(t, 3, strings.Count(logData.String(), "[error] failed to initialize database, got error mocked error"))
 }

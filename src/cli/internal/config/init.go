@@ -3,7 +3,6 @@ package config
 import (
 	"embed"
 
-	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
 	"gopkg.in/yaml.v3"
 )
@@ -27,5 +26,5 @@ func LoadDefaults() {
 
 	confighelper.LoadDefaults(defaultMap, ENV_PREFIX)
 
-	LoggerConfig(log.Default())
+	LoggerConfigDefault()
 }

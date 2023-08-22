@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	stdlog "log"
+
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
 )
@@ -44,4 +46,17 @@ func LoggerConfig(logger *log.Logger) {
 		logger.SetReportTimestamp(false)
 		logger.SetTimeFormat(time.Kitchen)
 	}
+}
+
+// LoggerConfigDefault sets up the default loggers with defined configuration.
+func LoggerConfigDefault() {
+	logger := log.Default()
+	LoggerConfig(logger) // setup `logger` object from config
+
+	// create standard logger object
+	stdLogger := logger.StandardLog(log.StandardLogOptions{ForceLevel: log.DebugLevel})
+
+	// update default standard logger
+	stdlog.Default().SetOutput(stdLogger.Writer())
+	stdlog.Default().SetFlags(stdLogger.Flags())
 }
