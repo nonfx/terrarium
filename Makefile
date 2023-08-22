@@ -169,42 +169,20 @@ ifeq ($(FARM_DIR),)
 FARM_DIR := examples/farm
 endif
 
-ifeq ($(FARM_MODULES_DIR),)
-FARM_MODULES_DIR := $(FARM_DIR)/modules
-endif
-
-%/.terraform: %/*.tf
-	@echo "running terraform init at $*"
-	@cd $* && terraform version && terraform init || (terraform providers && exit 1)
-	@touch $*/.terraform
-
-%/.terraform/providers/schema.json: %/.terraform  ## generate schema.json file for set terraform providers
-	@echo "generating $@"
-	mkdir -p $*/.terraform/providers
-	cd $* && terraform version && terraform providers schema -json > .terraform/providers/schema.json
-
-.PHONY: farm-clean
-farm-clean:  ## Delete .terraform folder and the lock file
-	rm -rf $(FARM_MODULES_DIR)/.terraform
-	rm -f $(FARM_MODULES_DIR)/.terraform.lock.hcl
-
-.PHONY: farm-init
-farm-init: $(FARM_MODULES_DIR)/.terraform  ## Run terraform init on the farm directory
-
 .PHONY: farm-harvest
 farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  ## Run all harvest commands on the farm directory
 
-.PHONY: farm-resource-harvest
-farm-resource-harvest: $(FARM_MODULES_DIR)/.terraform/providers/schema.json  ## Harvest terraform provider resources from the farm directory
-	terrarium harvest resources -s $(FARM_MODULES_DIR)/.terraform/providers/schema.json
+.PHONY: farm-resource-harvest  ## Harvest terraform provider resources from module list file
+farm-resource-harvest: $(FARM_DIR)/modules.yaml
+	terrarium harvest resources --module-list-file $(FARM_DIR)/modules.yaml
 
-.PHONY: farm-module-harvest  ## Harvest terraform modules from the farm directory
-farm-module-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium harvest modules --dir $(FARM_MODULES_DIR)
+.PHONY: farm-module-harvest  ## Harvest terraform modules from module list file
+farm-module-harvest: $(FARM_DIR)/modules.yaml
+	terrarium harvest modules --module-list-file $(FARM_DIR)/modules.yaml
 
-.PHONY: farm-mapping-harvest  ## Harvest attribute mappings from the farm directory
-farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium harvest mappings --dir $(FARM_MODULES_DIR)
+.PHONY: farm-mapping-harvest  ## Harvest attribute mappings from module list file
+farm-mapping-harvest: $(FARM_DIR)/modules.yaml
+	terrarium harvest mappings --module-list-file $(FARM_DIR)/modules.yaml
 
 ######################################################
 # Farm releases pull

@@ -26,10 +26,10 @@
       "args": [
         "harvest",
         "resources",
-        "-s",
-        "${workspaceFolder}/examples/farm/modules/.terraform/providers/schema.json",
-        // "-f",
-        // "examples/farm/modules.yaml", // terraform modules list
+        // "-s",
+        // "${workspaceFolder}/examples/farm/modules/.terraform/providers/schema.json",
+        "-f",
+        "examples/farm/modules.yaml", // terraform modules list
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -43,10 +43,10 @@
       "args": [
         "harvest",
         "modules",
-        "-d",
-        "examples/farm/modules", // terraform directory
-        // "-f",
-        // "examples/farm/modules.yaml", // terraform modules list
+        // "-d",
+        // "examples/farm/modules", // terraform directory
+        "-f",
+        "examples/farm/modules.yaml", // terraform modules list
         "-l" // include local
       ],
       "envFile": "${workspaceFolder}/.env",
@@ -61,10 +61,10 @@
       "args": [
         "harvest",
         "mappings",
-        "-d",
-        "examples/farm/modules", // terraform directory
-        // "-f",
-        // "examples/farm/modules.yaml", // terraform modules list
+        // "-d",
+        // "examples/farm/modules", // terraform directory
+        "-f",
+        "examples/farm/modules.yaml", // terraform modules list
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
