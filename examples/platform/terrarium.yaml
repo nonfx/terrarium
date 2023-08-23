@@ -22,9 +22,13 @@ components:
         type: object
         properties:
             db_name:
+                title: Database Name
+                description: The name provided here may get prefix and suffix based
                 type: string
                 default: default_db
             version:
+                title: Version
+                description: Version of the PostgreSQL engine to use
                 type: string
                 default: "11"
       outputs:
@@ -52,17 +56,19 @@ components:
         type: object
         properties:
             version:
+                title: Version
+                description: Version of the Redis engine to use
                 type: string
                 default: 5.0.6
       outputs:
         properties:
             host:
                 title: Host
-                description: The host address of the Redis server.
+                description: The address of the endpoint for the Redis replication group (cluster mode disabled)
                 type: string
             port:
                 title: Port
-                description: The port number on which the Redis server is listening.
+                description: The port for the Redis replication group (cluster mode disabled)
                 type: string
     - id: server_private
       title: Private Service

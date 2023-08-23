@@ -1,99 +1,105 @@
 components:
-    - id: postgres
-      inputs:
-        type: object
-        properties:
-            db_name:
-                type: string
-                default: default_db
-            version:
-                type: string
-                default: "11"
-      outputs:
-        type: object
-        properties:
-            host: {}
-            port: {}
-    - id: redis
-      inputs:
-        type: object
-        properties:
-            version:
-                type: string
-                default: 5.0.6
-      outputs:
-        type: object
-        properties:
-            host:
-                description: The address of the endpoint for the Redis replication group (cluster mode disabled)
-            port:
-                description: The port for the Redis replication group (cluster mode disabled)
+  - id: postgres
+    inputs:
+      type: object
+      properties:
+        db_name:
+          title: Database Name
+          description: The name provided here may get prefix and suffix based
+          type: string
+          default: default_db
+        version:
+          title: Version
+          description: Version of the PostgreSQL engine to use
+          type: string
+          default: "11"
+    outputs:
+      type: object
+      properties:
+        host: {}
+        port: {}
+  - id: redis
+    inputs:
+      type: object
+      properties:
+        version:
+          title: Version
+          description: Version of the Redis engine to use
+          type: string
+          default: 5.0.6
+    outputs:
+      type: object
+      properties:
+        host:
+          description: The address of the endpoint for the Redis replication group (cluster mode disabled)
+        port:
+          description: The port for the Redis replication group (cluster mode disabled)
 graph:
-    - id: data.aws_availability_zones.available
-      requirements:
-        - provider.aws
-    - id: local.azs
-      requirements: []
-    - id: local.database_enabled
-      requirements:
-        - local.tr_component_postgres
-    - id: local.elasticache_enabled
-      requirements:
-        - local.tr_component_redis
-    - id: local.tr_component_postgres
-      requirements: []
-    - id: local.tr_component_redis
-      requirements: []
-    - id: module.core_vpc
-      requirements:
-        - local.azs
-        - local.database_enabled
-        - local.elasticache_enabled
-        - resource.random_string.random
-    - id: module.postgres_security_group
-      requirements:
-        - module.core_vpc
-    - id: module.this
-      requirements: []
-    - id: module.tr_component_postgres
-      requirements:
-        - local.tr_component_postgres
-        - module.core_vpc
-        - module.postgres_security_group
-        - var.all_db_instance_class
-        - var.db_instance_class
-    - id: module.tr_component_redis
-      requirements:
-        - local.azs
-        - local.tr_component_redis
-        - module.core_vpc
-        - module.this
-    - id: output.data_az
-      requirements:
-        - data.aws_availability_zones.available
-    - id: output.tr_component_postgres_host
-      requirements:
-        - module.tr_component_postgres
-    - id: output.tr_component_postgres_port
-      requirements:
-        - module.tr_component_postgres
-    - id: output.tr_component_redis_host
-      requirements:
-        - module.tr_component_redis
-    - id: output.tr_component_redis_port
-      requirements:
-        - module.tr_component_redis
-    - id: output.vpc_id
-      requirements:
-        - module.core_vpc
-    - id: provider.aws
-      requirements: []
-    - id: provider.random
-      requirements: []
-    - id: resource.random_string.random
-      requirements:
-        - provider.random
-    - id: var.all_db_instance_class
-      requirements: []
-    - id: var.db_instance_class
-      requirements: []
+  - id: data.aws_availability_zones.available
+    requirements:
+      - provider.aws
+  - id: local.azs
+    requirements: []
+  - id: local.database_enabled
+    requirements:
+      - local.tr_component_postgres
+  - id: local.elasticache_enabled
+    requirements:
+      - local.tr_component_redis
+  - id: local.tr_component_postgres
+    requirements: []
+  - id: local.tr_component_redis
+    requirements: []
+  - id: module.core_vpc
+    requirements:
+      - local.azs
+      - local.database_enabled
+      - local.elasticache_enabled
+      - resource.random_string.random
+  - id: module.postgres_security_group
+    requirements:
+      - module.core_vpc
+  - id: module.this
+    requirements: []
+  - id: module.tr_component_postgres
+    requirements:
+      - local.tr_component_postgres
+      - module.core_vpc
+      - module.postgres_security_group
+      - var.all_db_instance_class
+      - var.db_instance_class
+  - id: module.tr_component_redis
+    requirements:
+      - local.azs
+      - local.tr_component_redis
+      - module.core_vpc
+      - module.this
+  - id: output.data_az
+    requirements:
+      - data.aws_availability_zones.available
+  - id: output.tr_component_postgres_host
+    requirements:
+      - module.tr_component_postgres
+  - id: output.tr_component_postgres_port
+    requirements:
+      - module.tr_component_postgres
+  - id: output.tr_component_redis_host
+    requirements:
+      - module.tr_component_redis
+  - id: output.tr_component_redis_port
+    requirements:
+      - module.tr_component_redis
+  - id: output.vpc_id
+    requirements:
+      - module.core_vpc
+  - id: provider.aws
+    requirements: []
+  - id: provider.random
+    requirements: []
+  - id: resource.random_string.random
+    requirements:
+      - provider.random
+  - id: var.all_db_instance_class
+    requirements: []
+  - id: var.db_instance_class
+    requirements: []

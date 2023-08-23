@@ -1,3 +1,4 @@
+# component[Redis Cache]: An in-memory data structure store used as a cache or message broker.
 module "tr_component_redis" {
   source = "cloudposse/elasticache-redis/aws"
 
@@ -15,10 +16,10 @@ module "tr_component_redis" {
 }
 
 module "this" {
-  source  = "cloudposse/label/null"
+  source = "cloudposse/label/null"
   # Cloud Posse recommends pinning every module to a specific version
   # version = "x.x.x"
-  namespace  = "var.namespace"
-  stage      = "var.stage"
-  name       = "var.name"
+  namespace = "var.namespace"
+  stage     = "var.stage"
+  name      = "var.name"
 }
