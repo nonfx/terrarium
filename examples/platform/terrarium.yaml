@@ -22,9 +22,13 @@ components:
         type: object
         properties:
             db_name:
+                title: Database Name
+                description: The name provided here may get prefix and suffix based
                 type: string
                 default: default_db
             version:
+                title: Version
+                description: Version of the PostgreSQL engine to use
                 type: string
                 default: "11"
       outputs:
@@ -52,6 +56,8 @@ components:
         type: object
         properties:
             version:
+                title: Version
+                description: Version of the Redis engine to use
                 type: string
                 default: 5.0.6
       outputs:

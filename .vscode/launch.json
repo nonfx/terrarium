@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "modules list",
+      "name": "Modules List",
       "type": "go",
       "request": "launch",
       "mode": "auto",
@@ -103,6 +103,26 @@
         "dependencies",
         "-d",
         "examples/farm/dependencies/"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "Generate Terraform",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "generate",
+        "-p",
+        "examples/platform",
+        "-a",
+        "examples/apps/voting-be",
+        "-a",
+        "examples/apps/voting-worker",
+        "-o",
+        "/tmp/.terrarium"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

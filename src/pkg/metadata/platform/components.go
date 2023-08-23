@@ -1,13 +1,25 @@
 package platform
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
+	"github.com/icza/backscanner"
 	"github.com/xeipuuv/gojsonschema"
 	"github.com/zclconf/go-cty/cty"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
+
+var (
+	docCommentMatcher    = regexp.MustCompile("^\\s*#.+$")
+	docCommentArgMatcher = regexp.MustCompile("#\\s*(.+?)(\\s*\\[(.+)\\])?:\\s*(.+)")
 )
 
 func NewComponents(platformModule *tfconfig.Module) Components {
@@ -64,10 +76,63 @@ func (c *Component) fetchInputs(m *tfconfig.Module) {
 		c.Inputs = &jsonschema.Node{}
 	}
 
+	fieldDoc, _, err := parseBlockDocComment(m, v.Pos)
+	if err != nil {
+		return
+	}
+
 	cv, _ := v.Expression.Value(nil)
 	valMap := cv.AsValueMap()
-	if v, ok := valMap["default"]; ok {
-		extractSchema(c.Inputs, v)
+	if mv, ok := valMap["default"]; ok {
+		extractSchema(c.Inputs, mv, "", fieldDoc)
+	}
+}
+
+func parseBlockDocComment(m *tfconfig.Module, blockPos tfconfig.SourcePos) (args map[string][2]string, lines []string, err error) {
+	if blockPos.Filename == "" {
+		return
+	}
+	lines, err = readCommentLinesAbove(blockPos.Filename, blockPos.StartByte)
+	if err != nil {
+		return
+	}
+
+	args = make(map[string][2]string, len(lines))
+	for _, line := range lines {
+		if groups := docCommentArgMatcher.FindStringSubmatch(line); groups != nil {
+			args[groups[1]] = [2]string{groups[3], groups[4]}
+		}
+	}
+	return
+}
+
+// read all comment lines (ignoring empty lines) above a given end byte until the first non-comment or the end of file
+func readCommentLinesAbove(filename string, endPos int) ([]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := backscanner.New(file, endPos)
+	for {
+		line, _, err := scanner.Line()
+		if err == io.EOF {
+			return lines, nil
+		} else if err != nil {
+			return lines, err
+		}
+
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine == "" {
+			continue
+		} else if docCommentMatcher.MatchString(trimmedLine) {
+			lines = append(lines, trimmedLine)
+			continue
+		}
+
+		return lines, nil
 	}
 }
 
@@ -97,7 +162,16 @@ func (c *Component) fetchOutputs(m *tfconfig.Module) {
 	}
 }
 
-func extractSchema(existingSchema *jsonschema.Node, value cty.Value) {
+func extractSchema(existingSchema *jsonschema.Node, value cty.Value, fieldName string, fieldDoc map[string][2]string) {
+	if docString, ok := fieldDoc[fieldName]; ok {
+		title := docString[0]
+		if title == "" {
+			title = cases.Title(language.Und, cases.NoLower).String(fieldName) // use the field name in title format instead
+		}
+		existingSchema.Title = title
+		existingSchema.Description = docString[1]
+	}
+
 	switch value.Type().FriendlyName() {
 	case "object":
 		mapValue := value.AsValueMap()
@@ -109,7 +183,8 @@ func extractSchema(existingSchema *jsonschema.Node, value cty.Value) {
 
 		for key, val := range mapValue {
 			existingSchema.Properties[key] = &jsonschema.Node{}
-			extractSchema(existingSchema.Properties[key], val)
+			valueFieldName := strings.TrimPrefix(fmt.Sprintf("%s.%s", fieldName, key), ".")
+			extractSchema(existingSchema.Properties[key], val, valueFieldName, fieldDoc)
 		}
 	case "string":
 		existingSchema.Type = gojsonschema.TYPE_STRING
@@ -131,7 +206,7 @@ func extractSchema(existingSchema *jsonschema.Node, value cty.Value) {
 		}
 
 		if len(listVal) > 0 {
-			extractSchema(existingSchema.Items, listVal[0])
+			extractSchema(existingSchema.Items, listVal[0], fieldName, fieldDoc)
 		}
 	}
 }
