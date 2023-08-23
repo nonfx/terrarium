@@ -19,6 +19,8 @@ type DB interface {
 	CreateTFModule(e *TFModule) (uuid.UUID, error)
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
+	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
+	GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error)
 
 	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
 	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)
@@ -70,6 +72,18 @@ func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID
 	}
 
 	return e.GetID(), nil
+}
+
+func (db *gDB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error) {
+	var taxonomy Taxonomy
+	uniqueFields := map[string]interface{}{
+		fieldName: fieldValue,
+	}
+	err := db.g().Where(uniqueFields).First(&taxonomy).Error
+	if err != nil {
+		return Taxonomy{}, err
+	}
+	return taxonomy, nil
 }
 
 func get[T entity](g *gorm.DB, e T, where T) error {

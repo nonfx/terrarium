@@ -1,0 +1,6 @@
+dependency-interfaces:
+  - id: invalid1
+    title: Invalid 1
+    description: Description for Invalid 1
+    inputs: {}
+    outputs: {}

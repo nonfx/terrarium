@@ -22,4 +22,8 @@
       "--go_out=/tmp"
     ]
   },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "cldcvr-terrarium",
+    "projectKey": "cldcvr_terrarium"
+  },
 }
