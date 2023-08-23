@@ -85,54 +85,44 @@ func TestBlockIDParse(t *testing.T) {
 	}
 }
 
-func TestIsComponent(t *testing.T) {
+func TestParseComponent(t *testing.T) {
 	tests := []struct {
 		name     string
 		blockID  BlockID
-		expected bool
+		wantName string
+		wantType BlockType
 	}{
 		{
-			name:     "is component",
+			name:     "is component module call",
 			blockID:  "module.tr_component_test",
-			expected: true,
+			wantName: "test",
+			wantType: BlockType_ModuleCall,
 		},
 		{
 			name:     "is not component",
 			blockID:  "module.test",
-			expected: false,
+			wantName: "",
+			wantType: BlockType_ModuleCall,
+		},
+		{
+			name:     "is component local input",
+			blockID:  "local.tr_component_test",
+			wantName: "test",
+			wantType: BlockType_Local,
+		},
+		{
+			name:     "is component invalid type",
+			blockID:  "resource.tr_component_test",
+			wantName: "",
+			wantType: BlockType_Resource,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.blockID.IsComponent()
-			assert.Equal(t, tt.expected, result)
-		})
-	}
-}
-
-func TestGetComponentName(t *testing.T) {
-	tests := []struct {
-		name     string
-		blockID  BlockID
-		expected string
-	}{
-		{
-			name:     "valid component name",
-			blockID:  "module.tr_component_test",
-			expected: "test",
-		},
-		{
-			name:     "invalid component name",
-			blockID:  "module.test",
-			expected: "",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := tt.blockID.GetComponentName()
-			assert.Equal(t, tt.expected, result)
+			bt, compType := tt.blockID.ParseComponent()
+			assert.Equal(t, tt.wantName, compType)
+			assert.Equal(t, tt.wantType, bt)
 		})
 	}
 }

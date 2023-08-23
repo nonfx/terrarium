@@ -129,59 +129,6 @@ dependency-interfaces:
 	}
 }
 
-func Test_getTaxonomyID(t *testing.T) {
-	tests := []struct {
-		name           string
-		levels         []string
-		mockTaxonomies func(*mocks.DB)
-
-		wantUUID uuid.UUID
-		wantErr  bool
-	}{
-		{
-			name:   "success",
-			levels: []string{"level1", "level2", "level3"},
-			mockTaxonomies: func(dbMocks *mocks.DB) {
-				// Mock GetTaxonomyByFieldName for each level
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, "level1").Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, "level2").Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, "level3").Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-			},
-			wantUUID: uuid.UUID{},
-		},
-		{
-			name:   "failure",
-			levels: []string{"level1", "level2"},
-			mockTaxonomies: func(dbMocks *mocks.DB) {
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, "level1").Return(
-					db.Taxonomy{}, fmt.Errorf("mocked error")).Once()
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			dbMocks := &mocks.DB{}
-			tt.mockTaxonomies(dbMocks)
-
-			taxonomyID, err := getTaxonomyID(dbMocks, tt.levels)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			assert.Equal(t, tt.wantUUID, taxonomyID)
-
-			dbMocks.AssertExpectations(t)
-		})
-	}
-}
-
 func Test_cmdRunE(t *testing.T) {
 	type args struct {
 		cmd  *cobra.Command
@@ -220,11 +167,25 @@ func Test_cmdRunE(t *testing.T) {
 	}
 }
 
+type mockOS struct {
+	mock.Mock
+}
+
+func (m *mockOS) ReadFile(filename string) ([]byte, error) {
+	args := m.Called(filename)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+type OSReader interface {
+	ReadFile(filename string) ([]byte, error)
+}
+
 func Test_processYAMLFiles(t *testing.T) {
 	tests := []struct {
 		name      string
 		directory string
 		mockDB    func(*mocks.DB)
+		mockOS    func() *mockOS
 		wantErr   bool
 	}{
 		{
@@ -240,11 +201,20 @@ func Test_processYAMLFiles(t *testing.T) {
 				dbMocks.On("CreateDependencyInterface", mock.Anything).Return(uuid.New(), nil).Once()
 			},
 		},
+		{
+			name:      "failure processing YAML data",
+			directory: "testdata/failure",
+			mockDB: func(dbMocks *mocks.DB) {
+				dbMocks.On("CreateDependencyInterface", mock.Anything).Return(uuid.New(), fmt.Errorf("mocked error")).Once()
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dbMocks := &mocks.DB{}
+			osMock := &mockOS{}
 			if tt.mockDB != nil {
 				tt.mockDB(dbMocks)
 			}
@@ -257,6 +227,12 @@ func Test_processYAMLFiles(t *testing.T) {
 			}
 
 			dbMocks.AssertExpectations(t)
+			osMock.AssertExpectations(t)
 		})
 	}
+}
+
+func TestGetCmd(t *testing.T) {
+	cmd := GetCmd()
+	assert.NotNil(t, cmd)
 }

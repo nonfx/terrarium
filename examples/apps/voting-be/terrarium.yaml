@@ -1,0 +1,13 @@
+id: voting_be
+name: Voting Backend
+env_prefix: VO
+
+compute:
+  use: server_web
+  inputs:
+    port: 3000
+
+dependencies:
+  - id: msg_queue
+    use: redis
+    no_provision: true

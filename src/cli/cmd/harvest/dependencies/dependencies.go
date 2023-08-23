@@ -53,12 +53,17 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 		if dep.Taxonomy != "" {
 			// Split the taxonomy string into levels
 			levels := taxonomy.NewTaxonomy(dep.Taxonomy).Split()
-
-			// Retrieve the TaxonomyID based on the levels from the taxonomy table
-			taxonomyID, err = getTaxonomyID(g, levels)
-			if err != nil {
-				return fmt.Errorf("error retrieving TaxonomyID: %w", err)
+			// Please refer to TER-209 for more details to update the following snippet of code to match the
+			// taxonomy levels in the dependency interface yaml to the database
+			var dbTax db.Taxonomy
+			for i, level := range levels {
+				tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
+				if err != nil {
+					return err
+				}
+				dbTax = tax
 			}
+			taxonomyID = dbTax.ID
 		}
 
 		// Create a db.Dependency instance
@@ -78,23 +83,4 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 		}
 	}
 	return nil
-}
-
-// getTaxonomyID retrieves the TaxonomyID based on the taxonomy levels from the taxonomy table.
-func getTaxonomyID(g db.DB, levels []string) (uuid.UUID, error) {
-	uniqueFields := make(map[string]interface{})
-	for i, level := range levels {
-		uniqueFields[fmt.Sprintf("level%d", i+1)] = level
-	}
-
-	var taxonomy db.Taxonomy
-	for i, level := range levels {
-		tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
-		if err != nil {
-			return uuid.UUID{}, err
-		}
-		taxonomy = tax
-	}
-
-	return taxonomy.ID, nil
 }

@@ -1,5 +1,7 @@
 package app
 
+import "gopkg.in/yaml.v3"
+
 // App multiple apps configuration
 type Apps []App
 
@@ -39,7 +41,7 @@ type Dependency struct {
 	ID string `yaml:"id"`
 
 	// Use indicates the specific dependency interface ID that is used to provision an app dependency.
-	Use string `yaml:"type"`
+	Use string `yaml:"use"`
 
 	// EnvPrefix is used to prefix the output env vars in order to avoid collision
 	// Defaults to dependency id upper case.
@@ -57,4 +59,14 @@ type Dependency struct {
 	// If true, this dependency is shared and its inputs are set in another app
 	// and its outputs are made available here.
 	NoProvision bool `yaml:"no_provision"`
+}
+
+func NewApp(content []byte) (*App, error) {
+	out := &App{}
+	err := yaml.Unmarshal(content, out)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }

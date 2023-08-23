@@ -1,6 +1,11 @@
 package lint
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
 
 var (
 	flagDir string
@@ -22,11 +27,21 @@ func GetCmd() *cobra.Command {
 }
 
 func cmdRunE(cmd *cobra.Command, args []string) error {
+	if err := checkDirExists(flagDir); err != nil {
+		return err
+	}
 	err := lintPlatform(flagDir)
 	if err != nil {
 		return err
 	}
 
 	cmd.Printf("Platform parse and lint completed\n")
+	return nil
+}
+
+func checkDirExists(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("could not open given directory '%s': %w", dir, err)
+	}
 	return nil
 }
