@@ -103,10 +103,10 @@ func TestParseWithNestedModules(t *testing.T) {
 	// Test Parse with nested modules
 	graph := NewGraph(module)
 	assert.Equal(t, Graph{
-		{"data.data.resource_type.label2", []BlockID{}},
+		{"data.resource_type.label2", []BlockID{}},
 		{"local.local1", []BlockID{}},
 		{"module.module2", []BlockID{"resource.resource_type.label1"}},
-		{"module.tr_component_module1", []BlockID{"data.data.resource_type.label2", "local.local1", "module.module2", "var.var1"}},
+		{"module.tr_component_module1", []BlockID{"data.resource_type.label2", "local.local1", "module.module2", "var.var1"}},
 		{"output.output1", []BlockID{}},
 		{"resource.resource_type.label1", []BlockID{}},
 		{"var.var1", []BlockID{}},

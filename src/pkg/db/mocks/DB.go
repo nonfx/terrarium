@@ -14,6 +14,32 @@ type DB struct {
 	mock.Mock
 }
 
+// CreateDependencyInterface provides a mock function with given fields: e
+func (_m *DB) CreateDependencyInterface(e *db.Dependency) (uuid.UUID, error) {
+	ret := _m.Called(e)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.Dependency) (uuid.UUID, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.Dependency) uuid.UUID); ok {
+		r0 = rf(e)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.Dependency) error); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateTFModule provides a mock function with given fields: e
 func (_m *DB) CreateTFModule(e *db.TFModule) (uuid.UUID, error) {
 	ret := _m.Called(e)
@@ -303,6 +329,30 @@ func (_m *DB) GetTFResourceType(e *db.TFResourceType, where *db.TFResourceType) 
 	return r0
 }
 
+// GetTaxonomyByFieldName provides a mock function with given fields: fieldName, fieldValue
+func (_m *DB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (db.Taxonomy, error) {
+	ret := _m.Called(fieldName, fieldValue)
+
+	var r0 db.Taxonomy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, interface{}) (db.Taxonomy, error)); ok {
+		return rf(fieldName, fieldValue)
+	}
+	if rf, ok := ret.Get(0).(func(string, interface{}) db.Taxonomy); ok {
+		r0 = rf(fieldName, fieldValue)
+	} else {
+		r0 = ret.Get(0).(db.Taxonomy)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, interface{}) error); ok {
+		r1 = rf(fieldName, fieldValue)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // QueryTFModuleAttributes provides a mock function with given fields: filterOps
 func (_m *DB) QueryTFModuleAttributes(filterOps ...db.FilterOption) (db.TFModuleAttributes, error) {
 	_va := make([]interface{}, len(filterOps))
@@ -367,13 +417,12 @@ func (_m *DB) QueryTFModules(filterOps ...db.FilterOption) (db.TFModules, error)
 	return r0, r1
 }
 
-type mockConstructorTestingTNewDB interface {
+// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewDB(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func NewDB(t mockConstructorTestingTNewDB) *DB {
+}) *DB {
 	mock := &DB{}
 	mock.Mock.Test(t)
 

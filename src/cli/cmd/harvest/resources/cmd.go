@@ -1,14 +1,20 @@
 package resources
 
 import (
+	"path"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
+	"github.com/cldcvr/terrarium/src/pkg/tf/runner"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
 
 var (
-	flagSchemaFile string
+	flagSchemaFile     string
+	flagModuleListFile string
 )
 
 var cmd = &cobra.Command{
@@ -24,7 +30,8 @@ var cmd = &cobra.Command{
 }
 
 func init() {
-	cmd.Flags().StringVarP(&flagSchemaFile, "file", "f", DefaultSchemaPath, "terraform provider schema json file path")
+	cmd.Flags().StringVarP(&flagSchemaFile, "schema-file", "s", DefaultSchemaPath, "terraform provider schema json file path")
+	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
 	cmd.RunE = cmdRunE
 }
 
@@ -33,25 +40,56 @@ func GetCmd() *cobra.Command {
 }
 
 func cmdRunE(cmd *cobra.Command, _ []string) error {
-
-	cmd.Printf("Loading providers from '%s'\n", flagSchemaFile)
-
-	// Load providers schema from file
-	providersSchema, err := loadProvidersSchema(flagSchemaFile)
-	if err != nil {
-		return eris.Wrap(err, heredoc.Docf(`
-			error loading providers schema file. make sure the schema file is created by following the instructions in the command help.
-				terraform init && terraform providers schema -json > %s
-		`, flagSchemaFile))
-	}
-
 	// Connect to the database
-	db, err := config.DBConnect()
+	g, err := config.DBConnect()
 	if err != nil {
 		return eris.Wrapf(err, "error connecting to the database")
 	}
 
-	providerCount, resCount, attrCount, err := pushProvidersSchemaToDB(providersSchema, db)
+	if flagModuleListFile == "" {
+		cmd.Printf("Loading modules from provided directory '%s'...\n", flagSchemaFile)
+		return loadFrom(g, flagSchemaFile)
+	}
+
+	cmd.Printf("Loading modules from provided list file '%s'...\n", flagModuleListFile)
+	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
+	if err != nil {
+		return err
+	}
+
+	tfRunner := runner.NewTerraformRunner()
+	for _, item := range moduleList.Farm {
+		dir, _, err := item.CreateTerraformFile()
+		if err != nil {
+			return err
+		}
+
+		schemaFilePath := path.Join(dir, DefaultSchemaPath)
+		if err := runner.TerraformProviderSchema(tfRunner, dir, schemaFilePath); err != nil {
+			return err
+		}
+
+		if err := loadFrom(g, schemaFilePath); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func loadFrom(g db.DB, schemaFilePath string) error {
+	cmd.Printf("Loading providers from '%s'\n", schemaFilePath)
+
+	// Load providers schema from file
+	providersSchema, err := loadProvidersSchema(schemaFilePath)
+	if err != nil {
+		return eris.Wrap(err, heredoc.Docf(`
+			error loading providers schema file. make sure the schema file is created by following the instructions in the command help.
+				terraform init && terraform providers schema -json > %s
+		`, schemaFilePath))
+	}
+
+	providerCount, resCount, attrCount, err := pushProvidersSchemaToDB(providersSchema, g)
 	if err != nil {
 		return eris.Wrapf(err, "error writing data to db")
 	}

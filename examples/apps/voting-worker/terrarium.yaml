@@ -1,0 +1,12 @@
+id: voting_worker
+name: Voting Worker
+env_prefix: VO
+
+compute:
+  use: server_private
+  inputs:
+    port: 3000
+
+dependencies:
+  - id: msg_queue
+    use: redis

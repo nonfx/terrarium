@@ -9,11 +9,9 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var resourceTypeByName map[string]*db.TFResourceType
-
-func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference) (*db.TFResourceAttributesMapping, error) {
+func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Resource, dstResInputName string, srcRes tfconfig.AttributeReference, resourceTypeByNameCache map[string]*db.TFResourceType) (*db.TFResourceAttributesMapping, error) {
 	if !slices.Contains([]string{"", "module", "var", "local", "each"}, srcRes.Type()) && srcRes.Path() != "" {
-		srcResDB, ok := resourceTypeByName[srcRes.Type()]
+		srcResDB, ok := resourceTypeByNameCache[srcRes.Type()]
 		if !ok {
 			srcResDB = &db.TFResourceType{}
 			if err := g.GetTFResourceType(srcResDB, &db.TFResourceType{
@@ -22,7 +20,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			}); err != nil {
 				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
 			}
-			resourceTypeByName[srcRes.Type()] = srcResDB
+			resourceTypeByNameCache[srcRes.Type()] = srcResDB
 		}
 
 		srcAttrDB := &db.TFResourceAttribute{}
@@ -36,7 +34,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			return nil, nil // skip unknown resource attributes (e.g. reference to field in a dynamic type)
 		}
 
-		dstResDB, ok := resourceTypeByName[dstRes.Type]
+		dstResDB, ok := resourceTypeByNameCache[dstRes.Type]
 		if !ok {
 			dstResDB = &db.TFResourceType{}
 			if err := g.GetTFResourceType(dstResDB, &db.TFResourceType{
@@ -45,7 +43,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			}); err != nil {
 				return nil, nil // skip unknown resources (e.g. need to populate more resource types)
 			}
-			resourceTypeByName[dstRes.Type] = dstResDB
+			resourceTypeByNameCache[dstRes.Type] = dstResDB
 		}
 
 		dstAttrDB := &db.TFResourceAttribute{}
@@ -73,13 +71,13 @@ func fmtAttrMeta(resType string, resName string, resAttr string, resFile string,
 	return fmt.Sprintf("[resource='%s.%s'; attribute='%s'; file='%s'; line=%d]", resType, resName, resAttr, resFile, resLine)
 }
 
-func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[string]*tfconfig.Resource, created *[]*db.TFResourceAttributesMapping) (resourceCount int, err error) {
+func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[string]*tfconfig.Resource, created *[]*db.TFResourceAttributesMapping, resourceTypeByNameCache map[string]*db.TFResourceType) (resourceCount int, err error) {
 	for dstResName, dstRes := range resources {
-		log.Infof("Processing resource declaration '%s'...\n", dstResName)
+		log.Infof("Processing resource declaration '%s'...", dstResName)
 		resourceMallingCount := 0
 		for dstResInputName, inputValueReferences := range dstRes.References {
 			for _, item := range inputValueReferences {
-				mapping, err := createMappingRecord(g, parent, dstRes, dstResInputName, item)
+				mapping, err := createMappingRecord(g, parent, dstRes, dstResInputName, item, resourceTypeByNameCache)
 				if err != nil {
 					return 0, err
 				}
@@ -87,21 +85,21 @@ func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[
 			}
 			resourceMallingCount += len(inputValueReferences)
 		}
-		log.Infof("Created %d mappings for resource declaration '%s'\n", resourceMallingCount, dstResName)
+		log.Infof("Created %d mappings for resource declaration '%s'", resourceMallingCount, dstResName)
 	}
 	return len(resources), nil
 }
 
-func createMappingsForModule(g db.DB, config *tfconfig.Module) (mappings []*db.TFResourceAttributesMapping, resourceCount int, err error) {
-	log.Infof("Processing module '%s'...\n", config.Path)
+func createMappingsForModule(g db.DB, config *tfconfig.Module, resourceTypeByNameCache map[string]*db.TFResourceType) (mappings []*db.TFResourceAttributesMapping, resourceCount int, err error) {
+	log.Infof("Processing module '%s'...", config.Path)
 	mappings = make([]*db.TFResourceAttributesMapping, 0)
-	count, err := createMappingsForResources(g, config, config.ManagedResources, &mappings)
+	count, err := createMappingsForResources(g, config, config.ManagedResources, &mappings, resourceTypeByNameCache)
 	if err != nil {
 		return nil, 0, err
 	}
 	resourceCount += count
 
-	count, err = createMappingsForResources(g, config, config.DataResources, &mappings)
+	count, err = createMappingsForResources(g, config, config.DataResources, &mappings, resourceTypeByNameCache)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -110,7 +108,7 @@ func createMappingsForModule(g db.DB, config *tfconfig.Module) (mappings []*db.T
 	// process sub-modules
 	for _, dstMod := range config.ModuleCalls {
 		if dstMod.Module != nil {
-			subMappings, subResCount, err := createMappingsForModule(g, dstMod.Module)
+			subMappings, subResCount, err := createMappingsForModule(g, dstMod.Module, resourceTypeByNameCache)
 			if err != nil {
 				return subMappings, subResCount, err
 			}

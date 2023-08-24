@@ -26,7 +26,10 @@
       "args": [
         "harvest",
         "resources",
-        "-f${workspaceFolder}/examples/farm/modules/.terraform/providers/schema.json"
+        "-s",
+        "${workspaceFolder}/examples/farm/modules/.terraform/providers/schema.json",
+        // "-f",
+        // "examples/farm/modules.yaml", // terraform modules list
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -42,6 +45,8 @@
         "modules",
         "-d",
         "examples/farm/modules", // terraform directory
+        // "-f",
+        // "examples/farm/modules.yaml", // terraform modules list
         "-l" // include local
       ],
       "envFile": "${workspaceFolder}/.env",
@@ -58,6 +63,8 @@
         "mappings",
         "-d",
         "examples/farm/modules", // terraform directory
+        // "-f",
+        // "examples/farm/modules.yaml", // terraform modules list
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -72,7 +79,7 @@
         "platform",
         "lint",
         "--dir",
-        "platform/definition",
+        "examples/platform",
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -84,6 +91,21 @@
       "mode": "auto",
       "program": "${workspaceFolder}/src/api/main.go",
       "envFile": "${workspaceFolder}/.env",
+    },
+    {
+      "name": "Harvest Dependency-interfaces",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "harvest",
+        "dependencies",
+        "-d",
+        "examples/farm/dependencies/"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
     },
   ]
 }

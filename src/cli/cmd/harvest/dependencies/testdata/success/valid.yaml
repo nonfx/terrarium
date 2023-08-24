@@ -1,0 +1,19 @@
+dependency-interfaces:
+  - id: interface1
+    taxonomy: storage/database/rdbms
+    title: RDBMS
+    description: Relational Database Management System
+    inputs:
+      type: object
+      properties:
+        port:
+          title: Port
+          description: The port number on which the server should listen.
+          type: number
+          default: 80
+    outputs:
+      properties:
+        host:
+          title: Host
+          description: The host address of the web server.
+          type: string

@@ -18,3 +18,8 @@ type Taxonomy struct {
 func (db *gDB) CreateTaxonomy(e *Taxonomy) (uuid.UUID, error) {
 	return createOrUpdate(db.g(), e, []string{"level1", "level2", "level3", "level4", "level5", "level6", "level7"})
 }
+
+// insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
+func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
+	return createOrUpdate(db.g(), e, []string{"interface_id"})
+}

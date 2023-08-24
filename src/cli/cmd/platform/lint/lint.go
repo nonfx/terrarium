@@ -23,18 +23,18 @@ const terrariumTaxonEnabledSuffix = "_enabled"
 func lintPlatform(dir string) error {
 	log.Info("Linting terrarium platform template...")
 
-	log.Infof("Loading Terraform modules to lint from '%s'...\n", dir)
+	log.Infof("Loading Terraform modules to lint from '%s'...", dir)
 	module, _ := tfconfig.LoadModule(dir, &tfconfig.ResolvedModulesSchema{})
 
 	log.Info("Validating Terraform modules...")
 	if err := validatePlatformTerraform(module); err != nil {
-		log.Infof("Following Terraform issues were found: %v\n", err)
+		log.Infof("Following Terraform issues were found: %v", err)
 		return fmt.Errorf("platform lint: %w", err)
 	}
 	log.Info("Platform is valid.")
 
 	metadataFile := filepath.Join(dir, "terrarium.yaml")
-	log.Infof("Loading Terrarium metadata file '%s'...\n", metadataFile)
+	log.Infof("Loading Terrarium metadata file '%s'...", metadataFile)
 
 	fileData, err := os.ReadFile(metadataFile)
 	if os.IsNotExist(err) {
@@ -86,9 +86,7 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 
 	for _, name := range requiredModuleNames {
 		switchVarName := name + terrariumComponentModuleEnabledSuffix
-		if expr, found := module.Locals[switchVarName]; !found {
-			return fmt.Errorf("terraform must declare a local boolean variable '%s' set to true if at least one component instance would be created: %s = length(local.%s) > 0", switchVarName, switchVarName, name)
-		} else if !parser.IsBool(expr.Expression) {
+		if expr, found := module.Locals[switchVarName]; found && !parser.IsBool(expr.Expression) {
 			return fmt.Errorf("terraform variable '%s' %s must evaluate to a boolean: %s = length(local.%s) > 0", switchVarName, fmtExpressionPosition(expr.Expression), switchVarName, name)
 		}
 

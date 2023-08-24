@@ -9,8 +9,13 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func NewBlockID(t BlockType, name string) BlockID {
-	return BlockID(fmt.Sprintf("%s.%s", t, name))
+func NewBlockID(t BlockType, bKey string) BlockID {
+	switch t {
+	case BlockType_Data:
+		return BlockID(bKey)
+	default:
+		return BlockID(fmt.Sprintf("%s.%s", t, bKey))
+	}
 }
 
 // GetBlockType returns a BlockType from pre-defined set of constants.
@@ -32,98 +37,101 @@ func GetBlockType(t string) BlockType {
 	}
 }
 
-func (bid BlockID) Parse() (t BlockType, name string) {
-	spl := strings.SplitN(string(bid), ".", 2)
+func (bID BlockID) Parse() (t BlockType, bKey string) {
+	spl := strings.SplitN(string(bID), ".", 2)
 	if len(spl) < 2 {
 		return
 	}
 
 	t = GetBlockType(spl[0])
-	name = spl[1]
+
+	switch t {
+	case BlockType_Data:
+		bKey = string(bID)
+	default:
+		bKey = spl[1]
+	}
 	return
 }
 
-func (b BlockID) IsComponent() bool {
+func (b BlockID) ParseComponent() (bt BlockType, componentName string) {
 	bt, bn := b.Parse()
-	return bt == BlockType_ModuleCall && strings.HasPrefix(bn, ComponentPrefix)
-}
-
-func (b BlockID) GetComponentName() string {
-	if !b.IsComponent() {
-		return ""
+	if !strings.HasPrefix(bn, ComponentPrefix) {
+		return
 	}
 
-	_, bn := b.Parse()
-	return strings.TrimPrefix(bn, ComponentPrefix)
+	switch bt {
+	case BlockType_ModuleCall, BlockType_Local:
+		return bt, strings.TrimPrefix(bn, ComponentPrefix)
+	}
+
+	return bt, ""
 }
 
-func (b BlockID) FindRequirements(m *tfconfig.Module) []BlockID {
-	t, _ := b.Parse()
-	switch t {
+func (bID BlockID) GetBlock(m *tfconfig.Module) (b ParsedBlock, found bool) {
+	bt, bn := bID.Parse()
+	switch bt {
 	case BlockType_ModuleCall:
-		return b.findModuleCallReq(m)
+		b, found = m.ModuleCalls[bn]
+		return
+
 	case BlockType_Resource:
-		return b.findResourceReq(m)
+		b, found = m.ManagedResources[bn]
+		return
+
 	case BlockType_Data:
-		return b.findResourceDataReq(m)
+		b, found = m.DataResources[bn]
+		return
+
+	case BlockType_Local:
+		b, found = m.Locals[bn]
+		return
+
+	case BlockType_Variable:
+		b, found = m.Variables[bn]
+		return
+
 	case BlockType_Output:
-		return b.findOutputReq(m)
+		b, found = m.Outputs[bn]
+		return
+
+	case BlockType_Provider:
+		b, found = m.RequiredProviders[bn]
+		return
 	}
 
-	return []BlockID{}
+	return
 }
 
-func (b BlockID) findModuleCallReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	mc := m.ModuleCalls[name]
-	if mc == nil {
-		return []BlockID{}
+func (bID BlockID) FindRequirements(m *tfconfig.Module) (requirements []BlockID) {
+	requirements = []BlockID{}
+
+	b, found := bID.GetBlock(m)
+	if !found || b == nil {
+		return
 	}
 
-	return b.findReqBlockIDs(mc.Dependencies, m)
-}
-
-func (b BlockID) findResourceReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	mr := m.ManagedResources[name]
-	if mr == nil {
-		return []BlockID{}
+	dg, ok := b.(BlockDependencyGetter)
+	if !ok || dg == nil {
+		return
 	}
 
-	return b.findReqBlockIDs(mr.Dependencies, m)
-}
-
-func (b BlockID) findResourceDataReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	dr := m.DataResources[name]
-	if dr == nil {
-		return []BlockID{}
-	}
-
-	return b.findReqBlockIDs(dr.Dependencies, m)
-}
-
-func (b BlockID) findOutputReq(m *tfconfig.Module) []BlockID {
-	_, name := b.Parse()
-	op := m.Outputs[name]
-	if op == nil {
-		return []BlockID{}
-	}
-
-	return b.findReqBlockIDs(op.Dependencies, m)
-}
-
-func (b BlockID) findReqBlockIDs(dependencies map[string]tfconfig.AttributeReference, m *tfconfig.Module) []BlockID {
-	requirements := []BlockID{}
-
-	for _, v := range dependencies {
+	for _, v := range dg.GetDependencies() {
 		bId, found := getBlockIDFromTFAttribute(v, m)
 		if found {
 			requirements = appendSortedUnique(requirements, bId)
 		}
 	}
 
-	return requirements
+	pg, ok := b.(BlockProviderGetter)
+	if !ok || pg.GeProviderName() == "" {
+		return
+	}
+
+	pbID := NewBlockID(BlockType_Provider, pg.GeProviderName())
+	requirements = appendSortedUnique(requirements, pbID)
+
+	return
 }
 
 func getBlockIDFromTFAttribute(v tfconfig.AttributeReference, m *tfconfig.Module) (BlockID, bool) {

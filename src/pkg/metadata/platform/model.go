@@ -56,6 +56,22 @@ const (
 	BlockType_Provider   BlockType = "provider" // Provider block type
 )
 
+type ParsedBlock interface {
+	GetPos() tfconfig.SourcePos
+}
+
+type BlockDependencyGetter interface {
+	GetDependencies() map[string]tfconfig.AttributeReference
+}
+
+type BlockParentPosGetter interface {
+	GetParentPos() *tfconfig.SourcePos
+}
+
+type BlockProviderGetter interface {
+	GeProviderName() string
+}
+
 // NewPlatformMetadata creates a new PlatformMetadata object.
 // It parses the platform module and existing YAML to create the components and the graph.
 func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (*PlatformMetadata, error) {

@@ -28,13 +28,12 @@ func (_m *entity) GetID() uuid.UUID {
 	return r0
 }
 
-type mockConstructorTestingTnewEntity interface {
+// newEntity creates a new instance of entity. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func newEntity(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// newEntity creates a new instance of entity. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func newEntity(t mockConstructorTestingTnewEntity) *entity {
+}) *entity {
 	mock := &entity{}
 	mock.Mock.Test(t)
 
