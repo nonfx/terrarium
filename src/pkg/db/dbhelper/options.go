@@ -15,9 +15,9 @@ type connConfig struct {
 
 func getDefaultConfig() connConfig {
 	return connConfig{
-		maxRetries:       0,
-		retryIntervalSec: 0,
-		jitterLimitSec:   0,
+		maxRetries:       2,
+		retryIntervalSec: 2,
+		jitterLimitSec:   2,
 		logger: logger.New(log.Default(), logger.Config{
 			LogLevel: logger.Warn,
 		}),
