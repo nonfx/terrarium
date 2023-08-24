@@ -3,7 +3,7 @@
 ## ER Diagram
 
 ```mermaid
-erDiagram  
+erDiagram
     "tf_provider" {
         string id PK
         string name
@@ -51,6 +51,15 @@ erDiagram
         string taxonomy_level_2
         string taxonomy_level_3
     }
+    "dependecies" {
+        string id PK
+        string taxonomy_id FK
+        string interface_id
+        string title
+        string description
+        json inputs
+        json outputs
+    }
 
     %% Define relationships
     "tf_resource_types" ||--o{ "tf_resource_attributes" : contains
@@ -60,4 +69,5 @@ erDiagram
     "tf_module_attributes" }|--|| "tf_resource_attributes" : related_resource_type_attribute_id
     "taxonomies" ||--|{ "tf_resource_types" : has
     "tf_provider" ||--|{ "tf_resource_types" : has
+    "dependecies" ||--|{ "taxonomies" : has
 ```
