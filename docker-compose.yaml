@@ -23,6 +23,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${TR_DB_PASSWORD:-}
       POSTGRES_DB: ${TR_DB_NAME:-cc_terrarium}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+      interval: 3s
+      timeout: 1s
+      retries: 3
     volumes:
       - ./data:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data/
@@ -53,7 +58,8 @@ services:
     ports:
       - ${TR_SERVER_HTTP_PORT:-3000}:3000
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   farm-harvester:
     image: cldcvr/terrarium-farm-harvester
@@ -71,6 +77,7 @@ services:
         target: /root/.netrc
     environment:
       # DB config
+      TR_DB_TYPE: ${TR_DB_TYPE:-postgres}
       TR_DB_HOST: ${TR_DB_HOST:-postgres}
       TR_DB_USER: ${TR_DB_USER:-}
       TR_DB_PORT: ${TR_DB_PORT:-}
@@ -81,7 +88,8 @@ services:
     profiles:
       - tooling
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   terrarium-unit-test:
     image: cldcvr/terrarium-unit-test
