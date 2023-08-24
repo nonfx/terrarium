@@ -173,6 +173,10 @@ ifeq ($(FARM_MODULES_DIR),)
 FARM_MODULES_DIR := $(FARM_DIR)/modules
 endif
 
+ifeq ($(FARM_DEPENDENCY_DIR),)
+FARM_DEPENDENCY_DIR := $(FARM_DIR)/dependencies/
+endif
+
 %/.terraform: %/*.tf
 	@echo "running terraform init at $*"
 	@cd $* && terraform version && terraform init || (terraform providers && exit 1)
@@ -186,13 +190,15 @@ endif
 .PHONY: farm-clean
 farm-clean:  ## Delete .terraform folder and the lock file
 	rm -rf $(FARM_MODULES_DIR)/.terraform
+	rm -rf $(FARM_DEPENDENCY_DIR)/.terraform
 	rm -f $(FARM_MODULES_DIR)/.terraform.lock.hcl
 
 .PHONY: farm-init
 farm-init: $(FARM_MODULES_DIR)/.terraform  ## Run terraform init on the farm directory
+farm-init: $(FARM_DEPENDENCY_DIR)/.terraform
 
 .PHONY: farm-harvest
-farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  ## Run all harvest commands on the farm directory
+farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  farm-dependency-harvest## Run all harvest commands on the farm directory
 
 .PHONY: farm-resource-harvest
 farm-resource-harvest: $(FARM_MODULES_DIR)/.terraform/providers/schema.json  ## Harvest terraform provider resources from the farm directory
@@ -207,8 +213,8 @@ farm-mapping-harvest: $(FARM_MODULES_DIR)/.terraform
 	terrarium harvest mappings --dir $(FARM_MODULES_DIR)
 
 .PHONY: farm-dependency-harvest  ## Harvest dependency interface from the farm directory
-farm-dependency-harvest: $(FARM_MODULES_DIR)/.terraform
-	terrarium harvest dependency --dir $(FARM_MODULES_DIR)
+farm-dependency-harvest: $(FARM_DEPENDENCY_DIR)
+	terrarium harvest dependencies --dir $(FARM_DEPENDENCY_DIR)
 
 ######################################################
 # Farm releases pull
