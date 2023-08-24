@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/hashicorp/hcl/v2 v2.17.0
-	github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec
+	github.com/hinshun/vt10x v0.0.0-20220301184237-5011da428d02
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rotisserie/eris v0.5.4
 	github.com/sirupsen/logrus v1.9.3
