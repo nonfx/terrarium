@@ -74,18 +74,19 @@ func fmtAttrMeta(resType string, resName string, resAttr string, resFile string,
 func createMappingsForResources(g db.DB, parent *tfconfig.Module, resources map[string]*tfconfig.Resource, created *[]*db.TFResourceAttributesMapping, resourceTypeByNameCache map[string]*db.TFResourceType) (resourceCount int, err error) {
 	for dstResName, dstRes := range resources {
 		log.Infof("Processing resource declaration '%s'...", dstResName)
-		resourceMallingCount := 0
+		resourceMappingCount := 0
 		for dstResInputName, inputValueReferences := range dstRes.References {
 			for _, item := range inputValueReferences {
 				mapping, err := createMappingRecord(g, parent, dstRes, dstResInputName, item, resourceTypeByNameCache)
 				if err != nil {
 					return 0, err
+				} else if mapping != nil {
+					*created = append(*created, mapping)
+					resourceMappingCount += 1
 				}
-				*created = append(*created, mapping)
 			}
-			resourceMallingCount += len(inputValueReferences)
 		}
-		log.Infof("Created %d mappings for resource declaration '%s'", resourceMallingCount, dstResName)
+		log.Infof("Created %d mappings for resource declaration '%s'", resourceMappingCount, dstResName)
 	}
 	return len(resources), nil
 }
