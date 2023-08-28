@@ -1,0 +1,37 @@
+on:
+  release:
+    types: [created]
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64, linux/arm64, windows/amd64, darwin/amd64, darwin/arm64
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set env vars
+      run: |
+        {
+          echo "BUILD_DATE=$(date -u +%Y%m%d)"
+        } >> ${GITHUB_ENV}
+    - uses: wangyoucao577/go-release-action@v1.40
+      with:
+        github_token: ${{ secrets.GH_RELEASE_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "1.20"
+        project_path: "./src/cli/terrarium"
+        binary_name: "terrarium"
+        ldflags: "-s -w -X 'github.com/cldcvr/terrarium/src/cli/internal/build.Version=${{ github.ref_name }}' -X 'github.com/cldcvr/terrarium/src/cli/internal/build.Date=${{ env.BUILD_DATE }}'"
+        overwrite: true

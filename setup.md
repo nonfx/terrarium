@@ -42,8 +42,10 @@ CLI connects with PostgreSQL Database to store the persistent data.
       go install github.com/cldcvr/terrarium/src/cli/terrarium@latest
       ```
 
-    - Download pre-compiled binary from GitHub Release (coming soon)
+    - Download pre-compiled binary from GitHub Release
 
+      There are downloadable assets associated with each CLI release in Github. These can be downloaded directly from [the Terrarium Github release page](https://github.com/cldcvr/terrarium/releases)
+<tr/>
 2. Seed & Run Database
 
    ```sh
