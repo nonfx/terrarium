@@ -47,7 +47,7 @@ func GetCmd() *cobra.Command {
 func cmdRunE(cmd *cobra.Command, _ []string) error {
 	g, err := config.DBConnect()
 	if err != nil {
-		panic(err)
+		return eris.Wrapf(err, "error connecting to the database")
 	}
 
 	if flagModuleListFile == "" {

@@ -29,7 +29,7 @@ var cmd = &cobra.Command{
 }
 
 func init() {
-	cmd.Flags().StringVarP(&depIfaceDirectoryFlag, "dir", "d", "", "path to dependency directory")
+	cmd.Flags().StringVarP(&depIfaceDirectoryFlag, "dir", "d", ".", "path to dependency directory")
 	cmd.RunE = cmdRunE
 }
 

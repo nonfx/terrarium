@@ -102,3 +102,13 @@ services:
       - ./coverage:/usr/src/app/coverage
     profiles:
       - tooling
+    environment:
+      # DB config
+      TR_DB_HOST: ${TR_DB_HOST:-postgres}
+      TR_DB_USER: ${TR_DB_USER:-}
+      TR_DB_PORT: ${TR_DB_PORT:-}
+      TR_DB_SSL_MODE: ${TR_DB_SSL_MODE:-}
+      TR_DB_PASSWORD: ${TR_DB_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy

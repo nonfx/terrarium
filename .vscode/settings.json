@@ -6,7 +6,7 @@
   "go.testTimeout": "600s",
   "go.testEnvFile": "${workspaceFolder}/.env",
   "go.testTags": "dbtest,mock",
-  // "go.buildTags": "dbtest", // uncomment this only while working on unit-test
+  // "go.buildTags": "dbtest,mock", // uncomment this only while working on unit-test
   "go.testFlags": [
     "-v",
     "-count=1"

@@ -6,10 +6,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/cldcvr/terrarium/src/pkg/commander"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/rotisserie/eris"
 	"github.com/spf13/viper"
 )
 
@@ -51,12 +53,19 @@ func (tr *terraformRunner) RunTerraformProviders(dir string) error {
 	return tr.runTerraformCommandWithDefaultEnv(dir, []string{"providers"}, nil)
 }
 
-func (tr *terraformRunner) RunTerraformProvidersSchema(dir string, outFilePath string) error {
+func (tr *terraformRunner) RunTerraformProvidersSchema(tfDir string, outFilePath string) error {
+	fileDir := path.Dir(outFilePath)
+	err := os.MkdirAll(fileDir, os.ModePerm)
+	if err != nil {
+		return eris.Wrapf(err, "failed to create directory path '%s'", fileDir)
+	}
+
 	out, err := os.Create(outFilePath)
 	if err != nil {
-		return fmt.Errorf("could not open output file '%s': %w", outFilePath, err)
+		return eris.Wrapf(err, "could not create file '%s'", outFilePath)
 	}
-	return tr.runTerraformCommandWithDefaultEnv(dir, []string{"providers", "schema", "-json"}, out)
+
+	return tr.runTerraformCommandWithDefaultEnv(tfDir, []string{"providers", "schema", "-json"}, out)
 }
 
 func (tr *terraformRunner) runTerraformCommandWithDefaultEnv(dir string, args []string, outWriter io.Writer) error {
@@ -75,7 +84,7 @@ func (tr *terraformRunner) runTerraformCommand(dir string, args []string, env []
 	cmd.Stderr = os.Stderr
 	log.Printf("[%s] %s", strings.Join(env, ", "), cmd.String())
 	if err := commander.GetCommander().Run(cmd); err != nil {
-		return fmt.Errorf("command '%v' finished with error: %v", cmd, err)
+		return eris.Wrapf(err, "command '%v' finished with error", cmd)
 	}
 	return nil
 }

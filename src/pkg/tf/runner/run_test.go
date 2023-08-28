@@ -11,16 +11,23 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/pkg/commander"
+	"github.com/rotisserie/eris"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockExec struct {
-	asserts func(*exec.Cmd)
+	asserts    func(*exec.Cmd)
+	assertsErr func(*exec.Cmd) error
 }
 
 func (m *mockExec) Run(cmd *exec.Cmd) error {
+	if m.assertsErr != nil {
+		return m.assertsErr(cmd)
+	}
 	if m.asserts != nil {
 		m.asserts(cmd)
+		return nil
 	}
 	return nil
 }
@@ -117,10 +124,14 @@ func Test_terraformRunner_RunTerraformProviders(t *testing.T) {
 }
 
 func Test_terraformRunner_RunTerraformProvidersSchema(t *testing.T) {
-	mockOut, err := os.CreateTemp("", "*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	tmpDir, err := os.MkdirTemp("", "*")
+	dirInTmp := path.Join(tmpDir, "a_dir")
+	fileInTmp := path.Join(dirInTmp, "a_file.json")
+	require.NoError(t, err)
+	require.NoError(t, os.Mkdir(dirInTmp, os.ModePerm))
+	_, err = os.Create(fileInTmp)
+	require.NoError(t, err)
+
 	type args struct {
 		dir         string
 		outFilePath string
@@ -131,10 +142,25 @@ func Test_terraformRunner_RunTerraformProvidersSchema(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "fail mkdir",
+			args: args{
+				outFilePath: path.Join(fileInTmp, "file_in_file.file"),
+			},
+			wantErr: true,
+		},
+		{
 			name: "bad out-file",
 			args: args{
 				dir:         "Berkshire",
-				outFilePath: path.Join(os.TempDir(), "ae66e499-9185-4639-a02a-79f870e1dce9", "d4285cd7-915f-4aa8-a193-9e6db7a033f0"),
+				outFilePath: dirInTmp, // dir instead of file
+			},
+			wantErr: true,
+		},
+		{
+			name: "command error",
+			args: args{
+				dir:         "want-cmd-error",
+				outFilePath: fileInTmp,
 			},
 			wantErr: true,
 		},
@@ -142,7 +168,7 @@ func Test_terraformRunner_RunTerraformProvidersSchema(t *testing.T) {
 			name: "providers schema",
 			args: args{
 				dir:         "Lanka",
-				outFilePath: mockOut.Name(),
+				outFilePath: fileInTmp,
 			},
 			wantErr: false,
 		},
@@ -150,10 +176,15 @@ func Test_terraformRunner_RunTerraformProvidersSchema(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			commander.SetCommander(&mockExec{
-				asserts: func(cmd *exec.Cmd) {
+				assertsErr: func(cmd *exec.Cmd) error {
+					if tt.args.dir == "want-cmd-error" {
+						return eris.New("mocked error")
+					}
+
 					assert.True(t, strings.HasSuffix(cmd.String(), "terraform providers schema -json"))
 					assert.Equal(t, tt.args.outFilePath, cmd.Stdout.(*os.File).Name())
 					assert.Equal(t, tt.args.dir, cmd.Dir)
+					return nil
 				},
 			})
 			tr := NewTerraformRunner()

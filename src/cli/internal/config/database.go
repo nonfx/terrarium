@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var mockdb = &mocks.DB{}
+var mockdb *mocks.DB
 
 // DBHost returns the database host
 func DBHost() string {
@@ -57,6 +57,9 @@ func DBConnect() (db.DB, error) {
 	var err error
 	switch DBType() {
 	case "mock":
+		if mockdb == nil {
+			return nil, eris.New("mocked err: connection failed")
+		}
 		return mockdb, nil
 	case "sqlite":
 		g, err = dbhelper.ConnectSQLite(DBDSN())

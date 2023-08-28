@@ -6,6 +6,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/rotisserie/eris"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,15 +20,15 @@ type FarmModuleRef struct {
 func (r FarmModuleRef) CreateTerraformFile() (dirPath string, filePath string, err error) {
 	dirPath, err = os.MkdirTemp("", fmt.Sprintf("tr_%s_*", r.Name))
 	if err != nil {
-		return "", "", fmt.Errorf("could not create output directory: %w", err)
+		return "", "", eris.Wrapf(err, "could not create output directory")
 	}
 	fp, err := os.Create(path.Join(dirPath, "main.tf"))
 	if err != nil {
-		return "", "", fmt.Errorf("could not open output file: %w", err)
+		return "", "", eris.Wrapf(err, "could not open output file")
 	}
 	defer fp.Close()
 	if _, err := fp.WriteString(r.ToTerraform()); err != nil {
-		return "", "", fmt.Errorf("could not write to output file '%s': %w", fp.Name(), err)
+		return "", "", eris.Wrapf(err, "could not write to output file '%s'", fp.Name())
 	}
 
 	filePath = fp.Name()
@@ -52,12 +53,12 @@ type FarmModuleList struct {
 func LoadFarmModules(listFilePath string) (FarmModuleList, error) {
 	moduleList, err := loadFarmModules(listFilePath)
 	if err != nil {
-		return moduleList, fmt.Errorf("failed to load farm module list file '%s': %w", listFilePath, err)
+		return moduleList, eris.Wrapf(err, "failed to load farm module list file '%s'", listFilePath)
 	} else if len(moduleList.Farm) < 1 {
-		return moduleList, fmt.Errorf("farm module list file '%s' is empty", listFilePath)
+		return moduleList, eris.Errorf("farm module list file '%s' is empty", listFilePath)
 	}
 	if err := moduleList.Validate(); err != nil {
-		return moduleList, fmt.Errorf("farm module list file '%s' has invalid items: %w", listFilePath, err)
+		return moduleList, eris.Wrapf(err, "farm module list file '%s' has invalid items", listFilePath)
 	}
 	return moduleList, nil
 }
@@ -79,18 +80,18 @@ func (l FarmModuleList) Validate() error {
 	uniqueExportNames := make(map[string]int, itemCount)
 	for i, item := range l.Farm {
 		if item.Name == "" {
-			return fmt.Errorf("module at index %d must have a unique name", i)
+			return eris.Errorf("module at index %d must have a unique name", i)
 		}
 		if item.Source == "" {
-			return fmt.Errorf("module '%s' must have a source", item.Name)
+			return eris.Errorf("module '%s' must have a source", item.Name)
 		}
 		if _, exists := uniqueExportNames[item.Name]; exists {
-			return fmt.Errorf("module '%s' at index %d has a duplicate name", item.Name, i)
+			return eris.Errorf("module '%s' at index %d has a duplicate name", item.Name, i)
 		}
 		uniqueExportNames[item.Name] = i
 		refKey := fmt.Sprintf("%s@%s", item.Source, item.Version)
 		if found, exists := uniqueModuleReferences[refKey]; exists {
-			return fmt.Errorf("module '%s' is duplicate of module '%s'", item.Name, found.Name)
+			return eris.Errorf("module '%s' is duplicate of module '%s'", item.Name, found.Name)
 		}
 		uniqueModuleReferences[refKey] = &item
 	}

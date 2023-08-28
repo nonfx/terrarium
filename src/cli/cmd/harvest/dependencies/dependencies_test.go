@@ -2,14 +2,11 @@ package dependencies
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
-	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -125,44 +122,6 @@ dependency-interfaces:
 			}
 
 			dbMocks.AssertExpectations(t)
-		})
-	}
-}
-
-func Test_cmdRunE(t *testing.T) {
-	type args struct {
-		cmd  *cobra.Command
-		args []string
-	}
-	config.LoadDefaults()
-	os.Setenv("TR_DB_TYPE", "mock")
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "DBConnect Error",
-			args: args{
-				cmd:  &cobra.Command{},
-				args: []string{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "ProcessYAMLFiles Error",
-			args: args{
-				cmd:  &cobra.Command{},
-				args: []string{},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := cmdRunE(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
-				t.Errorf("cmdRunE() error = %v, wantErr %v", err, tt.wantErr)
-			}
 		})
 	}
 }

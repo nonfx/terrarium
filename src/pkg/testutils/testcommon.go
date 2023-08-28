@@ -3,7 +3,6 @@ package testutils
 import (
 	"crypto/rand"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"os"
 	"time"
@@ -13,7 +12,7 @@ import (
 )
 
 func GetTempFileName(dir string, prefix string, suffix string) (string, error) {
-	tmpFile, err := ioutil.TempFile(dir, prefix)
+	tmpFile, err := os.CreateTemp(dir, prefix)
 	if err != nil {
 		return "", err
 	}

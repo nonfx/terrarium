@@ -16,6 +16,32 @@ func TestFarmModuleList_Validate(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "empty name",
+			list: FarmModuleList{
+				Farm: []FarmModuleRef{
+					{
+						Source:  "http://rowdy-watcher.info",
+						Version: "4.5.6",
+						Name:    "",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty source",
+			list: FarmModuleList{
+				Farm: []FarmModuleRef{
+					{
+						Source:  "",
+						Version: "1.2.3",
+						Name:    "solution",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "duplicate export name",
 			list: FarmModuleList{
 				Farm: []FarmModuleRef{
@@ -93,6 +119,16 @@ func TestFarmModuleRef_WriteFile(t *testing.T) {
 		wantErr      bool
 	}{
 		{
+			name: "invalid name",
+			m: FarmModuleRef{
+				Name:    "Home/",
+				Source:  "Carolina",
+				Version: "transmit",
+				Export:  true,
+			},
+			wantErr: true,
+		},
+		{
 			name: "valid reference",
 			m: FarmModuleRef{
 				Name:    "Home",
@@ -106,13 +142,12 @@ func TestFarmModuleRef_WriteFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotDirPath, gotFilePath, err := tt.m.CreateTerraformFile()
-			assert.NoError(t, err)
-			assert.NotEmpty(t, gotFilePath)
-			assert.True(t, strings.HasPrefix(gotFilePath, gotDirPath))
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.NotEmpty(t, gotFilePath)
+				assert.True(t, strings.HasPrefix(gotFilePath, gotDirPath))
 			}
 		})
 	}
@@ -128,6 +163,20 @@ func TestLoadFarmModules(t *testing.T) {
 			name: "empty list",
 			list: FarmModuleList{
 				Farm: []FarmModuleRef{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid list",
+			list: FarmModuleList{
+				Farm: []FarmModuleRef{
+					{
+						Name:    "",
+						Source:  "Automotive",
+						Version: "cross-media",
+						Export:  true,
+					},
+				},
 			},
 			wantErr: true,
 		},
