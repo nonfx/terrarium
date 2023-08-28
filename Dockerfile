@@ -39,7 +39,8 @@ RUN apk update && apk add make && rm -rf /var/cache/apk/*
 WORKDIR /app
 COPY --from=cli-build /go/bin/terrarium /bin/
 COPY Makefile ./
-ENV FARM_DIR=./farm
+ENV FARM_DIR=./farm \
+	TR_DB_RETRY_ATTEMPTS=20
 # workaround to use Makefile
 RUN mkdir -p ./src/pkg && \
 	mkdir -p ./src/cli
