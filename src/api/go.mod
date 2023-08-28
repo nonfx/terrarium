@@ -2,10 +2,8 @@ module github.com/cldcvr/terrarium/src/api
 
 go 1.20
 
-replace github.com/cldcvr/terrarium/src/pkg => ../pkg
-
 require (
-	github.com/cldcvr/terrarium/src/pkg v0.0.0-00010101000000-000000000000
+	github.com/cldcvr/terrarium/src/pkg v0.0.0-20230828104842-b967825be600
 	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/go-kit/kit v0.12.0
 	github.com/google/uuid v1.3.0
@@ -35,6 +33,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -58,5 +57,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230629202037-9506855d4529 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gorm.io/driver/postgres v1.5.2 // indirect
+	gorm.io/driver/sqlite v1.5.3 // indirect
 	gorm.io/gorm v1.25.2 // indirect
 )

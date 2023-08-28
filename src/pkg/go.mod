@@ -28,11 +28,13 @@ require (
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gopkg.in/square/go-jose.v2 v2.6.0
 	gorm.io/driver/postgres v1.5.2
+	gorm.io/driver/sqlite v1.5.3
 	gorm.io/gorm v1.25.2
 )
 
 require (
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 )
