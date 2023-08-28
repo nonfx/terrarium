@@ -1,7 +1,6 @@
 package confighelper
 
 import (
-	"os"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -31,10 +30,10 @@ func TestAll(t *testing.T) {
 		wantErr bool
 	}
 
-	os.Setenv("TEST_DB_PORT", "2222")
-	os.Setenv("TEST_DB_USER", "testuser")
-	os.Setenv("TEST_DB_TEST_VAR2", "false")
-	os.Setenv("TEST_DB_TEST_VAR3", "true")
+	t.Setenv("TEST_DB_PORT", "2222")
+	t.Setenv("TEST_DB_USER", "testuser")
+	t.Setenv("TEST_DB_TEST_VAR2", "false")
+	t.Setenv("TEST_DB_TEST_VAR3", "true")
 
 	t.Run("LoadDefaults", func(t *testing.T) {
 		for _, tt := range []testCase{

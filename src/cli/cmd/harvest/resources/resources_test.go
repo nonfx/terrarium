@@ -105,7 +105,7 @@ func Test_loadProvidersSchema(t *testing.T) {
 	}{
 		{
 			name: "success",
-			args: args{"./example_schema.json"},
+			args: args{"./testdata/example_schema.json"},
 			want: &schema.ProvidersSchema{
 				ProviderSchemas: map[string]schema.ProviderSchema{
 					"mock_provider": {
@@ -145,7 +145,7 @@ func Test_loadProvidersSchema(t *testing.T) {
 		},
 		{
 			name:    "fail unmarshal",
-			args:    args{"./invalid_schema.txt"},
+			args:    args{"./testdata/invalid_schema.txt"},
 			wantErr: true,
 		},
 	}

@@ -72,7 +72,7 @@ func ModuleSearchFilter(query string) FilterOption {
 
 	return func(g *gorm.DB) *gorm.DB {
 		q := "%" + query + "%"
-		return g.Where("source ILIKE ? OR module_name ILIKE ?", q, q)
+		return g.Where("source LIKE ? OR module_name LIKE ?", q, q)
 	}
 }
 

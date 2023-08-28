@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -91,6 +91,8 @@ type CLITest struct {
 type CLITestCase struct {
 	// Description of the test case
 	Name string
+	// Arguments to pass while executing the command for this test case
+	Args []string
 	// Whether to inject a token into the localstate before starting the test
 	TokenPresent    bool
 	UseInvalidToken bool
@@ -108,9 +110,11 @@ type CLITestCase struct {
 	// A function that will run before the command's Execute() method is called - a good place to call SetArgs
 	PreExecute func(ctx context.Context, t *testing.T, cmd *cobra.Command, cmdOpts CmdOpts)
 	// A function that will run to validate the output of the test
-	ValidateOutput      func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool
+	ValidateOutput      ValidateOutputFunc
 	ValidateAuditFields bool
 }
+
+type ValidateOutputFunc func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool
 
 func (clitest *CLITest) setupTest(t *testing.T) func(t *testing.T) {
 	var err error
@@ -225,6 +229,9 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 			} else {
 				cmd = clitest.CmdToTest
 			}
+
+			cmd.SetArgs(tt.Args)
+
 			if tt.PseudoTTY != nil {
 				cmd.SetOut(clitest.console.Tty())
 				cmd.SetErr(clitest.console.Tty())
@@ -235,6 +242,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 					tt.PseudoTTY(clitest.Ctx, t, clitest.console)
 				}()
 			} else {
+				clitest.outputBuffer.Reset()
 				cmd.SetOut(clitest.outputBuffer)
 				cmd.SetErr(clitest.outputBuffer)
 			}
@@ -244,12 +252,13 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 			if tt.PreExecute != nil {
 				tt.PreExecute(clitest.Ctx, t, cmd, clitest.cmdOptions)
 			}
-			cmd, err := cmd.ExecuteC()
+
+			err := cmd.Execute()
 			if (err == nil) == tt.WantErr {
-				t.Errorf("%s: error = %v, wantErr %v", tt.Name, err, tt.WantErr)
+				t.Errorf("%s: error = %+v, wantErr %+v", tt.Name, err, tt.WantErr)
 			} else {
 				if tt.WantErr {
-					assert.Contains(t, err.Error(), tt.ExpError)
+					assert.Contains(t, err.Error(), tt.ExpError, fmt.Sprintf("%+v", err))
 					assert.True(t, gock.IsDone(), "Not all gocks were called")
 				}
 
@@ -257,7 +266,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 					clitest.console.Tty().Close()
 					<-clitest.doneConsole
 				}
-				out, err := ioutil.ReadAll(clitest.outputBuffer)
+				out, err := io.ReadAll(clitest.outputBuffer)
 				if err != nil {
 					t.Errorf("%s: error occurred processing stdout: %s", tt.Name, err)
 				}
@@ -313,4 +322,24 @@ func addAutoTests(clitest *CLITest, tcIn []CLITestCase) (tcOut []CLITestCase) {
 		})
 	}
 	return
+}
+
+// ValidateOutputContains helper to assert if the output contains the given string
+func ValidateOutputContains(expectedString string) ValidateOutputFunc {
+	return validateOutputAsserter(expectedString, false)
+}
+
+// ValidateOutputContains helper to assert if the output is exactly same as the given string
+func ValidateOutputMatch(expectedString string) ValidateOutputFunc {
+	return validateOutputAsserter(expectedString, true)
+}
+
+func validateOutputAsserter(expectedString string, exactMatch bool) ValidateOutputFunc {
+	return func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool {
+		if exactMatch {
+			return assert.Equal(t, expectedString, string(output))
+		}
+
+		return assert.Contains(t, string(output), expectedString)
+	}
 }

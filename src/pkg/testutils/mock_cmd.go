@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	MockToken          = "this_is_cc_token"
+	MockToken        = "this_is_cc_token"
 	MockRefreshToken = "this_is_refresh_token"
 	ssoToken         = "this_is_sso_token"
 )

@@ -47,11 +47,11 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	if flagModuleListFile == "" {
-		cmd.Printf("Loading modules from provided directory '%s'...\n", flagSchemaFile)
+		cmd.Printf("Loading modules from the provider schema JSON file at '%s'...\n", flagSchemaFile)
 		return loadFrom(g, flagSchemaFile)
 	}
 
-	cmd.Printf("Loading modules from provided list file '%s'...\n", flagModuleListFile)
+	cmd.Printf("Loading modules from modules list YAML file '%s'...\n", flagModuleListFile)
 	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err

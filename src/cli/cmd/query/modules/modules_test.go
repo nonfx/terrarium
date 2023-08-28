@@ -1,9 +1,11 @@
+//go:build mock
+// +build mock
+
 package modules
 
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
@@ -18,13 +20,11 @@ import (
 
 func Test_CmdModules(t *testing.T) {
 	config.LoadDefaults()
-	os.Setenv("TR_DB_TYPE", "mock")
 	clitest := clitesting.CLITest{
 		CmdToTest: GetCmd(),
 	}
 	mockUuid1 := uuid.New()
-	configdb, _ := config.DBConnect()
-	mockDB := configdb.(*mocks.DB)
+	mockDB := &mocks.DB{}
 	mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
 		Return(nil, fmt.Errorf("mock error")).Once()
 	mockDB.On("QueryTFModules", mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption"), mock.AnythingOfType("db.FilterOption")).
@@ -38,6 +38,7 @@ func Test_CmdModules(t *testing.T) {
 				Namespace:   "farm_repo",
 			},
 		}, nil)
+	config.SetDBMocks(mockDB)
 	tests := []clitesting.CLITestCase{
 		{
 			Name:    "db failure",
