@@ -51,6 +51,21 @@ func DBDSN() string {
 	return confighelper.MustGetString("db.dsn")
 }
 
+// DBRetryAttempts returns the max number of re-ties on DB connection request failure
+func DBRetryAttempts() int {
+	return confighelper.MustGetInt("db.retry_attempts")
+}
+
+// DBRetryInterval returns interval to wait for before retrying. (in seconds)
+func DBRetryInterval() int {
+	return confighelper.MustGetInt("db.retry_interval_sec")
+}
+
+// DBRetryInterval returns additional random time (in seconds) between 0 and this, to be added to the wait time.
+func DBRetryJitter() int {
+	return confighelper.MustGetInt("db.retry_jitter_sec")
+}
+
 // DBConnect establishes a connection to the database using the connection parameters from the environment.
 func DBConnect() (db.DB, error) {
 	var g *gorm.DB
@@ -71,6 +86,7 @@ func DBConnect() (db.DB, error) {
 			DBName(),
 			DBPort(),
 			DBSSLMode(),
+			dbhelper.WithRetries(DBRetryAttempts(), DBRetryInterval(), DBRetryJitter()),
 		)
 		if err != nil {
 			return nil, eris.Wrap(err, "could not establish a connection to the database")

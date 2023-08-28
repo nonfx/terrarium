@@ -14,18 +14,22 @@
 # The following is the default configuration:
 
 db:
-  host: "localhost"
-  user: "postgres"
-  # password: # no default, panic if not set.
-  name: "cc_terrarium"
-  port: 5432
-  ssl_mode: false
-  type: postgres
+  host: "localhost"      # db host name
+  user: "postgres"       # db username
+  # password:            # db password no default, panic if not set.
+  name: "cc_terrarium"   # database name
+  port: 5432             # db port
+  ssl_mode: false        # enable SSL mode
+  type: postgres         # type of db - postgres | sqlite
+  dsn: embedded.db       # SQLite Data Source Name
+  retry_attempts: 20     # max number of re-tries on connection request failure
+  retry_interval_sec: 2  # time to wait for (in seconds) before each retry
+  retry_jitter_sec: 2    # additional random time (in seconds) between 0 and this, to be added to the wait time
 
 log:
-  format: "JSON"
-  level: "info"
-  pretty_print: false
+  format: "JSON"        # log format - text | json
+  level: "info"         # maximum log level - debug | info | warn | error | fatal
+  pretty_print: false   # format the text log using colors and indentation etc.
 
 server:
   http_port: 3000
