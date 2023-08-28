@@ -19,15 +19,22 @@ type TFModule struct {
 	ModuleName  string
 	Source      string  `gorm:"uniqueIndex:module_unique"`
 	Version     Version `gorm:"uniqueIndex:module_unique"`
+	Namespace   string  `gorm:"default:'farm_repo'"`
 	Description string
 	TaxonomyID  uuid.UUID `gorm:"default:null"`
-	Namespace   string    `gorm:"default:farm_repo"`
 
 	Taxonomy   *Taxonomy           `gorm:"foreignKey:TaxonomyID"`
 	Attributes []TFModuleAttribute `gorm:"foreignKey:ModuleID"` // Attributes of the module
 }
 
 type TFModules []TFModule
+
+func (m *TFModule) GetCondition() entity {
+	return &TFModule{
+		Source:  m.Source,
+		Version: m.Version,
+	}
+}
 
 func (m TFModule) GetInputAttributesWithMappings() (input TFModuleAttributes) {
 	input = make(TFModuleAttributes, 0, len(m.Attributes))

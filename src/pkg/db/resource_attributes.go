@@ -1,8 +1,6 @@
 package db
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
 type TFResourceAttribute struct {
 	Model
@@ -28,6 +26,14 @@ func (a TFResourceAttribute) GetConnectedModuleOutputs() TFModuleAttributes {
 		resp = append(resp, om.OutputAttribute.RelatedModuleAttrs...)
 	}
 	return resp
+}
+
+func (a *TFResourceAttribute) GetCondition() entity {
+	return &TFResourceAttribute{
+		ResourceTypeID: a.ResourceTypeID,
+		ProviderID:     a.ProviderID,
+		AttributePath:  a.AttributePath,
+	}
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object

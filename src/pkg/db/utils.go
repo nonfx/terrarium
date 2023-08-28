@@ -6,10 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-//go:generate mockery --all
+//go:generate mockery --name DB
 
 type DB interface {
 	CreateTFProvider(e *TFProvider) (uuid.UUID, error)
@@ -42,35 +41,51 @@ type FilterOption func(*gorm.DB) *gorm.DB
 
 // Model a basic GoLang struct which includes the following fields: ID, CreatedAt, UpdatedAt, DeletedAt
 type Model struct {
-	ID        uuid.UUID `gorm:"type:uuid;primarykey;default:uuid_generate_v4()"`
+	ID        uuid.UUID `gorm:"type:uuid;primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+func (m *Model) GenerateID() {
+	m.ID = uuid.New()
 }
 
 func (m *Model) GetID() uuid.UUID {
 	return m.ID
 }
 
+func (m *Model) SetID(id uuid.UUID) {
+	m.ID = id
+}
+
 type entity interface {
 	GetID() uuid.UUID
+	SetID(id uuid.UUID)
+	GenerateID()
+	GetCondition() entity
 }
 
 func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID, error) {
-	c := clause.OnConflict{
-		Columns:   []clause.Column{},
-		UpdateAll: true,
-	}
-
-	for _, f := range uniqueFields {
-		c.Columns = append(c.Columns, clause.Column{Name: f})
-	}
-
-	err := g.Clauses(c).Create(e).Error
-	if err != nil {
+	res := e.GetCondition()
+	err := g.First(res, e.GetCondition()).Error
+	if err != nil && !IsNotFoundError(err) {
 		return uuid.Nil, err
 	}
 
+	if res.GetID() != uuid.Nil {
+		// update
+		e.SetID(res.GetID())
+		err = g.Save(e).Error
+	} else {
+		// create
+		e.GenerateID()
+		err = g.Create(e).Error
+	}
+
+	if err != nil {
+		return uuid.Nil, err
+	}
 	return e.GetID(), nil
 }
 

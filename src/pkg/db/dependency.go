@@ -18,3 +18,14 @@ type Dependency struct {
 
 	Taxonomy *Taxonomy `gorm:"foreignKey:TaxonomyID"`
 }
+
+// insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
+func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
+	return createOrUpdate(db.g(), e, []string{"interface_id"})
+}
+
+func (dep *Dependency) GetCondition() entity {
+	return &Dependency{
+		InterfaceID: dep.InterfaceID,
+	}
+}

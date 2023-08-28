@@ -1,8 +1,6 @@
 package db
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
 type TFResourceType struct {
 	Model
@@ -13,6 +11,13 @@ type TFResourceType struct {
 
 	Provider TFProvider `gorm:"foreignKey:ProviderID"`
 	Taxonomy *Taxonomy  `gorm:"foreignKey:TaxonomyID"`
+}
+
+func (rt *TFResourceType) GetCondition() entity {
+	return &TFResourceType{
+		ProviderID:   rt.ProviderID,
+		ResourceType: rt.ResourceType,
+	}
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object

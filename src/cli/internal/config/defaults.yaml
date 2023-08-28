@@ -21,6 +21,7 @@ db:
   port: 5432
   ssl_mode: false
   type: postgres
+  dsn: embedded.db
 
 log:
   format: "text"

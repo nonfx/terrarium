@@ -417,12 +417,13 @@ func (_m *DB) QueryTFModules(filterOps ...db.FilterOption) (db.TFModules, error)
 	return r0, r1
 }
 
-// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewDB(t interface {
+type mockConstructorTestingTNewDB interface {
 	mock.TestingT
 	Cleanup(func())
-}) *DB {
+}
+
+// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewDB(t mockConstructorTestingTNewDB) *DB {
 	mock := &DB{}
 	mock.Mock.Test(t)
 
