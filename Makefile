@@ -54,8 +54,8 @@ docker-harvest: docker-tools-build start-db  ## Run harvest scripts on the Farm 
 docker-seed: docker-harvest  ## DEPRECATED. alias to docker-harvest target
 	@echo "\nNOTE: This target is deprecated. Use make docker-harvest instead"
 
-docker-api-test: docker-tools-build ## Run API unit tests in a containerized environment
-	docker compose run --rm terrarium-unit-test
+docker-api-test: ## Run API unit tests in a containerized environment
+	docker compose run --build --rm terrarium-unit-test
 
 proto:
 	make proto -f scripts/protoc.mak

@@ -22,13 +22,29 @@ API config is set in the `.env` file in the current folder. While the CLI config
 
 ## CLI Installation & Setup
 
+CLI connects with PostgreSQL Database to store the persistent data.
+
 1. Install CLI
 
-   ```sh
-   make install
-   ```
+    There are multiple ways to install the terrarium CLI:
 
-2. Pull Latest Farm Data and Run Containers
+    - Clone the repo and compile:
+
+      ```sh
+      git clone git@github.com:cldcvr/terrarium.git
+      cd terrarium
+      make install
+      ```
+
+    - Install using go package manager
+
+      ```sh
+      go install github.com/cldcvr/terrarium/src/cli/terrarium@latest
+      ```
+
+    - Download pre-compiled binary from GitHub Release (coming soon)
+
+2. Seed & Run Database
 
    ```sh
    echo "TR_DB_PASSWORD=<choose a password>" > .env

@@ -8,8 +8,13 @@ COPY src/pkg/go.mod src/pkg/go.sum ./src/pkg/
 COPY src/cli/go.mod src/cli/go.sum ./src/cli/
 ENV GOPRIVATE=github.com/cldcvr
 RUN --mount=type=cache,target=/go/pkg/mod/ \
+	cd src/cli && go mod edit -replace github.com/cldcvr/terrarium/src/pkg=../pkg && cd - && \
+	cd src/api && go mod edit -replace github.com/cldcvr/terrarium/src/pkg=../pkg && cd - && \
 	go mod download && go work sync
 COPY src ./src
+RUN \
+	cd src/cli && go mod edit -replace github.com/cldcvr/terrarium/src/pkg=../pkg && cd - && \
+	cd src/api && go mod edit -replace github.com/cldcvr/terrarium/src/pkg=../pkg && cd -
 
 FROM go-base AS api-build
 WORKDIR /usr/src/app
@@ -40,8 +45,13 @@ RUN mkdir -p ./src/pkg && \
 	mkdir -p ./src/cli
 ENTRYPOINT [ "make", "farm-harvest" ]
 
-FROM golang:1.20 AS unit-test
+FROM go-base AS unit-test
 WORKDIR /usr/src/app
-COPY --from=go-base /go /go
-COPY . .
+# following copies the already available go modules from cache
+# to the disk. so that it's available on runtime, and is not re-downloaded.
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+	cp -r /go/pkg/mod /go/pkg/mod.bak
+RUN rm -rf /go/pkg/mod && mv /go/pkg/mod.bak /go/pkg/mod
+COPY Makefile ./
+COPY examples ./examples
 ENTRYPOINT [ "make", "test" ]
