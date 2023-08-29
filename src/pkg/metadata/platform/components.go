@@ -45,7 +45,7 @@ func (cArr *Components) Append(c Component) *Component {
 }
 
 func (cArr *Components) Parse(platformModule *tfconfig.Module) {
-	for k := range platformModule.ModuleCalls {
+	for k, mc := range platformModule.ModuleCalls {
 		if !strings.HasPrefix(k, ComponentPrefix) {
 			continue
 		}
@@ -54,6 +54,19 @@ func (cArr *Components) Parse(platformModule *tfconfig.Module) {
 		c := cArr.GetByID(id)
 		if c == nil {
 			c = cArr.Append(Component{ID: id})
+		}
+		docs, _, err := parseBlockDocComment(mc.Module, mc.Pos)
+		if err != nil {
+			return
+		}
+
+		c.Title = tfValueToTitle(id, nil) // default to component name in title format
+		if docs, ok := docs["component"]; ok {
+			docTitle := docs[0]
+			if docTitle != "" {
+				c.Title = docTitle
+			}
+			c.Description = docs[1]
 		}
 
 		c.fetchInputs(platformModule)
@@ -154,21 +167,32 @@ func (c *Component) fetchOutputs(m *tfconfig.Module) {
 		}
 
 		outputKey := strings.TrimPrefix(k, prefix)
-		if c.Outputs.Properties[outputKey] == nil {
-			c.Outputs.Properties[outputKey] = &jsonschema.Node{
-				Description: v.Description,
-			}
+		node, ok := c.Outputs.Properties[outputKey]
+		if !ok {
+			node = &jsonschema.Node{}
+			c.Outputs.Properties[outputKey] = node
 		}
+		node.Title = tfValueToTitle(outputKey, &prefix)
+		node.Description = v.Description
 	}
 }
 
+// tfValueToTitle removes the common component prefix and converts snake-case "default_db_name" to "Default Db Name"
+func tfValueToTitle(value string, prefix *string) string {
+	if prefix == nil {
+		c := ComponentPrefix
+		prefix = &c
+	}
+	return cases.Title(language.Und, cases.NoLower).String(strings.ReplaceAll(strings.TrimPrefix(value, *prefix), "_", " "))
+}
+
 func extractSchema(existingSchema *jsonschema.Node, value cty.Value, fieldName string, fieldDoc map[string][2]string) {
+	existingSchema.Title = tfValueToTitle(fieldName, nil) // default to field name in title format
 	if docString, ok := fieldDoc[fieldName]; ok {
-		title := docString[0]
-		if title == "" {
-			title = cases.Title(language.Und, cases.NoLower).String(fieldName) // use the field name in title format instead
+		docTitle := docString[0]
+		if docTitle != "" {
+			existingSchema.Title = docTitle
 		}
-		existingSchema.Title = title
 		existingSchema.Description = docString[1]
 	}
 

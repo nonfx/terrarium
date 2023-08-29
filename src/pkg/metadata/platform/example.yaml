@@ -29,29 +29,29 @@ components:
           description: The password for accessing the PostgreSQL database.
 
 graph:
-    - id: output.vpc_id
-      requirements:
-        - module.core_vpc
-    - id: output.data_az
-      requirements:
-        - data.aws_availability_zones.available
-    - id: output.tr_component_postgres_host
-      requirements:
-        - module.tr_component_postgres
-    - id: output.tr_component_postgres_port
-      requirements:
-        - module.tr_component_postgres
-    - id: module.tr_component_postgres
-      requirements:
-        - module.postgres_security_group
-        - module.core_vpc
-    - id: module.postgres_security_group
-      requirements:
-        - module.core_vpc
-    - id: module.core_vpc
-      requirements:
-        - resource.random_string.random
-    - id: resource.random_string.random
-      requirements: []
-    - id: data.aws_availability_zones.available
-      requirements: []
+  - id: output.vpc_id
+    requirements:
+      - module.core_vpc
+  - id: output.data_az
+    requirements:
+      - data.aws_availability_zones.available
+  - id: output.tr_component_postgres_host
+    requirements:
+      - module.tr_component_postgres
+  - id: output.tr_component_postgres_port
+    requirements:
+      - module.tr_component_postgres
+  - id: module.tr_component_postgres
+    requirements:
+      - module.postgres_security_group
+      - module.core_vpc
+  - id: module.postgres_security_group
+    requirements:
+      - module.core_vpc
+  - id: module.core_vpc
+    requirements:
+      - resource.random_string.random
+  - id: resource.random_string.random
+    requirements: []
+  - id: data.aws_availability_zones.available
+    requirements: []
