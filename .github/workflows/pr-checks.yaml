@@ -83,3 +83,15 @@ jobs:
           path: coverage
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+  check-headers:
+    name: Check Copyright Headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Copywrite
+        uses: hashicorp/setup-copywrite@v1.1.2
+
+      - name: Check Header Compliance
+        run: copywrite headers --plan

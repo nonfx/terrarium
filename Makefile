@@ -214,3 +214,4 @@ help:
 
 -include scripts/mocks.mak
 -include scripts/protoc.mak
+-include scripts/copyright.mak

@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 id: voting_be
 name: Voting Backend
 env_prefix: VO

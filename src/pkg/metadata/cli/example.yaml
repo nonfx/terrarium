@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 farm:
   - name: vpc # REQUIRED: unique user-defined module name (will be used as name for exported modules)
     source: "terraform-aws-modules/vpc/aws" # REQUIRED: Terraform module source

@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 name: $(Build.DefinitionName)_${{ replace(replace(variables['Build.SourceBranch'],'refs/heads/',''),'/','_') }}_$(Date:yyyyMMdd)$(Rev:.r)
 
 trigger: none
