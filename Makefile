@@ -57,9 +57,6 @@ docker-seed: docker-harvest  ## DEPRECATED. alias to docker-harvest target
 docker-api-test: ## Run API unit tests in a containerized environment
 	docker compose run --build --rm terrarium-unit-test
 
-proto:
-	make proto -f scripts/protoc.mak
-
 ######################################################
 # Go Targets
 # Needs Go installed on the system
@@ -214,3 +211,6 @@ farm-release-pull:
 .PHONY: help
 help:
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+-include scripts/mocks.mak
+-include scripts/protoc.mak
