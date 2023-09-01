@@ -35,17 +35,13 @@ func GetCmd() *cobra.Command {
 }
 
 func addFlags() {
+	modulesCmd.ResetFlags()
 
 	modulesCmd.Flags().StringVarP(&flagSearchText, "searchText", "s", "", "optional search text")
-
 	modulesCmd.Flags().BoolVarP(&flagPopulateMappings, "populateMappings", "p", false, "A boolean flag to populate mappings")
-
 	modulesCmd.Flags().Int32Var(&flagPageSize, "pageSize", 100, "page size flag")
-
 	modulesCmd.Flags().Int32Var(&flagPageIndex, "pageIndex", 0, "page index flag")
-
 	modulesCmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
-
 	modulesCmd.Flags().StringSliceVarP(&flagNamespaces, "namespaces", "n", []string{}, "namespaces filter - farm repo will always be included")
 }
 

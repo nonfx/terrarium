@@ -21,7 +21,7 @@ import (
 func Test_CmdModules(t *testing.T) {
 	config.LoadDefaults()
 	clitest := clitesting.CLITest{
-		CmdToTest: GetCmd(),
+		CmdToTest: GetCmd,
 	}
 	mockUuid1 := uuid.New()
 	mockDB := &mocks.DB{}

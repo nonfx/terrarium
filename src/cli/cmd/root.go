@@ -30,7 +30,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(harvest.GetCmd())
 	rootCmd.AddCommand(platform.GetCmd())
-	rootCmd.AddCommand(generate.GetCmd())
+	rootCmd.AddCommand(generate.NewCmd())
 	rootCmd.AddCommand(version.GetCmd())
 	rootCmd.AddCommand(query.GetCmd())
 	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")

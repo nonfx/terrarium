@@ -12,25 +12,25 @@ import (
 )
 
 var (
+	cmd *cobra.Command
+
 	flagPlatformDir string
 	flagOutDir      string
 	flagApps        []string
 )
 
-var cmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Terrarium generate terraform code using platform and app dependencies",
-	Long:  "Terrarium generate command composes the working terraform code using the given platform template and a set of dependencies",
-}
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:   "generate",
+		Short: "Terrarium generate terraform code using platform and app dependencies",
+		Long:  "Terrarium generate command composes the working terraform code using the given platform template and a set of dependencies",
+		RunE:  cmdRunE,
+	}
 
-func init() {
-	cmd.RunE = cmdRunE
 	cmd.Flags().StringVarP(&flagPlatformDir, "platform-dir", "p", ".", "path to the directory containing the Terrarium platform template")
 	cmd.Flags().StringArrayVarP(&flagApps, "app", "a", nil, "path to the app directory or the app yaml file. can be more then one")
 	cmd.Flags().StringVarP(&flagOutDir, "output-dir", "o", "./.terrarium", "path to the directory where you want to generate the output")
-}
 
-func GetCmd() *cobra.Command {
 	return cmd
 }
 
