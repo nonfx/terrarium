@@ -3,6 +3,7 @@ package terrariumsrv
 import (
 	"context"
 
+	"github.com/cldcvr/terrarium/src/api/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/rotisserie/eris"
@@ -21,7 +22,7 @@ func (s Service) ListModules(ctx context.Context, req *terrariumpb.ListModulesRe
 		return nil, eris.Wrapf(ErrInvalidRequest, "got page size: %d", req.Page.Size)
 	}
 
-	req.Namespaces = append(req.Namespaces, "farm_repo")
+	req.Namespaces = append(req.Namespaces, config.FarmDefault())
 	result, err := s.db.QueryTFModules(
 		db.ModuleSearchFilter(req.Search),
 		db.PopulateModuleMappingsFilter(req.PopulateMappings),

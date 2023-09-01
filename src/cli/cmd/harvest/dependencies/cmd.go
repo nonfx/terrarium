@@ -25,7 +25,7 @@ var cmd = &cobra.Command{
   			terrarium dependencies --dir /path/to/yaml/files
 
 		Please ensure that the provided directory contains valid YAML or YML files with the appropriate structure to avoid any errors.
-		`),
+	`),
 }
 
 func init() {

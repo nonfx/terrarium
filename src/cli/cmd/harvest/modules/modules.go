@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	cliconfig "github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 )
 
@@ -76,6 +77,7 @@ func toTFModule(config *tfconfig.Module) *db.TFModule {
 	record := db.TFModule{
 		ModuleName: config.Path,
 		Source:     config.Path,
+		Namespace:  cliconfig.FarmDefault(),
 	}
 	if config.Metadata != nil {
 		record.ModuleName = config.Metadata.Name

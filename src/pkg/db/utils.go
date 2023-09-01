@@ -67,8 +67,8 @@ type entity interface {
 }
 
 func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID, error) {
-	res := e.GetCondition()
-	err := g.First(res, e.GetCondition()).Error
+	res := Model{}
+	err := g.Model(e).Where(e.GetCondition()).First(&res).Error
 	if err != nil && !IsNotFoundError(err) {
 		return uuid.Nil, err
 	}

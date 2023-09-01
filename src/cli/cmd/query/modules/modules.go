@@ -46,7 +46,7 @@ func addFlags() {
 
 	modulesCmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
 
-	modulesCmd.Flags().StringSliceVarP(&flagNamespaces, "namespaces", "n", []string{}, "namespaces filter - farm_repo will always be included")
+	modulesCmd.Flags().StringSliceVarP(&flagNamespaces, "namespaces", "n", []string{}, "namespaces filter - farm repo will always be included")
 }
 
 func listModules(cmd *cobra.Command, args []string) error {
@@ -59,7 +59,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 		Size:  flagPageSize,
 		Index: flagPageIndex,
 	}
-	flagNamespaces = append(flagNamespaces, "farm_repo")
+	flagNamespaces = append(flagNamespaces, config.FarmDefault())
 	result, err := g.QueryTFModules(
 		db.ModuleSearchFilter(flagSearchText),
 		db.PopulateModuleMappingsFilter(flagPopulateMappings),
