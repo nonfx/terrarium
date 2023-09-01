@@ -1,5 +1,7 @@
 components:
   - id: postgres
+    title: PostgreSQL Database
+    description: A relational database management system using SQL.
     inputs:
       type: object
       properties:
@@ -16,9 +18,15 @@ components:
     outputs:
       type: object
       properties:
-        host: {}
-        port: {}
+        host:
+          title: Host
+          description: The host address of the PostgreSQL server.
+        port:
+          title: Port
+          description: The port number on which the PostgreSQL server is listening.
   - id: redis
+    title: Redis Cache
+    description: An in-memory data structure store used as a cache or message broker.
     inputs:
       type: object
       properties:
@@ -31,8 +39,10 @@ components:
       type: object
       properties:
         host:
+          title: Host
           description: The address of the endpoint for the Redis replication group (cluster mode disabled)
         port:
+          title: Port
           description: The port for the Redis replication group (cluster mode disabled)
 graph:
   - id: data.aws_availability_zones.available

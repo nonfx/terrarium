@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	ComponentPrefix = "tr_component_" // Prefix for component identifiers in terraform code
+	ComponentDocPrefix = "component"     // Documentation comment prefix (i.e. "component[<name-override>]: <description>")
+	ComponentPrefix    = "tr_component_" // Prefix for component identifiers in terraform code
 )
 
 // Component represents an implementation of a dependency in the Terrarium platform.

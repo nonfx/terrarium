@@ -1,19 +1,24 @@
 components:
     - id: postgres
+      title: Postgres
       inputs:
         type: object
         properties:
             db_name:
+                title: Db Name
                 type: string
                 default: default_db
             version:
+                title: Version
                 type: string
                 default: "11.12"
       outputs:
         type: object
         properties:
-            host: {}
-            port: {}
+            host:
+                title: Host
+            port:
+                title: Port
 graph:
     - id: module.postgres_security_group
       requirements: []
