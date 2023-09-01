@@ -32,3 +32,6 @@ log:
 
 terraform:
   plugin_cache_dir: "~/.terraform.d/plugin-cache"
+
+farm:
+  default: github.com/cldcvr/terrarium-farm  # link of the farm repo to use by default

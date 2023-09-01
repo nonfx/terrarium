@@ -19,7 +19,7 @@ type TFModule struct {
 	ModuleName  string
 	Source      string  `gorm:"uniqueIndex:module_unique"`
 	Version     Version `gorm:"uniqueIndex:module_unique"`
-	Namespace   string  `gorm:"default:'farm_repo'"`
+	Namespace   string
 	Description string
 	TaxonomyID  uuid.UUID `gorm:"default:null"`
 
