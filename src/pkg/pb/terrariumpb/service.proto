@@ -22,8 +22,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 
 message Module {
   string id = 1;
-  string taxonomy_id = 2;
-  string module_name = 3;
+  string taxonomyId = 2;
+  string moduleName = 3;
   string source = 4;
   string version = 5;
   string description = 6;

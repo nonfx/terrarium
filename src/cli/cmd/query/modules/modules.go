@@ -1,13 +1,13 @@
 package modules
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
 	"github.com/spf13/cobra"
 )
 
@@ -76,7 +76,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 	}
 
 	if flagOutputFormat == "json" {
-		b, err := json.MarshalIndent(pbRes, "", " ")
+		b, err := transporthelper.CreateJSONBodyMarshaler().Marshaler.Marshal(pbRes)
 		if err != nil {
 			return err
 		}

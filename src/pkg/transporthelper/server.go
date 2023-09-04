@@ -64,7 +64,7 @@ func createRuntimeServeMux() *runtime.ServeMux {
 		runtime.WithIncomingHeaderMatcher(runtime.DefaultHeaderMatcher),
 		runtime.WithErrorHandler(runtime.DefaultHTTPErrorHandler),
 		runtime.WithRoutingErrorHandler(runtime.DefaultRoutingErrorHandler),
-		runtime.WithMarshalerOption("application/json", createJSONBodyMarshaler()),
+		runtime.WithMarshalerOption("application/json", CreateJSONBodyMarshaler()),
 	)
 }
 
@@ -77,7 +77,7 @@ func extractHTTPRequestMetadata(ctx context.Context, r *http.Request) metadata.M
 	})
 }
 
-func createJSONBodyMarshaler() *runtime.HTTPBodyMarshaler {
+func CreateJSONBodyMarshaler() *runtime.HTTPBodyMarshaler {
 	return &runtime.HTTPBodyMarshaler{
 		Marshaler: &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
