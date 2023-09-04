@@ -17,23 +17,32 @@ import (
 )
 
 var (
+	rootCmd *cobra.Command
+
 	flagCfgFile string
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "terrarium [command]",
-	Short: "Terrarium is a set of tools for cloud infrastructure provisioning",
-	Long:  `Terrarium is a set of tools meant to simplify cloud infrastructure provisioning. It provides tools for both app developers and DevOps teams. Terrarium helps DevOps teams in writing Terraform code and helps app developer teams in declaring app dependencies to generate working Terraform code.`,
-}
-
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.AddCommand(harvest.GetCmd())
-	rootCmd.AddCommand(platform.GetCmd())
+	newCmd()
+}
+
+func newCmd() *cobra.Command {
+	rootCmd = &cobra.Command{
+		Use:   "terrarium [command]",
+		Short: "Terrarium is a set of tools for cloud infrastructure provisioning",
+		Long:  `Terrarium is a set of tools meant to simplify cloud infrastructure provisioning. It provides tools for both app developers and DevOps teams. Terrarium helps DevOps teams in writing Terraform code and helps app developer teams in declaring app dependencies to generate working Terraform code.`,
+	}
+
+	rootCmd.AddCommand(harvest.NewCmd())
+	rootCmd.AddCommand(platform.NewCmd())
 	rootCmd.AddCommand(generate.NewCmd())
-	rootCmd.AddCommand(version.GetCmd())
-	rootCmd.AddCommand(query.GetCmd())
+	rootCmd.AddCommand(version.NewCmd())
+	rootCmd.AddCommand(query.NewCmd())
+
 	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
+
+	return rootCmd
 }
 
 func Execute() {

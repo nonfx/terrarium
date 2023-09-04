@@ -12,7 +12,7 @@ import (
 
 func Test_CmdVersion(t *testing.T) {
 	clitest := clitesting.CLITest{
-		CmdToTest: GetCmd,
+		CmdToTest: NewCmd,
 	}
 
 	tests := []clitesting.CLITestCase{

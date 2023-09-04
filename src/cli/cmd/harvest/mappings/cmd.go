@@ -15,23 +15,22 @@ import (
 )
 
 var (
+	cmd                *cobra.Command
 	flagTFDir          string
 	flagModuleListFile string
 )
 
-var cmd = &cobra.Command{
-	Use:   "mappings",
-	Short: "Scrapes resource attribute mappings from the terraform directory",
-	Long:  "The 'mappings' command scrapes resource attribute mappings from the specified terraform directory.",
-}
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:   "mappings",
+		Short: "Scrapes resource attribute mappings from the terraform directory",
+		Long:  "The 'mappings' command scrapes resource attribute mappings from the specified terraform directory.",
+		RunE:  cmdRunE,
+	}
 
-func init() {
-	cmd.RunE = cmdRunE
 	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
 	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-}
 
-func GetCmd() *cobra.Command {
 	return cmd
 }
 
