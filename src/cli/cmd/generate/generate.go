@@ -5,6 +5,8 @@ package generate
 
 import (
 	"bufio"
+	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -28,7 +30,7 @@ func blocksToPull(g platform.Graph, components ...string) []platform.BlockID {
 
 	return blockIDs
 }
-func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig.Module) (blockCount int, err error) {
+func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig.Module, profileName string) (blockCount int, err error) {
 	appDeps := apps.GetUniqueDependencyTypes()
 	blocks := blocksToPull(g, appDeps...)
 
@@ -47,6 +49,12 @@ func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig
 	if len(locals) > 0 {
 		err = writeLocalsToFile(locals, destDir, apps)
 		if err != nil {
+			return count, err
+		}
+	}
+
+	if profileName != "" {
+		if err := copyProfileConfigurationFile(tfModule.Path, profileName, destDir); err != nil {
 			return count, err
 		}
 	}
@@ -196,4 +204,70 @@ func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 	}
 
 	return writer.Flush()
+}
+
+func copyProfileConfigurationFile(moduleDirPath string, profileName string, codeDestDirPath string) error {
+	sourcePath, err := getProfileVariableInputSourceFile(moduleDirPath, profileName)
+	if err != nil {
+		return fmt.Errorf("could not retrieve configuration file for platform profile '%s': %w", profileName, err)
+	}
+
+	destPath, err := getProfileVariableInputDestFile(codeDestDirPath)
+	if err != nil {
+		return fmt.Errorf("could not retrieve configuration target path for platform profile '%s': %w", profileName, err)
+	}
+
+	if copyFile(sourcePath, destPath); err != nil {
+		return fmt.Errorf("could not copy platform '%s' profile configuration: %w", profileName, err)
+	}
+
+	return nil
+}
+
+func getProfileVariableInputSourceFile(moduleDirPath string, profileName string) (filePath string, err error) {
+	profileSourceFileName := fmt.Sprintf("%s.%s", profileName, "tfvars")
+	profileSourceFilePath := path.Join(moduleDirPath, profileSourceFileName)
+
+	sourceFileStat, err := os.Stat(profileSourceFilePath)
+	if os.IsNotExist(err) {
+		return profileSourceFilePath, fmt.Errorf("platform must define configuration for profile '%s' in terraform input file '%s'", profileName, profileSourceFilePath)
+	} else if err != nil {
+		return profileSourceFilePath, fmt.Errorf("could not open platform profile configuration file '%s': %w", profileSourceFilePath, err)
+	} else if !sourceFileStat.Mode().IsRegular() {
+		return profileSourceFilePath, fmt.Errorf("platform profile configuration path '%s' must point to a regular terraform input file", profileSourceFilePath)
+	}
+
+	return profileSourceFilePath, err
+}
+
+func getProfileVariableInputDestFile(destDirPath string) (filePath string, err error) {
+	// any existing profile configuration file will be replaced - i.e. there is ever only one profile configuration applied
+	profileDestFilePath := path.Join(destDirPath, "tr_gen_profile.auto.tfvars")
+
+	_, err = os.Stat(profileDestFilePath)
+	if err != nil && !os.IsNotExist(err) {
+		return profileDestFilePath, fmt.Errorf("could not access profile configuration target path '%s': %w", profileDestFilePath, err)
+	}
+
+	return profileDestFilePath, nil
+}
+
+func copyFile(srcPath string, dstPath string) error {
+	source, err := os.Open(srcPath)
+	if err != nil {
+		return fmt.Errorf("could not open copy source file '%s': %w", srcPath, err)
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dstPath)
+	if err != nil {
+		return fmt.Errorf("could not create copy destination file '%s': %w", srcPath, err)
+	}
+	defer destination.Close()
+
+	if _, err := io.Copy(destination, source); err != nil {
+		return fmt.Errorf("failed to copy data from '%s' to '%s': %w", srcPath, dstPath, err)
+	}
+
+	return nil
 }

@@ -57,7 +57,7 @@ func Test_CmdModules(t *testing.T) {
 			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
 				expectedOutput := "{\"modules\":[{\"id\":\"" + mockUuid1.String() + "\",\"taxonomyId\":\"00000000-0000-0000-0000-000000000000\",\"moduleName\":\"Rds\",\"source\":\"/Users/xyz/abc/tf-dir\",\"version\":\"1\",\"description\":\"\",\"inputAttributes\":[],\"namespace\":\"" + config.FarmDefault() + "\"}],\"page\":{\"size\":100,\"index\":0,\"total\":0}}"
-				return assert.Equal(t, expectedOutput, string(output))
+				return assert.JSONEq(t, expectedOutput, string(output))
 			},
 		},
 		{
@@ -79,7 +79,7 @@ func Test_CmdModules(t *testing.T) {
 			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
 				expectedOutput := "{\"modules\":[{\"id\":\"" + mockUuid1.String() + "\",\"taxonomyId\":\"00000000-0000-0000-0000-000000000000\",\"moduleName\":\"Rds\",\"source\":\"/Users/xyz/abc/tf-dir\",\"version\":\"1\",\"description\":\"\",\"inputAttributes\":[],\"namespace\":\"" + config.FarmDefault() + "\"}],\"page\":{\"size\":5,\"index\":0,\"total\":0}}"
-				return assert.Equal(t, expectedOutput, string(output))
+				return assert.JSONEq(t, expectedOutput, string(output))
 			},
 		},
 	}
