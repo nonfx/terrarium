@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/dependencies"
 	"github.com/cldcvr/terrarium/src/cli/cmd/query/modules"
 	"github.com/spf13/cobra"
 )
@@ -17,4 +18,5 @@ func GetCmd() *cobra.Command {
 
 func init() {
 	cmd.AddCommand(modules.GetCmd())
+	cmd.AddCommand(dependencies.GetCmd())
 }

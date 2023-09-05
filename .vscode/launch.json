@@ -108,6 +108,21 @@
       "cwd": "${workspaceFolder}",
     },
     {
+      "name": "Query Dependency-interfaces",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "harvest",
+        "dependencies",
+        "-d",
+        "examples/farm/dependencies/"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
       "name": "Generate Terraform",
       "type": "go",
       "request": "launch",
