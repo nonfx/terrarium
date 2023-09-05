@@ -10,6 +10,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/google/uuid"
+	"github.com/rotisserie/eris"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,7 +45,7 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 
 	err := yaml.Unmarshal(data, &yamlData)
 	if err != nil {
-		return fmt.Errorf("error parsing YAML file %s: %w", path, err)
+		return eris.Wrapf(err, "error parsing YAML file %s", path)
 	}
 
 	for _, dep := range yamlData["dependency-interfaces"] {
@@ -79,7 +80,7 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 		// Call CreateDependencyInterface with the updated Dependency object
 		_, err = g.CreateDependencyInterface(dbDep)
 		if err != nil {
-			return fmt.Errorf("error updating the database: %w", err)
+			return eris.Wrap(err, "error updating the database")
 		}
 	}
 	return nil

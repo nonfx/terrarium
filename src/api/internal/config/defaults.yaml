@@ -32,5 +32,8 @@ log:
   pretty_print: false   # format the text log using colors and indentation etc.
 
 server:
-  http_port: 3000
-  grpc_port: 10000
+  http_port: 3000   # port to bind for running new http server
+  grpc_port: 10000  # port to bind for running new gRPC server
+
+farm:
+  default: github.com/cldcvr/terrarium-farm  # link to the farm repo being utilized

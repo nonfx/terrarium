@@ -17,30 +17,30 @@ import (
 )
 
 var (
+	cmd *cobra.Command
+
 	flagTFDir          string
 	flagIncludeLocal   bool
 	flagModuleListFile string
 )
 
-var cmd = &cobra.Command{
-	Use:     "modules",
-	Aliases: []string{"mo"},
-	Short:   "Scrapes Terraform modules and attributes from the terraform directory",
-	Long: heredoc.Doc(`
-		The 'modules' command scrapes all Terraform modules and its attributes from the specified terraform directory.
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:     "modules",
+		Aliases: []string{"mo"},
+		Short:   "Scrapes Terraform modules and attributes from the terraform directory",
+		Long: heredoc.Doc(`
+			The 'modules' command scrapes all Terraform modules and its attributes from the specified terraform directory.
 
-		Prerequisite: Run "terraform init" in the directory before using this command.
-	`),
-}
+			Prerequisite: Run "terraform init" in the directory before using this command.
+		`),
+		RunE: cmdRunE,
+	}
 
-func init() {
-	cmd.RunE = cmdRunE
 	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
 	cmd.Flags().BoolVarP(&flagIncludeLocal, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
 	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-}
 
-func GetCmd() *cobra.Command {
 	return cmd
 }
 

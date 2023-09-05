@@ -23,7 +23,7 @@ import (
 
 func TestCmd(t *testing.T) {
 	testSetup := clitesting.CLITest{
-		CmdToTest: GetCmd(),
+		CmdToTest: NewCmd,
 		SetupTest: func(ctx context.Context, t *testing.T) {
 			t.Setenv("TR_LOG_LEVEL", "error")
 			config.LoadDefaults()

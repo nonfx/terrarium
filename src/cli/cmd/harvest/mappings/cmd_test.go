@@ -1,7 +1,7 @@
 //go:build mock
 // +build mock
 
-package modules
+package mappings
 
 import (
 	"context"

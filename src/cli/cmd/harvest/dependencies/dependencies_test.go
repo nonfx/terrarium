@@ -191,7 +191,7 @@ func Test_processYAMLFiles(t *testing.T) {
 	}
 }
 
-func TestGetCmd(t *testing.T) {
-	cmd := GetCmd()
+func TestNewCmd(t *testing.T) {
+	cmd := NewCmd()
 	assert.NotNil(t, cmd)
 }

@@ -87,8 +87,8 @@ stages:
             cd terrarium
             go env -w GO111MODULE=on
             go env -w GOPRIVATE=github.com/cldcvr/*
-            make docker-init docker-run
-            make docker-harvest
+            make docker-init
+            make docker-build docker-run docker-harvest
           env:
             PM_GIT_TOKEN: $(PM_GIT_TOKEN)
             GIT_TOKEN: $(GIT_TOKEN)

@@ -57,9 +57,6 @@ docker-seed: docker-harvest  ## DEPRECATED. alias to docker-harvest target
 docker-api-test: ## Run API unit tests in a containerized environment
 	docker compose run --build --rm terrarium-unit-test
 
-proto:
-	make proto -f scripts/protoc.mak
-
 ######################################################
 # Go Targets
 # Needs Go installed on the system
@@ -118,7 +115,7 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 .PHONY: test
 test:  ## Run go unit tests
 	mkdir -p coverage
-	go test -v -tags=mock,dbtest -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
+	go test -tags=mock,dbtest -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
 	@echo "-- Test coverage for terrarium --"
 	@go tool cover -func=$(COVERAGE_FILE)|grep "total:"
 
@@ -214,3 +211,6 @@ farm-release-pull:
 .PHONY: help
 help:
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+-include scripts/mocks.mak
+-include scripts/protoc.mak

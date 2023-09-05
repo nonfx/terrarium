@@ -1,4 +1,4 @@
-ARG TERRAFORM_VERSION=latest
+ARG TERRAFORM_VERSION=1.5
 
 FROM golang:1.20 AS go-base
 WORKDIR /usr/src/app
