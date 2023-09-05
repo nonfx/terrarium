@@ -8,20 +8,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cmd = &cobra.Command{
-	Use:     "harvest",
-	Aliases: []string{"h"},
-	Short:   "Commands to scans the Terrarium farm code and update the core terrarium DB.",
-	Long:    `The 'harvest' command provides subcommands to scan Terraform providers, modules, mappings, and more from the specified farm directory.`,
-}
+var cmd *cobra.Command
 
-func init() {
-	cmd.AddCommand(resources.GetCmd())
-	cmd.AddCommand(modules.GetCmd())
-	cmd.AddCommand(mappings.GetCmd())
-	cmd.AddCommand(dependencies.GetCmd())
-}
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:     "harvest",
+		Aliases: []string{"h"},
+		Short:   "Commands to scans the Terrarium farm code and update the core terrarium DB.",
+		Long:    `The 'harvest' command provides subcommands to scan Terraform providers, modules, mappings, and more from the specified farm directory.`,
+	}
 
-func GetCmd() *cobra.Command {
+	cmd.AddCommand(resources.NewCmd())
+	cmd.AddCommand(modules.NewCmd())
+	cmd.AddCommand(mappings.NewCmd())
+	cmd.AddCommand(dependencies.NewCmd())
+
 	return cmd
 }

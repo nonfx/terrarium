@@ -13,29 +13,29 @@ import (
 )
 
 var (
+	cmd *cobra.Command
+
 	flagSchemaFile     string
 	flagModuleListFile string
 )
 
-var cmd = &cobra.Command{
-	Use:     "resources",
-	Aliases: []string{"res"},
-	Short:   "Harvests Terraform resources and attributes using the provider schema json",
-	Long: heredoc.Docf(`
-		Harvests Terraform resources and attributes using the provider schema json.
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:     "resources",
+		Aliases: []string{"res"},
+		Short:   "Harvests Terraform resources and attributes using the provider schema json",
+		Long: heredoc.Docf(`
+			Harvests Terraform resources and attributes using the provider schema json.
 
-		This command requires terraform provider schema already generated. To do that, run:
-			terraform init && terraform providers schema -json > %s
-	`, DefaultSchemaPath),
-}
+			This command requires terraform provider schema already generated. To do that, run:
+				terraform init && terraform providers schema -json > %s
+		`, DefaultSchemaPath),
+		RunE: cmdRunE,
+	}
 
-func init() {
 	cmd.Flags().StringVarP(&flagSchemaFile, "schema-file", "s", DefaultSchemaPath, "terraform provider schema json file path")
 	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-	cmd.RunE = cmdRunE
-}
 
-func GetCmd() *cobra.Command {
 	return cmd
 }
 

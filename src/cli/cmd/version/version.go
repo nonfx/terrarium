@@ -8,13 +8,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Display version information",
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		fmt.Fprintf(cmd.OutOrStdout(), format(build.Version, build.Date))
-		return
-	},
+var cmd *cobra.Command
+
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:   "version",
+		Short: "Display version information",
+		RunE:  cmdRunE,
+	}
+
+	return cmd
+}
+
+func cmdRunE(cmd *cobra.Command, args []string) (err error) {
+	cmd.Print(format(build.Version, build.Date))
+	return
 }
 
 func format(version, buildDate string) string {
@@ -25,8 +33,4 @@ func format(version, buildDate string) string {
 	}
 
 	return fmt.Sprintf("terrarium version %s\n", version)
-}
-
-func GetCmd() *cobra.Command {
-	return versionCmd
 }

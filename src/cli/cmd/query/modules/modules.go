@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	cmd *cobra.Command
+
 	flagPopulateMappings bool
 	flagSearchText       string
 	flagOutputFormat     string
@@ -20,33 +22,22 @@ var (
 	flagNamespaces       []string
 )
 
-var modulesCmd = &cobra.Command{
-	Use:   "modules",
-	Short: "List modules matching the source pattern",
-	Long:  "command to list mathcing modules as per the filter chosen. provides variety of filters to list desired modules",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return listModules(cmd, args)
-	},
-}
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:   "modules",
+		Short: "List modules matching the source pattern",
+		Long:  "command to list mathcing modules as per the filter chosen. provides variety of filters to list desired modules",
+		RunE:  listModules,
+	}
 
-func GetCmd() *cobra.Command {
-	addFlags()
-	return modulesCmd
-}
+	cmd.Flags().StringVarP(&flagSearchText, "searchText", "s", "", "optional search text")
+	cmd.Flags().BoolVarP(&flagPopulateMappings, "populateMappings", "p", false, "A boolean flag to populate mappings")
+	cmd.Flags().Int32Var(&flagPageSize, "pageSize", 100, "page size flag")
+	cmd.Flags().Int32Var(&flagPageIndex, "pageIndex", 0, "page index flag")
+	cmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
+	cmd.Flags().StringSliceVarP(&flagNamespaces, "namespaces", "n", []string{}, "namespaces filter - farm repo will always be included")
 
-func addFlags() {
-
-	modulesCmd.Flags().StringVarP(&flagSearchText, "searchText", "s", "", "optional search text")
-
-	modulesCmd.Flags().BoolVarP(&flagPopulateMappings, "populateMappings", "p", false, "A boolean flag to populate mappings")
-
-	modulesCmd.Flags().Int32Var(&flagPageSize, "pageSize", 100, "page size flag")
-
-	modulesCmd.Flags().Int32Var(&flagPageIndex, "pageIndex", 0, "page index flag")
-
-	modulesCmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
-
-	modulesCmd.Flags().StringSliceVarP(&flagNamespaces, "namespaces", "n", []string{}, "namespaces filter - farm repo will always be included")
+	return cmd
 }
 
 func listModules(cmd *cobra.Command, args []string) error {

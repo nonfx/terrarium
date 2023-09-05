@@ -8,21 +8,21 @@ import (
 )
 
 var (
+	cmd *cobra.Command
+
 	flagDir string
 )
 
-var cmd = &cobra.Command{
-	Use:   "lint",
-	Short: "Check a given directory is valid platform definition",
-	Long:  "Analyze the directory and verify it constitutes a valid platform definition.",
-}
+func NewCmd() *cobra.Command {
+	cmd = &cobra.Command{
+		Use:   "lint",
+		Short: "Check a given directory is valid platform definition",
+		Long:  "Analyze the directory and verify it constitutes a valid platform definition.",
+		RunE:  cmdRunE,
+	}
 
-func init() {
-	cmd.RunE = cmdRunE
-	cmd.Flags().StringVar(&flagDir, "dir", ".", "Path to platform directory to validate.")
-}
+	cmd.Flags().StringVarP(&flagDir, "dir", "d", ".", "Path to platform directory to validate.")
 
-func GetCmd() *cobra.Command {
 	return cmd
 }
 

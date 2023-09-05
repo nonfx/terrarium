@@ -8,7 +8,7 @@ import (
 
 func TestCmd(t *testing.T) {
 	testSetup := clitesting.CLITest{
-		CmdToTest: GetCmd(),
+		CmdToTest: NewCmd,
 	}
 
 	testSetup.RunTests(t, []clitesting.CLITestCase{
@@ -17,6 +17,12 @@ func TestCmd(t *testing.T) {
 			Args:     []string{},
 			WantErr:  true,
 			ExpError: "No Apps provided. use -a flag to set apps",
+		},
+		{
+			Name:     "invalid app path",
+			Args:     []string{"-a", "./invalid-path"},
+			WantErr:  true,
+			ExpError: "invalid file path: ./invalid-path",
 		},
 		{
 			Name:           "Success",

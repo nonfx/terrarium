@@ -15,6 +15,7 @@ import (
 
 	"github.com/Netflix/go-expect"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,7 +63,7 @@ type CLITest struct {
 	// A Context object that can be used to maintain context between tests/test cases
 	Ctx context.Context
 	// newCmd function to test
-	CmdToTest  *cobra.Command
+	CmdToTest  func() *cobra.Command
 	ParentCmds []func() *cobra.Command
 	// function to initialize the command specific CmdOptions structure
 	CmdOptionsInit func() CmdOpts
@@ -213,7 +214,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 		t.Run(tt.Name, func(t *testing.T) {
 			var cmd *cobra.Command
 			if clitest.ParentCmds != nil {
-				subCmd := clitest.CmdToTest
+				subCmd := clitest.CmdToTest()
 				var nextCmd *cobra.Command
 				for i, cmdFunc := range clitest.ParentCmds {
 					if i == 0 {
@@ -227,7 +228,7 @@ func (clitest *CLITest) RunTests(t *testing.T, testCases []CLITestCase) {
 				}
 				nextCmd.AddCommand(subCmd)
 			} else {
-				cmd = clitest.CmdToTest
+				cmd = clitest.CmdToTest()
 			}
 
 			cmd.SetArgs(tt.Args)
@@ -341,5 +342,23 @@ func validateOutputAsserter(expectedString string, exactMatch bool) ValidateOutp
 		}
 
 		return assert.Contains(t, string(output), expectedString)
+	}
+}
+
+func resetFlagsVal(cmds ...*cobra.Command) {
+	for _, c := range cmds {
+		c.Flags().Visit(func(f *pflag.Flag) {
+			if !f.Changed {
+				return
+			}
+
+			switch v := f.Value.(type) {
+			case interface{ Replace(val []string) error }:
+				v.Replace(nil)
+			default:
+				v.Set(f.DefValue)
+			}
+			f.Changed = false
+		})
 	}
 }
