@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 ARG TERRAFORM_VERSION=1.5
 
 FROM golang:1.20 AS go-base

@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 
 # Specify the path to the database dump file
 dump_file="/docker-entrypoint-initdb.d/cc_terrarium.psql"

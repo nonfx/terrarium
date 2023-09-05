@@ -1,2 +1,5 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 quiet: True
 disable-version-string: True
