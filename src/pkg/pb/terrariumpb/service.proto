@@ -111,3 +111,11 @@ service TerrariumService {
     };
   }
 }
+
+message Dependency {
+  string interface_id = 1;
+  string title = 2;
+  string description = 3;
+  string inputs = 4; // JSON serialized Inputs
+  string outputs = 5; // JSON serialized Outputs
+}

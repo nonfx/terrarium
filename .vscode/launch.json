@@ -108,16 +108,16 @@
       "cwd": "${workspaceFolder}",
     },
     {
-      "name": "Query Dependency-interfaces",
+      "name": "Dependency List",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/src/cli/terrarium/main.go",
       "args": [
-        "harvest",
+        "query",
         "dependencies",
-        "-d",
-        "examples/farm/dependencies/"
+        "-i",
+        "postgres"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
