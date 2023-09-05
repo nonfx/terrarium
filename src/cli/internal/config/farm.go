@@ -9,3 +9,8 @@ import "github.com/cldcvr/terrarium/src/pkg/confighelper"
 func FarmDefault() string {
 	return confighelper.MustGetString("farm.default")
 }
+
+// FarmVersion version of the farm repo to use by default
+func FarmVersion() string {
+	return confighelper.MustGetString("farm.version")
+}

@@ -38,6 +38,8 @@ type DB interface {
 
 	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
+
+	ExecuteSQLStatement(string) error
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB
@@ -126,4 +128,8 @@ func PaginateGlobalFilter(pageSize, pageIndex int32, totalPages *int32) FilterOp
 
 func NoOpFilter(g *gorm.DB) *gorm.DB {
 	return g
+}
+
+func (db *gDB) ExecuteSQLStatement(statement string) error {
+	return db.g().Exec(statement).Error
 }
