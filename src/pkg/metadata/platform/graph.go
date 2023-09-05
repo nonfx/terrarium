@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/rotisserie/eris"
 	"golang.org/x/exp/slices"
 )
 
@@ -83,12 +84,12 @@ func (g *Graph) Walk(roots []BlockID, cb GraphWalkerCB) error {
 
 	err := g.traverseRootBlocks(&traverser, cb)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "error traversing hcl blocks")
 	}
 
 	err = g.traverseOutputBlocks(&traverser, cb)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "error traversing hcl output blocks")
 	}
 
 	return nil

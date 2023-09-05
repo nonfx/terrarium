@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/charmbracelet/log v0.2.3
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230821164346-f0b467a9714a
-	github.com/cldcvr/terrarium/src/pkg v0.0.0-20230828104842-b967825be600
+	github.com/cldcvr/terrarium/src/pkg v0.0.0-20230911180813-4861be5a2cea
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -26,12 +26,14 @@ require (
 	github.com/charmbracelet/lipgloss v0.7.1 // indirect
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
+	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hinshun/vt10x v0.0.0-20220301184237-5011da428d02 // indirect
+	github.com/icza/backscanner v0.0.0-20230330133933-bf6beb754c70 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.3.1 // indirect
@@ -41,6 +43,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect

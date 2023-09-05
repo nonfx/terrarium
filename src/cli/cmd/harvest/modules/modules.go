@@ -4,13 +4,13 @@
 package modules
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	cliconfig "github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/rotisserie/eris"
 )
 
 type tfValue interface {
@@ -51,7 +51,7 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 		// we store all sub-paths such as 'rule.noncurrent_version_expiration.newer_noncurrent_versions'
 		// but the output or input variable may be refering to 'rule.noncurrent_version_expiration' portion only
 		// we should treat each "path-level" as an attribute of its own - other modules may use it as input
-		// return nil, fmt.Errorf("unknown resource-attribute record: %v", err)
+		// return nil, eris.Wrap(err, "unknown resource-attribute record")
 		return nil, nil
 	}
 
@@ -70,7 +70,7 @@ func createAttributeRecord(g db.DB, moduleDB *db.TFModule, v tfValue, varAttribu
 	}
 
 	if _, err := g.CreateTFModuleAttribute(moduleAttrDB); err != nil {
-		return nil, fmt.Errorf("error creating module-attribute record: %v", err)
+		return nil, eris.Wrap(err, "error creating module-attribute record")
 	}
 
 	return moduleAttrDB, nil

@@ -16,7 +16,7 @@ func WriteLocals(val map[string]interface{}, out io.Writer) error {
 	// Convert the map to cty.Value
 	ctyData, err := utils.ToCtyValue(val)
 	if err != nil {
-		return err
+		return eris.Wrapf(err, "error converting given value to hcl: %v", val)
 	}
 	data := ctyData.AsValueMap()
 
