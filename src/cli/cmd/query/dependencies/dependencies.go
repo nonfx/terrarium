@@ -1,12 +1,16 @@
+// Copyright (c) CloudCover
+// SPDX-License-Identifier: Apache-2.0
+
 package dependencies
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -21,9 +25,18 @@ var (
 func NewCmd() *cobra.Command {
 	cmd = &cobra.Command{
 		Use:   "dependencies",
-		Short: "List dependency details matching the component pattern",
-		Long:  "command to list matching dependencies as per the filter chosen. provides variety of filters to list desired dependencies",
-		RunE:  fectchDependencies,
+		Short: "List dependency details matching the dependency interface id",
+		Long: heredoc.Docf(`
+		The 'dependencies' command provides detailed information about dependencies based on their interface IDs.
+		When invoked, it searches through the available dependencies and retrieves specific details related to the
+		provided interface ID.
+
+		Usage examples:
+		  terrarium dependencies -i <specific_id>
+
+		The above commands will fetch and list the details of the dependency associated with the specified interface ID.
+		`),
+		RunE: fectchDependencies,
 	}
 
 	cmd.Flags().StringVarP(&depIfaceIDFlag, "id", "i", "", "id of the dependency interface")
@@ -43,19 +56,19 @@ func fectchDependencies(cmd *cobra.Command, args []string) error {
 	}
 
 	if flagOutputFormat == "json" {
-		b, err := json.MarshalIndent(result, "", " ")
+		b, err := transporthelper.CreateJSONBodyMarshaler().Marshaler.Marshal(result)
 		if err != nil {
 			return err
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(b))
 	} else {
-		displayInTable(result)
+		displayInTable(cmd.OutOrStdout(), result)
 	}
 	return nil
 }
 
-func displayInTable(dependency *terrariumpb.Dependency) {
-	table := tablewriter.NewWriter(os.Stdout)
+func displayInTable(w io.Writer, dependency *terrariumpb.Dependency) {
+	table := tablewriter.NewWriter(w)
 	table.SetHeader([]string{"Interface ID", "Title", "Description", "Inputs", "Outputs"})
 
 	table.Append([]string{
