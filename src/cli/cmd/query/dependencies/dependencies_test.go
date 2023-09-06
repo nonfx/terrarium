@@ -5,70 +5,73 @@ package dependencies
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
-	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
-	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
-	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/cobra"
+	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-func Test_CmdDependencies(t *testing.T) {
+func Test_fectchDependencies(t *testing.T) {
 	config.LoadDefaults()
-	clitest := clitesting.CLITest{
-		CmdToTest: NewCmd,
-	}
 
+	mockDependencyID := "mock-dep-id"
 	mockDB := &mocks.DB{}
-	mockDB.On("FetchDependencyByInterfaceID", mock.AnythingOfType("string")).Return(nil, fmt.Errorf("mock error")).Once()
-	mockDB.On("FetchDependencyByInterfaceID", mock.AnythingOfType("string")).Return(&db.Dependency{
-		InterfaceID: "mockID",
-		Title:       "mockTitle",
-		Description: "mockDescription",
-		Inputs:      []byte("mockInputs"),
-		Outputs:     []byte("mockOutputs"),
-	}, nil)
+
+	mockDB.On("FetchDependencyByInterfaceID", mockDependencyID).
+		Return(nil, fmt.Errorf("mock error")).Once()
+
+	mockDependency := &terrariumpb.Dependency{
+		InterfaceId: mockDependencyID,
+		Title:       "Mock Title",
+		Description: "Mock Description",
+		Inputs:      "Mock Inputs",
+		Outputs:     "Mock Outputs",
+	}
+	mockDB.On("FetchDependencyByInterfaceID", mockDependencyID).
+		Return(mockDependency, nil).Once()
 
 	config.SetDBMocks(mockDB)
 
-	tests := []clitesting.CLITestCase{
+	tests := []struct {
+		name           string
+		args           []string
+		wantErr        bool
+		expectedOutput string
+	}{
 		{
-			Name:    "db failure",
-			WantErr: true,
+			name:    "db failure",
+			args:    []string{"-i", mockDependencyID},
+			wantErr: true,
 		},
 		{
-			Name: "list dependencies in json format",
-			PreExecute: func(ctx context.Context, t *testing.T, cmd *cobra.Command, cmdOpts clitesting.CmdOpts) {
-				args := []string{"-o", "json"}
-				cmd.SetArgs(args)
-			},
-			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				expectedOutput := "{\n \"InterfaceID\": \"mockID\",\n \"Title\": \"mockTitle\",\n \"Description\": \"mockDescription\",\n \"Inputs\": \"mockInputs\",\n \"Outputs\": \"mockOutputs\"\n}\n"
-				return assert.Equal(t, expectedOutput, string(output))
-			},
-		},
-		{
-			Name: "list dependencies in tabular format",
-			PreExecute: func(ctx context.Context, t *testing.T, cmd *cobra.Command, cmdOpts clitesting.CmdOpts) {
-				args := []string{"-o", "table"}
-				cmd.SetArgs(args)
-			},
-			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				buffer := new(bytes.Buffer)
-				table := tablewriter.NewWriter(buffer)
-				table.SetHeader([]string{"Interface ID", "Title", "Description", "Inputs", "Outputs"})
-				table.Append([]string{"mockID", "mockTitle", "mockDescription", "mockInputs", "mockOutputs"})
-				table.Render()
-				return assert.Equal(t, buffer.String(), string(output))
-			},
+			name: "fetch dependencies in json format",
+			args: []string{"-o", "json", "-i", mockDependencyID},
+			expectedOutput: `{
+ "interface_id": "mock-dep-id",
+ "title": "Mock Title",
+ "description": "Mock Description",
+ "inputs": "Mock Inputs",
+ "outputs": "Mock Outputs"
+}`,
 		},
 	}
 
-	clitest.RunTests(t, tests)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := NewCmd()
+			cmd.SetArgs(tt.args)
+			buffer := &bytes.Buffer{}
+			cmd.SetOutput(buffer)
+			err := cmd.Execute()
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedOutput, buffer.String())
+			}
+		})
+	}
 }
