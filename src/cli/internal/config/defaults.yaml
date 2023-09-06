@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 # Configuration System:
 #
 # The project uses the Viper library to manage its configuration system.

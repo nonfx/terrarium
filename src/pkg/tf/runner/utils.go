@@ -1,3 +1,6 @@
+// Copyright (c) CloudCover
+// SPDX-License-Identifier: Apache-2.0
+
 package runner
 
 func TerraformProviderSchema(runner *terraformRunner, dir string, outFilePath string) error {

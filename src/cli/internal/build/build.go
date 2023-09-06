@@ -1,3 +1,6 @@
+// Copyright (c) CloudCover
+// SPDX-License-Identifier: Apache-2.0
+
 package build
 
 // Version is dynamically set by the toolchain or overridden by the Makefile.

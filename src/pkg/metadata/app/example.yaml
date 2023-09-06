@@ -1,3 +1,6 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 id: banking_app # REQUIRED. no special chars, start with alpha, contains alpha-num, and cannot be gt 20 chars. used by IaC to uniquely identify the dependency in the project.
 name: Banking App
 env_prefix: BA # defaults to empty string.
