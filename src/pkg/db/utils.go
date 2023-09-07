@@ -7,7 +7,6 @@ import (
 	"math"
 	"time"
 
-	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -40,7 +39,8 @@ type DB interface {
 	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
 
-	FetchDependencyByInterfaceID(interfaceID string) (*terrariumpb.Dependency, error)
+	QueryDependencyByInterfaceID(interfaceID string, filterOps ...FilterOption) (result *Dependency, err error)
+	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB

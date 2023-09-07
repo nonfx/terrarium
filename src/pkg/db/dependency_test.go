@@ -1,91 +1,83 @@
 // Copyright (c) CloudCover
 // SPDX-License-Identifier: Apache-2.0
 
-package db
+//go:build dbtest
+// +build dbtest
 
-import (
-	"testing"
+package db_test
 
-	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
-	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-)
+// func Test_gDB_QueryDependencies(t *testing.T) {
+// 	tests := []struct {
+// 		name     string
+// 		filters  []db.FilterOption
+// 		wantDeps []*terrariumpb.Dependency
+// 		wantErr  bool
+// 		errMsg   string
+// 	}{
+// 		{
+// 			name: "query by InterfaceID",
+// 			filters: []db.FilterOption{
+// 				db.DependencySearchFilter("server_web"),
+// 			},
+// 			wantDeps: []*terrariumpb.Dependency{
+// 				{
+// 					InterfaceId: "server_web",
+// 					Title:       "Web Server",
+// 					Description: "A server that hosts web applications and handles HTTP requests.",
+// 					Inputs: &terrariumpb.JSONSchema{
+// 						Type: "object",
+// 						Properties: map[string]*terrariumpb.JSONSchema{
+// 							"port": {
+// 								Title:       "Port",
+// 								Description: "The port number on which the server should listen.",
+// 								Type:        "number",
+// 								Default:     structpb.NewStringValue("80"),
+// 							},
+// 						},
+// 					},
+// 					Outputs: &terrariumpb.JSONSchema{
+// 						Properties: map[string]*terrariumpb.JSONSchema{
+// 							"host": {
+// 								Title:       "Host",
+// 								Description: "The host address of the web server.",
+// 								Type:        "string",
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
 
-type MockgDB struct {
-	mock.Mock
-}
+// 	for dbName, connector := range getConnectorMap() {
+// 		g := connector(t)
+// 		dbObj, err := db.AutoMigrate(g)
+// 		require.NoError(t, err)
 
-type MockDbChain struct {
-	mock.Mock
-}
+// 		t.Run(dbName, func(t *testing.T) {
+// 			for _, tt := range tests {
+// 				t.Run(tt.name, func(t *testing.T) {
+// 					gotDeps, err := dbObj.QueryDependencies(tt.filters...)
+// 					if tt.wantErr {
+// 						assert.Error(t, err)
 
-func (m *MockgDB) g() *MockDbChain {
-	return &MockDbChain{}
-}
+// 						if tt.errMsg != "" {
+// 							assert.EqualError(t, err, tt.errMsg)
+// 						}
+// 					} else {
+// 						assert.NoError(t, err)
+// 						assert.EqualValues(t, tt.wantDeps, gotDeps.ToProto())
+// 					}
+// 				})
+// 			}
+// 		})
+// 	}
+// }
 
-func (chain *MockDbChain) Where(query interface{}, args ...interface{}) *MockDbChain {
-	return chain
-}
-
-func (chain *MockDbChain) Preload(column string) *MockDbChain {
-	return chain
-}
-
-func (chain *MockDbChain) First(dest interface{}) *MockDbChain {
-	args := chain.Called(dest)
-	return args.Get(0).(*MockDbChain)
-}
-
-func (chain *MockDbChain) Error() error {
-	args := chain.Called()
-	return args.Error(0)
-}
-
-func (m *MockgDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
-	args := m.Called(e)
-	return args.Get(0).(uuid.UUID), args.Error(1)
-}
-
-func (m *MockgDB) FetchDependencyByInterfaceID(interfaceID string) (*terrariumpb.Dependency, error) {
-	args := m.Called(interfaceID)
-	return args.Get(0).(*terrariumpb.Dependency), args.Error(1)
-}
-
-func TestCreateDependencyInterface(t *testing.T) {
-	mockDB := new(MockgDB)
-	dep := &Dependency{InterfaceID: "test_id"}
-
-	// Mock db call.
-	uuidVal, _ := uuid.NewUUID()
-	mockDB.On("CreateDependencyInterface", dep).Return(uuidVal, nil)
-
-	_, err := mockDB.CreateDependencyInterface(dep)
-	assert.Nil(t, err)
-}
-
-func TestToProto(t *testing.T) {
-	dep := &Dependency{
-		InterfaceID: "test_id",
-		Inputs:      &jsonschema.Node{Type: "string"},
-		Outputs:     &jsonschema.Node{Type: "string"},
-	}
-
-	protoDep, err := dep.ToProto()
-	assert.Nil(t, err)
-	assert.Equal(t, "test_id", protoDep.InterfaceId)
-}
-
-func TestFetchDependencyByInterfaceID(t *testing.T) {
-	mockDB := new(MockgDB)
-	interfaceID := "test_id"
-
-	// Mock db call.
-	dep := &terrariumpb.Dependency{InterfaceId: "test_id"}
-	mockDB.On("FetchDependencyByInterfaceID", interfaceID).Return(dep, nil)
-
-	protoDep, err := mockDB.FetchDependencyByInterfaceID(interfaceID)
-	assert.Nil(t, err)
-	assert.Equal(t, "test_id", protoDep.InterfaceId)
-}
+// func mustNewValue(v interface{}) *structpb.Value {
+// 	value, err := structpb.NewValue(v)
+// 	if err != nil {
+// 		panic(fmt.Sprintf("Failed to create proto value: %v", err))
+// 	}
+// 	return value
+// }

@@ -116,8 +116,6 @@
       "args": [
         "query",
         "dependencies",
-        "-i",
-        "postgres"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

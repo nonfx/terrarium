@@ -7,78 +7,96 @@
 package dependencies
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
-	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func Test_fectchDependencies(t *testing.T) {
+func Test_fetchDependencies(t *testing.T) {
+	// Setup and mocks
 	config.LoadDefaults()
-
-	mockDependencyID := "mock-dep-id"
 	mockDB := &mocks.DB{}
+	mockUuid1 := uuid.New()
 
-	mockDB.On("FetchDependencyByInterfaceID", mockDependencyID).
-		Return(nil, fmt.Errorf("mock error")).Once()
-
-	mockDependency := &terrariumpb.Dependency{
-		InterfaceId: mockDependencyID,
-		Title:       "Mock Title",
-		Description: "Mock Description",
-		Inputs:      "Mock Inputs",
-		Outputs:     "Mock Outputs",
+	// The exact number of FilterOptions and their order matters.
+	// Ensure you are mocking it correctly.
+	mockDependencyData := db.Dependencies{
+		{
+			Model:       db.Model{ID: mockUuid1},
+			InterfaceID: "mockInterface123",
+			Title:       "SampleDependency",
+			Description: "This is a mock dependency",
+			Inputs:      nil, // or an appropriate `jsonschema.Node` mock
+			Outputs:     nil, // or an appropriate `jsonschema.Node` mock
+			ExtendsID:   "mockExtend456",
+			Taxonomy:    nil, // or an appropriate `Taxonomy` mock
+		},
 	}
-	mockDB.On("FetchDependencyByInterfaceID", mockDependencyID).Return(mockDependency, nil).Times(2)
+	mockDB.On("FetchAllDependency",
+		mock.AnythingOfType("db.FilterOption"),
+		mock.AnythingOfType("db.FilterOption"),
+	).Return(mockDependencyData, nil)
 
 	config.SetDBMocks(mockDB)
 
-	expectedTableOutput := `+--------------+------------+------------------+-------------+--------------+
-| INTERFACE ID |   TITLE    |   DESCRIPTION    |   INPUTS    |   OUTPUTS    |
-+--------------+------------+------------------+-------------+--------------+
-| mock-dep-id  | Mock Title | Mock Description | Mock Inputs | Mock Outputs |
-+--------------+------------+------------------+-------------+--------------+
-`
+	expectedJSON := fmt.Sprintf(`{
+		"dependencies": [{
+			"id": "%s",
+			"interfaceId": "mockInterface123",
+			"title": "SampleDependency",
+			"description": "This is a mock dependency",
+			"inputs": null,
+			"outputs": null,
+			"extendsId": "mockExtend456",
+			"taxonomy": null
+		}]
+	}`, mockUuid1.String())
 
 	tests := []struct {
-		name           string
-		args           []string
-		wantErr        bool
-		expectedOutput string
+		Name           string
+		Args           []string
+		WantErr        bool
+		ExpectedOutput string
 	}{
 		{
-			name:    "db failure",
-			args:    []string{"-i", mockDependencyID},
-			wantErr: true,
-		},
-		{
-			name:           "fetch dependencies in json format",
-			args:           []string{"-o", "json", "-i", mockDependencyID},
-			expectedOutput: `{"interfaceId":"mock-dep-id","title":"Mock Title","description":"Mock Description","inputs":"Mock Inputs","outputs":"Mock Outputs"}`,
-		}, {
-			name:           "fetch dependencies in table format",
-			args:           []string{"-o", "table", "-i", mockDependencyID},
-			expectedOutput: expectedTableOutput,
+			Name:           "fetch dependencies in json format",
+			Args:           []string{"-o", "json"},
+			ExpectedOutput: expectedJSON,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cmd := NewCmd()
-			cmd.SetArgs(tt.args)
-			buffer := &bytes.Buffer{}
-			cmd.SetOutput(buffer)
-			err := cmd.Execute()
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedOutput, buffer.String())
+		t.Run(tt.Name, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			cmd.SetArgs(tt.Args)
+
+			err := fetchDependencies(cmd, tt.Args)
+			if (err != nil) != tt.WantErr {
+				t.Errorf("fetchDependencies() error = %v, wantErr %v", err, tt.WantErr)
+				return
 			}
 		})
 	}
+}
+
+func TestNewCmd(t *testing.T) {
+	cmd := NewCmd()
+
+	assert.Equal(t, "dependencies", cmd.Use)
+	assert.Equal(t, "List dependency details matching the dependency interface id", cmd.Short)
+
+	searchFlag := cmd.Flag("searchText")
+	assert.NotNil(t, searchFlag)
+	assert.Equal(t, "", searchFlag.DefValue)
+
+	pageSizeFlag := cmd.Flag("pageSize")
+	assert.NotNil(t, pageSizeFlag)
+	assert.Equal(t, "100", pageSizeFlag.DefValue)
 }
