@@ -35,19 +35,26 @@ func Connect(dialector gorm.Dialector, options ...ConnOption) (*gorm.DB, error) 
 	return db, err
 }
 
-// createDSN creates the DSN (Data Source Name) string for the database connection.
-func createDSN(host, user, password, dbName string, port int, sslMode bool) string {
+// createPostgresDSN creates the DSN (Data Source Name) string for the postgres database connection.
+func createPostgresDSN(host, user, password, dbName string, port int, sslMode bool) string {
 	sslModeStr := "disable"
 	if sslMode {
 		sslModeStr = "enable"
 	}
 
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s", host, user, password, dbName, port, sslModeStr)
+	passwordStr := ""
+	if password != "" {
+		// omitting the password block when not set, allows the library to look at
+		// other standard sources like `~/.pgpass`
+		passwordStr = "password=" + password
+	}
+
+	return fmt.Sprintf("host=%s user=%s %s dbname=%s port=%d sslmode=%s", host, user, passwordStr, dbName, port, sslModeStr)
 }
 
 // ConnectPG establishes a connection to a postgres database using the provided connection parameters.
 func ConnectPG(host, user, password, dbName string, port int, sslMode bool, options ...ConnOption) (*gorm.DB, error) {
-	dsn := createDSN(host, user, password, dbName, port, sslMode)
+	dsn := createPostgresDSN(host, user, password, dbName, port, sslMode)
 	return Connect(postgres.Open(dsn), options...)
 }
 
