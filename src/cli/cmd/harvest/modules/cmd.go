@@ -25,6 +25,7 @@ var (
 	flagTFDir          string
 	flagIncludeLocal   bool
 	flagModuleListFile string
+	flagWorkDir        string
 )
 
 func NewCmd() *cobra.Command {
@@ -43,6 +44,7 @@ func NewCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
 	cmd.Flags().BoolVarP(&flagIncludeLocal, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
 	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
+	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "store all module sources in this directory; improves performance by reusing data between harvest commands")
 
 	return cmd
 }
@@ -67,7 +69,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	tfRunner := runner.NewTerraformRunner()
 	for _, item := range moduleList.Farm {
 		if item.Export {
-			dir, _, err := item.CreateTerraformFile()
+			dir, _, err := item.CreateTerraformFile(flagWorkDir)
 			if err != nil {
 				return err
 			}

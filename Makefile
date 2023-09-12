@@ -164,6 +164,10 @@ install:  ## Install the CLI native binary into GOBIN
 # Needs terraform installed on the system
 ######################################################
 
+ifeq ($(HARVEST_WD),)
+HARVEST_WD := /tmp/harvest
+endif
+
 ifeq ($(FARM_DIR),)
 FARM_DIR := examples/farm
 endif
@@ -177,15 +181,18 @@ farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  fa
 
 .PHONY: farm-resource-harvest  ## Harvest terraform provider resources from module list file
 farm-resource-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest resources --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest resources --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-module-harvest  ## Harvest terraform modules from module list file
 farm-module-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest modules --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest modules --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-mapping-harvest  ## Harvest attribute mappings from module list file
 farm-mapping-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest mappings --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest mappings --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-dependency-harvest  ## Harvest dependency interface from the farm directory
 farm-dependency-harvest: $(FARM_DEPENDENCY_DIR)
