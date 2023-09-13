@@ -52,7 +52,7 @@ func (n *Node) Compile() (err error) {
 func (n *Node) Validate(val interface{}) error {
 	err := n.compileIfNot()
 	if err != nil {
-		return err
+		return eris.Wrapf(err, "failed to compile validation schema")
 	}
 
 	result, err := n.compiled.Validate(gojsonschema.NewGoLoader(val))

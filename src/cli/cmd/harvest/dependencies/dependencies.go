@@ -63,7 +63,7 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 			for i, level := range levels {
 				tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
 				if err != nil {
-					return err
+					return eris.Wrap(err, "error getting taxonomy data")
 				}
 				dbTax = tax
 			}

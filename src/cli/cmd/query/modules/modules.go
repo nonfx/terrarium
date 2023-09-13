@@ -11,6 +11,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
+	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func NewCmd() *cobra.Command {
 func listModules(cmd *cobra.Command, args []string) error {
 	g, err := config.DBConnect()
 	if err != nil {
-		return err
+		return eris.Wrap(err, "error accessing database")
 	}
 
 	page := &terrariumpb.Page{
@@ -61,7 +62,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 		db.ModuleNamespaceFilter(flagNamespaces),
 	)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "error getting available modules")
 	}
 
 	pbRes := &terrariumpb.ListModulesResponse{
@@ -72,7 +73,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 	if flagOutputFormat == "json" {
 		b, err := transporthelper.CreateJSONBodyMarshaler().Marshaler.Marshal(pbRes)
 		if err != nil {
-			return err
+			return eris.Wrap(err, "error formatting module list")
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), string(b))
 

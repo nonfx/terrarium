@@ -6,8 +6,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/log"
+	"github.com/cldcvr/terrarium/src/cli/cmd/farm"
 	"github.com/cldcvr/terrarium/src/cli/cmd/generate"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest"
 	"github.com/cldcvr/terrarium/src/cli/cmd/platform"
@@ -42,8 +44,9 @@ func newCmd() *cobra.Command {
 	rootCmd.AddCommand(generate.NewCmd())
 	rootCmd.AddCommand(version.NewCmd())
 	rootCmd.AddCommand(query.NewCmd())
+	rootCmd.AddCommand(farm.NewCmd())
 
-	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium.yaml)")
+	rootCmd.PersistentFlags().StringVar(&flagCfgFile, "config", "", "config file (default is $HOME/.terrarium/config.yaml)")
 
 	return rootCmd
 }
@@ -68,9 +71,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".terrarium" (without extension)
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".terrarium")
+		// Search config in `$HOME/.terrarium` directory with name "config" (without extension)
+		viper.AddConfigPath(filepath.Join(home, ".terrarium"))
+		viper.SetConfigName("config")
 	}
 
 	// If a config file is found, read it in.

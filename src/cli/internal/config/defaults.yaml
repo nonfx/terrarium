@@ -17,17 +17,17 @@
 # The following is the default configuration:
 
 db:
-  host: "localhost"      # db host name
-  user: "postgres"       # db username
-  password: ""           # db password no default, panic if not set.
-  name: "cc_terrarium"   # database name
-  port: 5432             # db port
-  ssl_mode: false        # enable SSL mode
-  type: postgres         # type of db - postgres | sqlite
-  dsn: embedded.db       # SQLite Data Source Name
-  retry_attempts: 0      # max number of re-tries on connection request failure
-  retry_interval_sec: 3  # time to wait for (in seconds) before each retry
-  retry_jitter_sec: 0    # additional random time (in seconds) between 0 and this, to be added to the wait time
+  host: "localhost"              # db host name
+  user: "postgres"               # db username
+  password: ""                   # db password
+  name: "cc_terrarium"           # database name
+  port: 5432                     # db port
+  ssl_mode: false                # enable SSL mode
+  type: postgres                 # type of db - postgres | sqlite
+  dsn: ~/.terrarium/farm.sqlite  # SQLite Data Source Name
+  retry_attempts: 0              # max number of re-tries on connection request failure
+  retry_interval_sec: 3          # time to wait for (in seconds) before each retry
+  retry_jitter_sec: 0            # additional random time (in seconds) between 0 and this, to be added to the wait time
 
 log:
   format: "text"        # log format - text | json
@@ -38,3 +38,4 @@ terraform:
 
 farm:
   default: github.com/cldcvr/terrarium-farm  # link of the farm repo to use by default
+  version: latest # release tag to use

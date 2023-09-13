@@ -85,7 +85,7 @@ func processBlocks(g platform.Graph, blocks []platform.BlockID, tfModule *tfconf
 
 		relFilePath, err := getRelativeFilePath(tfModule.Path, b.GetPos().Filename)
 		if err != nil {
-			return err
+			return eris.Wrap(err, "invalid updated module file path")
 		}
 
 		updateFileIndex(fileIndex, relFilePath, b)
@@ -130,7 +130,7 @@ func writeLocalsToFile(locals map[string]interface{}, destDir string, apps app.A
 
 	localsFile, err := os.Create(path.Join(destDir, "tr_gen_locals.tf"))
 	if err != nil {
-		return err
+		return eris.Wrapf(err, "error creating generated locals file")
 	}
 	defer localsFile.Close()
 
@@ -176,17 +176,17 @@ func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 
 	srcLines, err := readAllLines(srcFile)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "failed to read lines to copy")
 	}
 
 	destLines, err := readAllLines(destFile)
 	if err != nil && !os.IsNotExist(err) {
-		return err
+		return eris.Wrap(err, "failed to read destination file")
 	}
 
 	output, err := os.Create(destFile)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "failed to create destination file")
 	}
 	defer output.Close()
 
@@ -209,16 +209,16 @@ func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 func copyProfileConfigurationFile(moduleDirPath string, profileName string, codeDestDirPath string) error {
 	sourcePath, err := getProfileVariableInputSourceFile(moduleDirPath, profileName)
 	if err != nil {
-		return fmt.Errorf("could not retrieve configuration file for platform profile '%s': %w", profileName, err)
+		return eris.Wrapf(err, "could not retrieve configuration file for platform profile '%s'", profileName)
 	}
 
 	destPath, err := getProfileVariableInputDestFile(codeDestDirPath)
 	if err != nil {
-		return fmt.Errorf("could not retrieve configuration target path for platform profile '%s': %w", profileName, err)
+		return eris.Wrapf(err, "could not retrieve configuration target path for platform profile '%s'", profileName)
 	}
 
 	if copyFile(sourcePath, destPath); err != nil {
-		return fmt.Errorf("could not copy platform '%s' profile configuration: %w", profileName, err)
+		return eris.Wrapf(err, "could not copy platform '%s' profile configuration", profileName)
 	}
 
 	return nil
@@ -230,11 +230,11 @@ func getProfileVariableInputSourceFile(moduleDirPath string, profileName string)
 
 	sourceFileStat, err := os.Stat(profileSourceFilePath)
 	if os.IsNotExist(err) {
-		return profileSourceFilePath, fmt.Errorf("platform must define configuration for profile '%s' in terraform input file '%s'", profileName, profileSourceFilePath)
+		return profileSourceFilePath, eris.Errorf("platform must define configuration for profile '%s' in terraform input file '%s'", profileName, profileSourceFilePath)
 	} else if err != nil {
-		return profileSourceFilePath, fmt.Errorf("could not open platform profile configuration file '%s': %w", profileSourceFilePath, err)
+		return profileSourceFilePath, eris.Wrapf(err, "could not open platform profile configuration file '%s'", profileSourceFilePath)
 	} else if !sourceFileStat.Mode().IsRegular() {
-		return profileSourceFilePath, fmt.Errorf("platform profile configuration path '%s' must point to a regular terraform input file", profileSourceFilePath)
+		return profileSourceFilePath, eris.Errorf("platform profile configuration path '%s' must point to a regular terraform input file", profileSourceFilePath)
 	}
 
 	return profileSourceFilePath, err
@@ -246,7 +246,7 @@ func getProfileVariableInputDestFile(destDirPath string) (filePath string, err e
 
 	_, err = os.Stat(profileDestFilePath)
 	if err != nil && !os.IsNotExist(err) {
-		return profileDestFilePath, fmt.Errorf("could not access profile configuration target path '%s': %w", profileDestFilePath, err)
+		return profileDestFilePath, eris.Wrapf(err, "could not access profile configuration target path '%s'", profileDestFilePath)
 	}
 
 	return profileDestFilePath, nil
@@ -255,18 +255,18 @@ func getProfileVariableInputDestFile(destDirPath string) (filePath string, err e
 func copyFile(srcPath string, dstPath string) error {
 	source, err := os.Open(srcPath)
 	if err != nil {
-		return fmt.Errorf("could not open copy source file '%s': %w", srcPath, err)
+		return eris.Wrapf(err, "could not open copy source file '%s'", srcPath)
 	}
 	defer source.Close()
 
 	destination, err := os.Create(dstPath)
 	if err != nil {
-		return fmt.Errorf("could not create copy destination file '%s': %w", srcPath, err)
+		return eris.Wrapf(err, "could not create copy destination file '%s'", srcPath)
 	}
 	defer destination.Close()
 
 	if _, err := io.Copy(destination, source); err != nil {
-		return fmt.Errorf("failed to copy data from '%s' to '%s': %w", srcPath, dstPath, err)
+		return eris.Wrapf(err, "failed to copy data from '%s' to '%s'", srcPath, dstPath)
 	}
 
 	return nil

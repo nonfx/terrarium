@@ -155,7 +155,7 @@ func runAsync(ctx context.Context, host string, srv interface{ Serve(net.Listene
 		defer close(result)
 		defer func() {
 			if p := recover(); p != nil {
-				result <- fmt.Errorf("server task has failed with unhandled panic: %v\n%s", p, debug.Stack())
+				result <- eris.Errorf("server task has failed with unhandled panic: %v\n%s", p, debug.Stack())
 			}
 		}()
 		result <- srv.Serve(listener)

@@ -41,6 +41,8 @@ type DB interface {
 
 	QueryDependencyByInterfaceID(interfaceID string, filterOps ...FilterOption) (result *Dependency, err error)
 	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
+
+	ExecuteSQLStatement(string) error
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB
@@ -129,4 +131,8 @@ func PaginateGlobalFilter(pageSize, pageIndex int32, totalPages *int32) FilterOp
 
 func NoOpFilter(g *gorm.DB) *gorm.DB {
 	return g
+}
+
+func (db *gDB) ExecuteSQLStatement(statement string) error {
+	return db.g().Exec(statement).Error
 }

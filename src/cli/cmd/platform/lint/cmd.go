@@ -4,9 +4,9 @@
 package lint
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +44,7 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 
 func checkDirExists(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return fmt.Errorf("could not open given directory '%s': %w", dir, err)
+		return eris.Wrapf(err, "could not open given directory '%s'", dir)
 	}
 	return nil
 }
