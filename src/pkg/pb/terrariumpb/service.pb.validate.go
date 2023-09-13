@@ -1335,3 +1335,1233 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ModuleAttributeValidationError{}
+
+// Validate checks the field values on Dependency with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Dependency) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Dependency with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in DependencyMultiError, or
+// nil if none found.
+func (m *Dependency) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Dependency) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for InterfaceId
+
+	// no validation rules for Title
+
+	// no validation rules for Description
+
+	if all {
+		switch v := interface{}(m.GetInputs()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DependencyValidationError{
+					field:  "Inputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DependencyValidationError{
+					field:  "Inputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DependencyValidationError{
+				field:  "Inputs",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetOutputs()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DependencyValidationError{
+					field:  "Outputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DependencyValidationError{
+					field:  "Outputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DependencyValidationError{
+				field:  "Outputs",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return DependencyMultiError(errors)
+	}
+
+	return nil
+}
+
+// DependencyMultiError is an error wrapping multiple validation errors
+// returned by Dependency.ValidateAll() if the designated constraints aren't met.
+type DependencyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DependencyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DependencyMultiError) AllErrors() []error { return m }
+
+// DependencyValidationError is the validation error returned by
+// Dependency.Validate if the designated constraints aren't met.
+type DependencyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DependencyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DependencyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DependencyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DependencyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DependencyValidationError) ErrorName() string { return "DependencyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DependencyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDependency.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DependencyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DependencyValidationError{}
+
+// Validate checks the field values on JSONSchema with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *JSONSchema) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on JSONSchema with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in JSONSchemaMultiError, or
+// nil if none found.
+func (m *JSONSchema) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *JSONSchema) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Title
+
+	// no validation rules for Description
+
+	// no validation rules for Type
+
+	if all {
+		switch v := interface{}(m.GetDefault()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, JSONSchemaValidationError{
+					field:  "Default",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, JSONSchemaValidationError{
+					field:  "Default",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return JSONSchemaValidationError{
+				field:  "Default",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetExamples() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, JSONSchemaValidationError{
+						field:  fmt.Sprintf("Examples[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, JSONSchemaValidationError{
+						field:  fmt.Sprintf("Examples[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return JSONSchemaValidationError{
+					field:  fmt.Sprintf("Examples[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetEnum() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, JSONSchemaValidationError{
+						field:  fmt.Sprintf("Enum[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, JSONSchemaValidationError{
+						field:  fmt.Sprintf("Enum[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return JSONSchemaValidationError{
+					field:  fmt.Sprintf("Enum[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for MinLength
+
+	// no validation rules for MaxLength
+
+	// no validation rules for Pattern
+
+	// no validation rules for Format
+
+	// no validation rules for Minimum
+
+	// no validation rules for Maximum
+
+	// no validation rules for ExclusiveMinimum
+
+	// no validation rules for ExclusiveMaximum
+
+	// no validation rules for MultipleOf
+
+	if all {
+		switch v := interface{}(m.GetItems()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, JSONSchemaValidationError{
+					field:  "Items",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, JSONSchemaValidationError{
+					field:  "Items",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetItems()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return JSONSchemaValidationError{
+				field:  "Items",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for AdditionalItems
+
+	// no validation rules for MinItems
+
+	// no validation rules for MaxItems
+
+	// no validation rules for UniqueItems
+
+	{
+		sorted_keys := make([]string, len(m.GetProperties()))
+		i := 0
+		for key := range m.GetProperties() {
+			sorted_keys[i] = key
+			i++
+		}
+		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
+		for _, key := range sorted_keys {
+			val := m.GetProperties()[key]
+			_ = val
+
+			// no validation rules for Properties[key]
+
+			if all {
+				switch v := interface{}(val).(type) {
+				case interface{ ValidateAll() error }:
+					if err := v.ValidateAll(); err != nil {
+						errors = append(errors, JSONSchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				case interface{ Validate() error }:
+					if err := v.Validate(); err != nil {
+						errors = append(errors, JSONSchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				}
+			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+				if err := v.Validate(); err != nil {
+					return JSONSchemaValidationError{
+						field:  fmt.Sprintf("Properties[%v]", key),
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return JSONSchemaMultiError(errors)
+	}
+
+	return nil
+}
+
+// JSONSchemaMultiError is an error wrapping multiple validation errors
+// returned by JSONSchema.ValidateAll() if the designated constraints aren't met.
+type JSONSchemaMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m JSONSchemaMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m JSONSchemaMultiError) AllErrors() []error { return m }
+
+// JSONSchemaValidationError is the validation error returned by
+// JSONSchema.Validate if the designated constraints aren't met.
+type JSONSchemaValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e JSONSchemaValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e JSONSchemaValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e JSONSchemaValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e JSONSchemaValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e JSONSchemaValidationError) ErrorName() string { return "JSONSchemaValidationError" }
+
+// Error satisfies the builtin error interface
+func (e JSONSchemaValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sJSONSchema.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = JSONSchemaValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = JSONSchemaValidationError{}
+
+// Validate checks the field values on ListDependenciesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListDependenciesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListDependenciesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListDependenciesResponseMultiError, or nil if none found.
+func (m *ListDependenciesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListDependenciesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetDependencies() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListDependenciesResponseValidationError{
+						field:  fmt.Sprintf("Dependencies[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListDependenciesResponseValidationError{
+						field:  fmt.Sprintf("Dependencies[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListDependenciesResponseValidationError{
+					field:  fmt.Sprintf("Dependencies[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if all {
+		switch v := interface{}(m.GetPage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListDependenciesResponseValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListDependenciesResponseValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListDependenciesResponseValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ListDependenciesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListDependenciesResponseMultiError is an error wrapping multiple validation
+// errors returned by ListDependenciesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListDependenciesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListDependenciesResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListDependenciesResponseMultiError) AllErrors() []error { return m }
+
+// ListDependenciesResponseValidationError is the validation error returned by
+// ListDependenciesResponse.Validate if the designated constraints aren't met.
+type ListDependenciesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListDependenciesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListDependenciesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListDependenciesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListDependenciesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListDependenciesResponseValidationError) ErrorName() string {
+	return "ListDependenciesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListDependenciesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListDependenciesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListDependenciesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListDependenciesResponseValidationError{}
+
+// Validate checks the field values on Schema with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Schema) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Schema with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in SchemaMultiError, or nil if none found.
+func (m *Schema) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Schema) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	{
+		sorted_keys := make([]string, len(m.GetProperties()))
+		i := 0
+		for key := range m.GetProperties() {
+			sorted_keys[i] = key
+			i++
+		}
+		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
+		for _, key := range sorted_keys {
+			val := m.GetProperties()[key]
+			_ = val
+
+			// no validation rules for Properties[key]
+
+			if all {
+				switch v := interface{}(val).(type) {
+				case interface{ ValidateAll() error }:
+					if err := v.ValidateAll(); err != nil {
+						errors = append(errors, SchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				case interface{ Validate() error }:
+					if err := v.Validate(); err != nil {
+						errors = append(errors, SchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				}
+			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+				if err := v.Validate(); err != nil {
+					return SchemaValidationError{
+						field:  fmt.Sprintf("Properties[%v]", key),
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return SchemaMultiError(errors)
+	}
+
+	return nil
+}
+
+// SchemaMultiError is an error wrapping multiple validation errors returned by
+// Schema.ValidateAll() if the designated constraints aren't met.
+type SchemaMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SchemaMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SchemaMultiError) AllErrors() []error { return m }
+
+// SchemaValidationError is the validation error returned by Schema.Validate if
+// the designated constraints aren't met.
+type SchemaValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SchemaValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SchemaValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SchemaValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SchemaValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SchemaValidationError) ErrorName() string { return "SchemaValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SchemaValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSchema.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SchemaValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SchemaValidationError{}
+
+// Validate checks the field values on DependencyInputsAndOutputs with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DependencyInputsAndOutputs) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DependencyInputsAndOutputs with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DependencyInputsAndOutputsMultiError, or nil if none found.
+func (m *DependencyInputsAndOutputs) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DependencyInputsAndOutputs) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Title
+
+	// no validation rules for Description
+
+	// no validation rules for Type
+
+	switch v := m.DefaultValue.(type) {
+	case *DependencyInputsAndOutputs_DefaultNumber:
+		if v == nil {
+			err := DependencyInputsAndOutputsValidationError{
+				field:  "DefaultValue",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+		// no validation rules for DefaultNumber
+	case *DependencyInputsAndOutputs_DefaultString:
+		if v == nil {
+			err := DependencyInputsAndOutputsValidationError{
+				field:  "DefaultValue",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+		// no validation rules for DefaultString
+	default:
+		_ = v // ensures v is used
+	}
+
+	if len(errors) > 0 {
+		return DependencyInputsAndOutputsMultiError(errors)
+	}
+
+	return nil
+}
+
+// DependencyInputsAndOutputsMultiError is an error wrapping multiple
+// validation errors returned by DependencyInputsAndOutputs.ValidateAll() if
+// the designated constraints aren't met.
+type DependencyInputsAndOutputsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DependencyInputsAndOutputsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DependencyInputsAndOutputsMultiError) AllErrors() []error { return m }
+
+// DependencyInputsAndOutputsValidationError is the validation error returned
+// by DependencyInputsAndOutputs.Validate if the designated constraints aren't met.
+type DependencyInputsAndOutputsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DependencyInputsAndOutputsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DependencyInputsAndOutputsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DependencyInputsAndOutputsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DependencyInputsAndOutputsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DependencyInputsAndOutputsValidationError) ErrorName() string {
+	return "DependencyInputsAndOutputsValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DependencyInputsAndOutputsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDependencyInputsAndOutputs.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DependencyInputsAndOutputsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DependencyInputsAndOutputsValidationError{}
+
+// Validate checks the field values on DependencyInputsAndOutputsJSONSchema
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *DependencyInputsAndOutputsJSONSchema) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DependencyInputsAndOutputsJSONSchema
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// DependencyInputsAndOutputsJSONSchemaMultiError, or nil if none found.
+func (m *DependencyInputsAndOutputsJSONSchema) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DependencyInputsAndOutputsJSONSchema) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	{
+		sorted_keys := make([]string, len(m.GetProperties()))
+		i := 0
+		for key := range m.GetProperties() {
+			sorted_keys[i] = key
+			i++
+		}
+		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
+		for _, key := range sorted_keys {
+			val := m.GetProperties()[key]
+			_ = val
+
+			// no validation rules for Properties[key]
+
+			if all {
+				switch v := interface{}(val).(type) {
+				case interface{ ValidateAll() error }:
+					if err := v.ValidateAll(); err != nil {
+						errors = append(errors, DependencyInputsAndOutputsJSONSchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				case interface{ Validate() error }:
+					if err := v.Validate(); err != nil {
+						errors = append(errors, DependencyInputsAndOutputsJSONSchemaValidationError{
+							field:  fmt.Sprintf("Properties[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				}
+			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+				if err := v.Validate(); err != nil {
+					return DependencyInputsAndOutputsJSONSchemaValidationError{
+						field:  fmt.Sprintf("Properties[%v]", key),
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return DependencyInputsAndOutputsJSONSchemaMultiError(errors)
+	}
+
+	return nil
+}
+
+// DependencyInputsAndOutputsJSONSchemaMultiError is an error wrapping multiple
+// validation errors returned by
+// DependencyInputsAndOutputsJSONSchema.ValidateAll() if the designated
+// constraints aren't met.
+type DependencyInputsAndOutputsJSONSchemaMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DependencyInputsAndOutputsJSONSchemaMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DependencyInputsAndOutputsJSONSchemaMultiError) AllErrors() []error { return m }
+
+// DependencyInputsAndOutputsJSONSchemaValidationError is the validation error
+// returned by DependencyInputsAndOutputsJSONSchema.Validate if the designated
+// constraints aren't met.
+type DependencyInputsAndOutputsJSONSchemaValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) ErrorName() string {
+	return "DependencyInputsAndOutputsJSONSchemaValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DependencyInputsAndOutputsJSONSchemaValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDependencyInputsAndOutputsJSONSchema.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DependencyInputsAndOutputsJSONSchemaValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DependencyInputsAndOutputsJSONSchemaValidationError{}
+
+// Validate checks the field values on DependencyInputsAndOutputsDependency
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *DependencyInputsAndOutputsDependency) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DependencyInputsAndOutputsDependency
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// DependencyInputsAndOutputsDependencyMultiError, or nil if none found.
+func (m *DependencyInputsAndOutputsDependency) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DependencyInputsAndOutputsDependency) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetInputs()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
+					field:  "Inputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
+					field:  "Inputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DependencyInputsAndOutputsDependencyValidationError{
+				field:  "Inputs",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetOutputs()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
+					field:  "Outputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
+					field:  "Outputs",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DependencyInputsAndOutputsDependencyValidationError{
+				field:  "Outputs",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return DependencyInputsAndOutputsDependencyMultiError(errors)
+	}
+
+	return nil
+}
+
+// DependencyInputsAndOutputsDependencyMultiError is an error wrapping multiple
+// validation errors returned by
+// DependencyInputsAndOutputsDependency.ValidateAll() if the designated
+// constraints aren't met.
+type DependencyInputsAndOutputsDependencyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DependencyInputsAndOutputsDependencyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DependencyInputsAndOutputsDependencyMultiError) AllErrors() []error { return m }
+
+// DependencyInputsAndOutputsDependencyValidationError is the validation error
+// returned by DependencyInputsAndOutputsDependency.Validate if the designated
+// constraints aren't met.
+type DependencyInputsAndOutputsDependencyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DependencyInputsAndOutputsDependencyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DependencyInputsAndOutputsDependencyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DependencyInputsAndOutputsDependencyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DependencyInputsAndOutputsDependencyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DependencyInputsAndOutputsDependencyValidationError) ErrorName() string {
+	return "DependencyInputsAndOutputsDependencyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DependencyInputsAndOutputsDependencyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDependencyInputsAndOutputsDependency.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DependencyInputsAndOutputsDependencyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DependencyInputsAndOutputsDependencyValidationError{}

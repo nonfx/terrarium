@@ -27,13 +27,12 @@ func (_m *Commander) Run(_a0 *exec.Cmd) error {
 	return r0
 }
 
-type mockConstructorTestingTNewCommander interface {
+// NewCommander creates a new instance of Commander. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewCommander(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// NewCommander creates a new instance of Commander. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func NewCommander(t mockConstructorTestingTNewCommander) *Commander {
+}) *Commander {
 	mock := &Commander{}
 	mock.Mock.Test(t)
 

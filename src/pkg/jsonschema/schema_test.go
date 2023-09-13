@@ -4,6 +4,7 @@
 package jsonschema
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -150,6 +151,54 @@ func TestNode_ApplyDefaultsToArr(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.node.ApplyDefaultsToArr(tt.inp)
 			assert.Equal(t, tt.wantOut, tt.inp)
+		})
+	}
+}
+
+func TestNodeScan(t *testing.T) {
+	n := &Node{}
+
+	// Successful unmarshalling
+	validJSON := `{"type":"testType"}`
+	err := n.Scan([]byte(validJSON))
+	assert.Nil(t, err)
+	assert.Equal(t, "testType", n.Type)
+
+	// Failure due to incorrect type assertion
+	err = n.Scan("invalidType")
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "type assertion to []byte failed")
+
+	// Failure due to invalid JSON
+	invalidJSON := `{"type":}`
+	err = n.Scan([]byte(invalidJSON))
+	assert.NotNil(t, err)
+}
+
+func TestNodeValue(t *testing.T) {
+	tests := []struct {
+		name string
+		node Node
+		want error
+	}{
+		{
+			name: "successful value",
+			node: Node{
+				Type: "string",
+			},
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tt.node.Value()
+			if tt.want == nil && err != nil {
+				t.Fatalf("expected no error, got: %v", err)
+			}
+			if tt.want != nil && !errors.Is(err, tt.want) {
+				t.Fatalf("expected error %v, got: %v", tt.want, err)
+			}
 		})
 	}
 }

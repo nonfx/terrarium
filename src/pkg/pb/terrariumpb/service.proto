@@ -10,6 +10,7 @@ package terrarium.v0;
 option go_package = "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 
 import "src/pkg/pb/grpc/validate/validate.proto";
 import "src/pkg/pb/google/api/annotations.proto";
@@ -113,4 +114,81 @@ service TerrariumService {
       get: "/v0/modules/{moduleId=*}/attributes"
     };
   }
+}
+
+message Dependency {
+  string interface_id = 1;
+  string title = 2;
+  string description = 3;
+  JSONSchema inputs = 4; // JSON serialized Inputs
+  JSONSchema outputs = 5; // JSON serialized Outputs
+}
+
+message JSONSchema {
+  // Basic schema details
+  string title = 1;
+  string description = 2;
+  string type = 3;  // e.g., string, number, integer, boolean, object, array, null
+
+  // Default value for the field.
+  google.protobuf.Value default = 4;
+
+  // Common attributes
+  repeated google.protobuf.Value examples = 5;
+  repeated google.protobuf.Value enum = 6;
+
+  // Attributes for string type
+  int32 minLength = 7;
+  int32 maxLength = 8;
+  string pattern = 9;
+  string format = 10;  // Standard formats like "date", "email", etc.
+
+  // Attributes for number and integer types
+  int32 minimum = 11;
+  int32 maximum = 12;
+  bool exclusiveMinimum = 13;  // Notice the type change to bool
+  bool exclusiveMaximum = 14;  // Notice the type change to bool
+  int32 multipleOf = 15;
+
+  // Attributes for array type
+  JSONSchema items = 16; // Defines the schema for array items
+  bool additionalItems = 17;
+  int32 minItems = 18;
+  int32 maxItems = 19;
+  bool uniqueItems = 20;
+
+  // Attributes for object type
+  map<string, JSONSchema> properties = 21; // Each property is itself a JSON schema
+  repeated string required = 22;
+}
+
+
+message ListDependenciesResponse {
+  repeated Dependency dependencies = 1;
+  Page page = 2;
+}
+
+message Schema {
+  string type = 1; // can be: "object", "array" or others based on context
+  map<string, JSONSchema> properties = 2;
+}
+
+message DependencyInputsAndOutputs {
+  string title = 1;
+  string description = 2;
+  string type = 3;
+  oneof default_value {
+      int32 default_number = 4;
+      string default_string = 5;
+  }
+}
+
+message DependencyInputsAndOutputsJSONSchema {
+  string type = 1;
+  map<string, DependencyInputsAndOutputs> properties = 2;
+}
+
+message DependencyInputsAndOutputsDependency {
+  DependencyInputsAndOutputsJSONSchema inputs = 1;
+  DependencyInputsAndOutputsJSONSchema outputs = 2;
 }
