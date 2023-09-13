@@ -44,8 +44,13 @@ CLI connects with PostgreSQL Database to store the persistent data.
 
     - Download pre-compiled binary from GitHub Release
 
-      There are downloadable assets associated with each CLI release in Github. These can be downloaded directly from [the Terrarium Github release page](https://github.com/cldcvr/terrarium/releases)
-<tr/>
+      - There are downloadable assets associated with each CLI release in Github. These can be downloaded directly from [the Terrarium Github release page](https://github.com/cldcvr/terrarium/releases)
+      - The release assets can also be downloaded via wget or curl:
+      ```sh
+      wget https://github.com/cldcvr/terrarium/releases/download/v0.1/terrarium_v0.1_darwin_arm64.tar.gz
+
+      curl -LO https://github.com/cldcvr/terrarium/releases/download/v0.1/terrarium-v0.1-darwin-arm64.tar.gz
+      ```
 2. Seed & Run Database
 
    ```sh

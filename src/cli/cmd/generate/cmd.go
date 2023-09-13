@@ -20,6 +20,7 @@ var (
 	flagPlatformDir string
 	flagOutDir      string
 	flagApps        []string
+	flagProfile     string
 )
 
 func NewCmd() *cobra.Command {
@@ -33,6 +34,7 @@ func NewCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flagPlatformDir, "platform-dir", "p", ".", "path to the directory containing the Terrarium platform template")
 	cmd.Flags().StringArrayVarP(&flagApps, "app", "a", nil, "path to the app directory or the app yaml file. can be more then one")
 	cmd.Flags().StringVarP(&flagOutDir, "output-dir", "o", "./.terrarium", "path to the directory where you want to generate the output")
+	cmd.Flags().StringVarP(&flagProfile, "configuration-profile", "c", "", "name of platform configuration profile to apply")
 
 	return cmd
 }
@@ -62,7 +64,7 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	blockCount, err := writeTF(pm.Graph, flagOutDir, apps, m)
+	blockCount, err := writeTF(pm.Graph, flagOutDir, apps, m, flagProfile)
 	if err != nil {
 		return eris.Wrapf(err, "failed to write terraform code to dir: %s", flagOutDir)
 	}

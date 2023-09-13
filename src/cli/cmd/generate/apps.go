@@ -55,7 +55,7 @@ func readAppDependency(appYamlPath string) ([]byte, error) {
 	// If it's a directory, append terrarium.yaml to the path
 	if info.IsDir() {
 		appYamlPath = path.Join(appYamlPath, defaultYAMLFileName)
-	} else if !slices.Contains([]string{"yml", "yaml"}, path.Ext(appYamlPath)) {
+	} else if !slices.Contains([]string{".yml", ".yaml"}, path.Ext(appYamlPath)) {
 		// If it's a file but not a .yaml, return an error
 		return nil, eris.New("provided path is not a directory or a .yaml|.yml file")
 	}

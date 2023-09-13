@@ -46,11 +46,21 @@ func TestCreateDSN(t *testing.T) {
 			sslMode:  true,
 			expected: "host=localhost user=test password=test dbname=test port=5432 sslmode=enable",
 		},
+		{
+			name:     "no password",
+			host:     "localhost",
+			user:     "test",
+			password: "",
+			dbName:   "test",
+			port:     5432,
+			sslMode:  true,
+			expected: "host=localhost user=test  dbname=test port=5432 sslmode=enable",
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			dsn := createDSN(tc.host, tc.user, tc.password, tc.dbName, tc.port, tc.sslMode)
+			dsn := createPostgresDSN(tc.host, tc.user, tc.password, tc.dbName, tc.port, tc.sslMode)
 			assert.Equal(t, tc.expected, dsn)
 		})
 	}
