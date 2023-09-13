@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/cldcvr/terrarium/src/pkg/utils"
+	"github.com/rotisserie/eris"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -32,7 +33,7 @@ func Connect(dialector gorm.Dialector, options ...ConnOption) (*gorm.DB, error) 
 		return err
 	})
 
-	return db, err
+	return db, eris.Wrap(err, "error connecting to database")
 }
 
 // createPostgresDSN creates the DSN (Data Source Name) string for the postgres database connection.

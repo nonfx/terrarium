@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/rotisserie/eris"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -148,7 +149,7 @@ func TestWalk(t *testing.T) {
 			graph: defaultG,
 			roots: []BlockID{"A"},
 			walkerCB: func(blockId BlockID) error {
-				return errors.New("error in walker function")
+				return eris.New("error in walker function")
 			},
 			expectedError: errors.New("error in walker function"),
 		},
@@ -158,7 +159,7 @@ func TestWalk(t *testing.T) {
 			roots: []BlockID{"A"},
 			walkerCB: func(blockId BlockID) error {
 				if t, _ := blockId.Parse(); t == BlockType_Output {
-					return errors.New("error in output function")
+					return eris.New("error in output function")
 				}
 				return nil
 			},
@@ -181,9 +182,11 @@ func TestWalk(t *testing.T) {
 
 			err := tt.graph.Walk(tt.roots, cb)
 
-			assert.Equal(t, tt.expectedError, err)
 			if tt.expectedError == nil {
+				assert.NoError(t, err)
 				assert.Equal(t, tt.expectedPath, traversed)
+			} else {
+				assert.True(t, eris.Is(err, tt.expectedError))
 			}
 		})
 	}

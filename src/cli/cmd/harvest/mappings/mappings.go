@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/rotisserie/eris"
 	"golang.org/x/exp/slices"
 )
 
@@ -55,7 +56,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			ProviderID:     dstResDB.ProviderID,
 			AttributePath:  dstResInputName,
 		}); err != nil {
-			return nil, fmt.Errorf("unknown resource-attribute record %s: %v", fmtAttrMeta(dstRes.Type, dstRes.Name, dstResInputName, dstRes.Pos.Filename, dstRes.Pos.Line), err)
+			return nil, eris.Wrapf(err, "unknown resource-attribute record %s", fmtAttrMeta(dstRes.Type, dstRes.Name, dstResInputName, dstRes.Pos.Filename, dstRes.Pos.Line))
 		}
 
 		mappingDB := &db.TFResourceAttributesMapping{
@@ -63,7 +64,7 @@ func createMappingRecord(g db.DB, parent *tfconfig.Module, dstRes *tfconfig.Reso
 			OutputAttributeID: srcAttrDB.ID,
 		}
 		if _, err := g.CreateTFResourceAttributesMapping(mappingDB); err != nil {
-			return nil, fmt.Errorf("error creating attribut-mapping record: %v", err)
+			return nil, eris.Wrap(err, "error creating attribut-mapping record")
 		}
 		return mappingDB, nil
 	}
