@@ -4,10 +4,14 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
+	"github.com/mitchellh/go-homedir"
 	"github.com/rotisserie/eris"
 	"gorm.io/gorm"
 )
@@ -80,7 +84,15 @@ func DBConnect() (db.DB, error) {
 		}
 		return mockdb, nil
 	case "sqlite":
-		g, err = dbhelper.ConnectSQLite(DBDSN())
+		dir, err := homedir.Expand(filepath.Dir(DBDSN()))
+		if err != nil {
+			return nil, eris.Wrap(err, "could not locate the DB file location")
+		}
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return nil, eris.Wrap(err, "could not create/access DB file location")
+		}
+		g, err = dbhelper.ConnectSQLite(filepath.Join(dir, filepath.Base(DBDSN())))
 		if err != nil {
 			return nil, eris.Wrap(err, "could not establish a connection to the database")
 		}

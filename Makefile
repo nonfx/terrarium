@@ -9,6 +9,7 @@ POSTGRES_DB := cc_terrarium
 POSTGRES_USER := postgres
 FARM_DB_DUMP_FILE := $(POSTGRES_DB).psql
 COVERAGE_FILE = coverage/coverage.txt
+FARM_DB_DUMP_FILE_SQL_ZIP := $(POSTGRES_DB)_data.sql.gz
 
 # Define variables for pg_dump command
 DUMP_DIR := ./data
@@ -20,6 +21,7 @@ docker-init:  ## Initialize the environment before running docker commands
 .PHONY: db-dump
 db-dump: start-db  ## Target for dumping PostgreSQL database to a file
 	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump --column-inserts -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE) -Fc $(POSTGRES_DB)
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -Z 9 --column-inserts --rows-per-insert=100 --data-only --exclude-table=taxonomies -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE_SQL_ZIP) -Fp $(POSTGRES_DB)
 
 .PHONY: db-update  ## Restore database from the database bump file. Ignore errors for existing rows.
 db-update: data/$(FARM_DB_DUMP_FILE) start-db
@@ -121,7 +123,7 @@ test:  ## Run go unit tests
 
 define make_binary
 	@echo "-- Building application binary $(1) for $(2)-$(3)"
-	CGO_ENABLED=0 GOOS=$(2) GOARCH=$(3) go build $(GO_LDFLAGS) -v -o $(1) ./src/cli/terrarium
+	GOOS=$(2) GOARCH=$(3) go build $(GO_LDFLAGS) -v -o $(1) ./src/cli/terrarium
 endef
 
 $(BINARY_NAME): $(CLI_SRCS)

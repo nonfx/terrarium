@@ -19,7 +19,7 @@ secrets:
 
 services:
   postgres:
-    image: postgres:11
+    image: postgres:12
     container_name: postgres
     networks: [terrarium]
     environment:
