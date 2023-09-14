@@ -23,7 +23,7 @@ db:
   name: "cc_terrarium"           # database name
   port: 5432                     # db port
   ssl_mode: false                # enable SSL mode
-  type: postgres                 # type of db - postgres | sqlite
+  type: sqlite                 # type of db - postgres | sqlite
   dsn: ~/.terrarium/farm.sqlite  # SQLite Data Source Name
   retry_attempts: 0              # max number of re-tries on connection request failure
   retry_interval_sec: 3          # time to wait for (in seconds) before each retry
