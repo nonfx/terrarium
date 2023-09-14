@@ -1,6 +1,6 @@
-# App Dependency Format Documentation
+# App Manifest
 
-The App Dependency Format is a specification that allows application developers to define and manage the dependencies of their applications in a structured manner. This format is used in conjunction with the Terrarium tools, which handle the resolution and provisioning of these dependencies.
+The App Manifest Format is a specification that allows application developers to define and manage the dependencies of their applications in a structured manner. This format is used in conjunction with the Terrarium tools, which handle the resolution and provisioning of these dependencies.
 
 ## Overview
 
