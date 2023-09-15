@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230821164346-f0b467a9714a
 	github.com/creack/pty v1.1.18
@@ -14,6 +15,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/hinshun/vt10x v0.0.0-20220301184237-5011da428d02
+	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/icza/backscanner v0.0.0-20230330133933-bf6beb754c70
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rotisserie/eris v0.5.4

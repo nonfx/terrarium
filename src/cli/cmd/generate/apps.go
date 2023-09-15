@@ -6,9 +6,12 @@ package generate
 import (
 	"os"
 	"path"
+	"sort"
 
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/app"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/utils"
 	"github.com/rotisserie/eris"
 	"golang.org/x/exp/slices"
 )
@@ -69,39 +72,16 @@ func readAppDependency(appYamlPath string) ([]byte, error) {
 	return content, nil
 }
 
-func matchAppAndPlatform(pm *platform.PlatformMetadata, apps app.Apps) (err error) {
-	for i, app := range apps {
-		if app.Compute.ID != "" {
-			err = validateDependency(pm, &(apps[i].Compute))
-			if err != nil {
-				return
-			}
-		}
-
-		for j, dep := range app.Dependencies {
-			if !dep.NoProvision {
-				err = validateDependency(pm, &(apps[i].Dependencies[j]))
-				if err != nil {
-					return
-				}
-			}
+func writeAppsEnv(pm *platform.PlatformMetadata, apps app.Apps) error {
+	for _, appObj := range apps {
+		vars := utils.GetAppEnvTemplate(pm, appObj)
+		sort.Sort(vars)
+		fileName := "app_" + appObj.ID + ".env.mustache"
+		err := os.WriteFile(path.Join(flagOutDir, fileName), []byte(vars.RenderWithQuotes()), constants.ReadWritePermissions)
+		if err != nil {
+			return eris.Wrapf(err, "failed to write app env file")
 		}
 	}
 
-	return nil
-}
-
-func validateDependency(pm *platform.PlatformMetadata, appDep *app.Dependency) error {
-	comp := pm.Components.GetByID(appDep.Use)
-	if comp == nil {
-		return eris.Errorf("component '%s.%s' is not implemented in the platform", appDep.ID, appDep.Use)
-	}
-
-	err := comp.Inputs.Validate(appDep.Inputs)
-	if err != nil {
-		return eris.Wrapf(err, "component '%s.%s' does not contain a valid set of inputs", appDep.ID, appDep.Use)
-	}
-
-	comp.Inputs.ApplyDefaultsToMSI(appDep.Inputs)
 	return nil
 }

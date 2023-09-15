@@ -14,7 +14,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // processYAMLFiles recursively processes YAML files in the specified directory.
