@@ -1,20 +1,70 @@
+<a href="https://terrarium.cldcvr.com/">
+  <img alt="terrarium" src="https://storage.googleapis.com/codepipes-assets/terrarium/assets/T8-logo.png" width="100" />
+</a>
+
+[![Documentation](https://img.shields.io/badge/Documentation-Design_Docs-blue?logo=read-the-docs)](https://terrarium.readme.io/docs/)
+[![Build results](https://github.com/cldcvr/terrarium/actions/workflows/release.yaml/badge.svg)](https://github.com/cldcvr/terrarium/actions/workflows/release.yaml)
+[![GitHub license](https://img.shields.io/github/license/cldcvr/terrarium)](https://github.com/cldcvr/terrarium/blob/main/LICENSE)
+[![Discord](https://img.shields.io/discord/1130781563928444978)](https://discord.gg/gG3gDm9GmF)
+[![Contribute](https://img.shields.io/badge/Contribute-How_to_Contribute-blue?logo=github)](./CONTRIBUTING.md)
+
+---
+
 # Terrarium
 
-The Terrarium project aims to empower DevOps professionals by providing a comprehensive suite of tools for creating reusable Terraform templates.
+The Terrarium project aims to empower platform engineering professionals by providing a comprehensive suite of tools for creating reusable Terraform templates. In the evolving landscape of DevOps, Terrarium aligns with the principles of [Internal Developer Platforms (IDP)](internaldeveloperplatform.org), ensuring streamlined infrastructure provisioning and management.
+
+## Installation Instructions
+
+1. Download [Terrarium](https://github.com/cldcvr/terrarium/releases) and extract the TAR archive.
+
+   ```bash
+   wget https://github.com/cldcvr/terrarium/releases/download/$VERSION/terrarium-$VERSION-linux-amd64.tar.gz
+   ```
+   Example:
+   ```bash
+   wget https://github.com/cldcvr/terrarium/releases/download/v0.3/terrarium-v0.3-darwin-amd64.tar.gz
+   tar -xzf terrarium-v0.3-darwin-amd64.tar.gz
+   ```
+
+2. Move the `terrarium` binary to a directory in your system's PATH, like `/usr/local/bin/`.
+   Add this to your shell:
+   ```bash
+   PATH="$PATH:/path/to/terrarium"
+   ```
+
+3. Alternatively, install using the source code.
+   Clone this repo and execute:
+
+   ```bash
+   make install
+   ```
+
+4. Verify the Installation
+
+   To check if Terrarium is installed correctly, open your terminal or command prompt and run:
+
+   ```bash
+   terrarium version
+   ```
+
+### Get Started with Terrarium
+
+## Client Libraries
+
+| Tool                 | Description                                                           |
+|----------------------|-----------------------------------------------------------------------|
+| [VS Code Extension](https://github.com/cldcvr/terrarium-vscode-plugin) | Assists DevOps in writing Terraform code and managing dependencies.    |
+| [CLI](./setup.md)    | Command-line interface for working with Terrarium and app templates. |
+| [Web UI](https://github.com/cldcvr/terrarium-frontend) (coming soon) | User interface for visualizing Terrarium Platform Templates.         |
+| [API](./src/api/) (internal) | Internal query server for Terrarium Farm repo content.              |
 
 ## Concepts
 
-- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a repository containing curated collection of content that enables essential features such as generalization of infrastructure dependency interfaces, taxonomy management and auto-complete suggestions for terraform and app-dependencies. Cloud Cover owned Farm repo is maintained at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm).
-- [Terrarium Dependency Interface](./src/pkg/metadata/dependency/readme.md) - The Terrarium Dependency Interface is a contract that defines the inputs and outputs of an infrastructure dependency, facilitating communication between applications and Infrastructure as Code (IaC).
-- [Terrarium Platform Framework](./examples/platform/readme.md) - The Terrarium Platform Framework facilitates the creation of reusable Infrastructure as Code configurations using Terraform. Templates built using this framework are referred to as Terrarium Platform templates.
-- [Terrarium App Metadata](./src/pkg/metadata/app/readme.md) - Terrarium App metadata provides a way for applications to declare their infrastructure dependencies.
-
-## Tools
-
-- [CLI](./setup.md) - Our command-line interface (CLI) offers a seamless experience for working with Terrarium. It includes commands for Terrarium Auto-Complete, leveraging the Terrarium Platform framework, adding dependencies to your applications, and ultimately composing a fully functional Terraform template by combining the Platform template and the app-specific dependencies.
-- [VS Code Extension](https://github.com/cldcvr/terrarium-vscode-plugin) - Our VS Code extension is designed to assists DevOps in writing Terraform code and streamline infrastructure dependency declaration for the app Developers.
-- [Web UI](https://github.com/cldcvr/terrarium-frontend) (coming soon) - The UI component, currently in development, will provide comprehensive documentation and visual representations of the Terrarium Platform Templates, the implemented dependencies within the Platform, and platform insights. This will help DevOps professionals gain a clear overview of the platform template and assist developers in selecting appropriate dependencies.
-- [API](./src/api/) (internal) - The API serves as a query server for the content in the Terrarium Farm repo. It is intended to be utilized by the Terrarium Web UI and is not intended for direct use. Therefore, it is an internal tool.
+- [App Manifest](./src/pkg/metadata/app/readme.md) - App Manifest provides a way for any applications to declare its infrastructure requirements using generic dependency interfaces. Such that, a working Terraform template can be generated at the time of deployment using the best practice defined in the Terrarium platform template.
+- [Terrarium Dependency Interface](./src/pkg/metadata/dependency/readme.md) - The Terrarium Dependency Interface is an agreement that outlines how applications and Infrastructure as Code (IaC) interact. Dependencies are implemented in platforms and used in apps. A single dependency can be built into various platforms but only once per platform. However, an app can use the same dependency multiple times.
+- [Terrarium Platform Framework](./examples/platform/readme.md) - The Terrarium Platform Framework helps make reusable templates with Terraform. A Terrarium Platform Template implements dependencies in an opinionated way, exposing only relevant controls to the app and generating a defined set of outputs for the app to use as environment variables.
+- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a repository containing seed data like tf-modules, dependencies, taxonomy & platforms. The farm repository has workflows to ensure the sanity of the content as well as scan the content to extract key information. Cloud Cover-owned Farm repo is maintained at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm).
 
 ## Flow
 
@@ -23,18 +73,26 @@ The Terrarium project aims to empower DevOps professionals by providing a compre
 ```mermaid
 flowchart LR
     PT["Terrarium Platform Template\neg: cc-aws/cc-gcp/cc-azure"]
-    AD["App Dependencies\neg: pgsql, redis,\nweb-server, background-worker, static-server"]
-    TR["Terrarium"]
+    DEP["Dependencies\neg: pgsql, redis,\nweb-server, background-worker, static-server"]
+    APP["Applications\neg: backend, frontend, worker"]
+    TR["Terrarium CLI"]
     WT["Working Terraform Template"]
+    ENV["Environment Variables"]
 
-    PT --> TR
-    AD --> TR
-    TR --> WT
+    DEP --"implemented in"--> PT
+    DEP --"used in"--> APP
+
+    PT --"one"--> TR
+    APP --"many"--> TR
+    TR --"generates"--> WT
+    TR --"generates"--> ENV
 ```
 
 ### How it works
 
-![Terrarium](./_docs/terrarium-ref-diag.png)
+<div align="center">
+<img src="./_docs/terrarium-ref-diag.png" alt="end-to-end" style="border-radius: 10px;">
+</div>
 
 ### Repos & Deployment setup
 
@@ -72,19 +130,26 @@ flowchart TD
 
 ## Progress
 
-- [x] Released VS-Code extension with basic auto-complete from curated modules in the farm-repo.
-- [x] Documented Terrarium Platform Framework and App dependencies format with example.
-- [x] Implemented CLI Command to lint & parse Terrarium Platform Templates.
-- [ ] Removing complexity of installing Postgres & T8-API in Docker to run VS Code extension, by abstracting it into CLI.
-- [ ] Developing CLI Command to compose working Terraform templates using T8-Platform Templates & App Dependencies.
-- [ ] Improving VS Code Plugin to support auto-complete with local modules.
-- [ ] Developing UI to assist developers in selecting App Dependencies by rendering platform and farm insights.
-- [ ] Adding taxonomy & dependency-interfaces content to the farm-repo.
-- [ ] Enhancing VS Code plugin to automatically implement dependency-interfaces in a platform (best guess).
-- [ ] Developing CLI & VS Code Plugin features to help developers declare infrastructure dependencies for their apps.
+- [x] Release VS-Code extension with basic auto-complete from curated modules in the farm-repo.
+- [x] Document the Terrarium Platform Framework and app dependencies format with examples.
+- [x] Implement CLI command to lint & parse Terrarium Platform Templates.
+- [x] Simplify the installation of Postgres & T8-API in Docker for the VS Code extension by integrating it into the CLI.
+- [x] Develop CLI command to compose working Terraform templates using T8-Platform Templates & App Dependencies.
+- [x] Enhance VS Code plugin to support auto-complete with local modules.
+- [x] Add dependency-interfaces content to the farm-repo.
+- [ ] Develop CLI & VS Code plugin features to assist developers in declaring infrastructure dependencies for their apps.
+- [ ] Create a UI to help developers select App Dependencies by showcasing platform and farm insights.
+- [ ] Add taxonomy mappings to the farm-repo.
+- [ ] Enhance VS Code plugin to automatically implement dependency-interfaces in a platform (best guess).
 
-## Communication Channel
 
-The Terrarium project is still in its early stages, and we value your support and feedback to shape the product into something that can make a real difference in the DevOps world.
 
-We are just a slack away - `#terrarium`
+
+## Get Involved
+
+Join our slack community - `#terrarium-community`.
+
+Terrarium, is still in its early stages; we welcome your contribution.
+
+To file a bug, suggest an improvement, or request a new feature please open an issue, refer to our [contributing guide](./CONTRIBUTING.md)
+

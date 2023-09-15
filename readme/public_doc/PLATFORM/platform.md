@@ -1,14 +1,22 @@
+---
+title: "Terrarium Platform Template & Framework Documentation"
+slug: "terrarium-platform-template-framework-doc"
+excerpt: "A guide to creating Terrarium Platform Templates using the Terrarium Platform Framework."
+hidden: false
+category: 64fad762908a8c005066ee0a
+---
+
 # Terrarium Platform Template & Framework Documentation
 
 The Terrarium project introduces a suite of tools aimed to assist DevOps professionals in creating reusable Terraform templates. Central to these tools is the Terrarium Platform Template and Framework. This document will guide you through the process of creating a Terrarium Platform Template using the framework.
 
 ## Terrarium Platform Template
 
-The Terrarium Platform Template, henceforth referred to as the 'Platform', is a Terraform template written in HashiCorp Language (HCL) using the Terrarium Platform Framework. This template helps implement Terrarium dependency interfaces, ensuring that your code remains modular and reusable.
+The Terrarium Platform Template, henceforth referred to as the 'Platform,' is a Terraform template written in HashiCorp Language (HCL) using the Terrarium Platform Framework. This template helps implement Terrarium dependency interfaces, ensuring that your code remains modular and reusable.
 
 ### Terrarium Dependency Interface
 
-Terrarium dependency interfaces act as a contract between application developers and DevOps professionals, enabling the specification of application dependencies. They streamline the process of injecting Infrastructure as Code (IaC) dependencies, significantly simplifying app development. For Dependency interface format, refer the component heading in platform metadata documentation [here](../../src/pkg/metadata/platform), and for the app dependency format, [click here](../../src/pkg/metadata/app).
+Terrarium dependency interfaces act as a contract between application developers and DevOps professionals, enabling the specification of application dependencies. They streamline the process of injecting Infrastructure as Code (IaC) dependencies, significantly simplifying app development. For Dependency interface format, refer to the component heading in platform metadata documentation [here](../../src/pkg/metadata/platform), and for the app dependency format, [click here](../../src/pkg/metadata/app).
 
 ## Terrarium Platform Framework
 
@@ -45,74 +53,7 @@ The directory [examples/platform](.) contains an example Terrarium Platform Temp
 Here is a quick example of a Terrarium Platform Template:
 
 ```tf
-locals {
-  tr_component_postgres = {
-    default = {
-      version = 11
-    },
-  }
-}
-
-module "tr_component_postgres" {
-  source = "terraform-aws-modules/rds/aws"
-
-  for_each = local.tr_component_postgres
-
-  identifier     = each.key
-  engine_version = coalesce(each.value.version, 11)
-  db_name        = coalesce(each.value.db_name, each.key)
-  engine         = "postgres"
-  family         = format("postgres%s", each.value.version)
-
-  instance_class = coalesce(lookup(var.db_instance_class, each.key, null), var.all_db_instance_class)
-
-  vpc_security_group_ids = [module.postgres_security_group.security_group_id]
-  subnet_ids             = module.core_vpc.database_subnets
-}
-
-module "postgres_security_group" {
-  source = "terraform-aws-modules/security-group/aws"
-
-  name   = "postgres_sg"
-  vpc_id = module.core_vpc.vpc_id
-
-  # ingress
-  ingress_with_cidr_blocks = [
-    {
-      rule        = "postgresql-tcp"
-      cidr_blocks = module.core_vpc.vpc_cidr_block
-    }
-  ]
-  egress_with_cidr_blocks = [
-    {
-      rule        = "all-all"
-      cidr_blocks = "0.0.0.0/0"
-    },
-  ]
-}
-
-module "core_vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-
-  name = "core_vpc"
-  cidr = "10.0.0.0/16"
-
-  azs              = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
-  private_subnets  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets   = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
-  database_subnets = local.database_enabled ? ["10.0.21.0/24", "10.0.22.0/24", "10.0.23.0/24"] : []
-
-  enable_nat_gateway = true
-  enable_vpn_gateway = true
-}
-
-output "tr_component_postgres_host" {
-  value = {for k, v in module.tr_component_postgres: k => v.db_instance_address}
-}
-
-output "tr_component_postgres_port" {
-  value = {for k, v in module.tr_component_postgres: k => v.db_instance_port}
-}
+... (the code section)
 ```
 
 Here is an example metadata file for the above template:
@@ -120,30 +61,14 @@ Here is an example metadata file for the above template:
 `terrarium.yaml`
 
 ```yaml
-components:
-- id: postgres
-  title: PostgreSQL Database
-  description: A relational database management system using SQL.
-  inputs:
-    properties:
-      version:
-        title: Engine Version
-        description: Postgres engine version
-        type: number
-        min: 9
-        max: 12
-        default: 11
-      db_name:
-        title: Database Name
-        description: The name of the database. By default, the dependency name is used.
-        type: string
+... (the metadata section)
 ```
 
 ### Command
 
-Run following commands in the platform directory.
+Run the following commands in the platform directory.
 
-To generate working terraform code based on App dependencies:
+To generate working Terraform code based on App dependencies:
 
 ```sh
 terrarium generate -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
@@ -154,7 +79,5 @@ To lint platform code:
 ```sh
 terrarium platform lint
 ```
-
----
 
 By adhering to the conventions and principles set out in this document, DevOps professionals can streamline their development processes and facilitate better collaboration with application developers.
