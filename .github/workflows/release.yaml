@@ -31,6 +31,7 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         goversion: "1.20"
+        pre_command: "export CGO_ENABLED=1"
         project_path: "./src/cli/terrarium"
         binary_name: "terrarium"
         ldflags: "-s -w -X 'github.com/cldcvr/terrarium/src/cli/internal/build.Version=${{ github.ref_name }}' -X 'github.com/cldcvr/terrarium/src/cli/internal/build.Date=${{ env.BUILD_DATE }}'"
