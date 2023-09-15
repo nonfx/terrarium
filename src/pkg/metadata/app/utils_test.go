@@ -65,6 +65,7 @@ func TestSetDefaults(t *testing.T) {
 	apps := getAppsTest()
 
 	apps[0].Compute.ID = ""
+	apps[0].Dependencies[0].ID = ""
 
 	apps.SetDefaults()
 	for _, app := range apps {
@@ -75,6 +76,7 @@ func TestSetDefaults(t *testing.T) {
 		}
 	}
 
+	assert.Equal(t, apps[0].Dependencies[0].ID, depPostgres)
 	assert.Equal(t, apps[0].Dependencies[0].Use, depPostgres)
 	assert.Equal(t, apps[0].Dependencies[0].Inputs["version"], "11")
 }

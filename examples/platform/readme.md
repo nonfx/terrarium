@@ -145,16 +145,36 @@ components:
 
 Run following commands in the platform directory.
 
-To generate working terraform code based on App dependencies:
-
-```sh
-terrarium generate -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
-```
-
 To lint platform code:
 
 ```sh
 terrarium platform lint
+```
+
+To generate working terraform code based on App dependencies:
+
+```sh
+terrarium generate -c dev -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
+```
+
+The `terrarium generate` command generates the terraform code, a `tr_gen_profile.auto.tfvars` profile and `*.env.mustache` files for each app in the destination folder (`./.terrarium`).
+
+These files looks something like this:
+
+`app_voting_be.env.mustache`
+
+```sh
+BA_LEDGERDB_HOST="{{ tr_component_postgres_host.value.ledgerdb }}"
+BA_LEDGERDB_PASSWORD="{{ tr_component_postgres_password.value.ledgerdb }}"
+BA_LEDGERDB_PORT="{{ tr_component_postgres_port.value.ledgerdb }}"
+BA_LEDGERDB_USERNAME="{{ tr_component_postgres_username.value.ledgerdb }}"
+```
+
+As you can see, the env vars personalised for the app are templated referring to a value in terraform state file.
+after provisioning infrastructure with terraform, one can render the above template by providing the terraform state file outputs to it. like this:
+
+```sh
+terraform output -json | mustache app_banking_app.env.mustache
 ```
 
 ---

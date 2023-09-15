@@ -67,7 +67,7 @@ func (app *App) SetDefaults() {
 		app.EnvPrefix = strings.ToUpper(app.ID)
 	}
 
-	if app.Compute.ID == "" {
+	if app.Compute.ID == "" && app.Compute.Use != "" {
 		app.Compute.ID = app.ID
 	}
 
@@ -79,10 +79,6 @@ func (app *App) SetDefaults() {
 }
 
 func (dep *Dependency) SetDefaults() {
-	if dep.EnvPrefix == "" {
-		dep.EnvPrefix = strings.ToUpper(dep.ID)
-	}
-
 	if dep.Inputs == nil {
 		dep.Inputs = map[string]interface{}{}
 	}
@@ -90,6 +86,14 @@ func (dep *Dependency) SetDefaults() {
 	if strings.Contains(dep.Use, "@") {
 		split := strings.SplitN(dep.Use, "@", 2)
 		dep.Use, dep.Inputs["version"] = split[0], split[1]
+	}
+
+	if dep.ID == "" {
+		dep.ID = dep.Use
+	}
+
+	if dep.EnvPrefix == "" {
+		dep.EnvPrefix = strings.ToUpper(dep.ID)
 	}
 }
 
@@ -106,7 +110,10 @@ func (apps Apps) GetAppByID(id string) *App {
 
 // GetDependencies returns the dependencies for the app including it's deployment dependency.
 func (app App) GetDependencies() Dependencies {
-	allDeps := append(app.Dependencies, app.Compute)
+	allDeps := app.Dependencies
+	if app.Compute.ID != "" {
+		allDeps = append(app.Dependencies, app.Compute)
+	}
 
 	return allDeps
 }
