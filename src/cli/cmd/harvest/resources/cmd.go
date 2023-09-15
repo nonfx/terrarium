@@ -20,6 +20,7 @@ var (
 
 	flagSchemaFile     string
 	flagModuleListFile string
+	flagWorkDir        string
 )
 
 func NewCmd() *cobra.Command {
@@ -38,6 +39,7 @@ func NewCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&flagSchemaFile, "schema-file", "s", DefaultSchemaPath, "terraform provider schema json file path")
 	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
+	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "store all module sources in this directory; improves performance by reusing data between harvest commands")
 
 	return cmd
 }
@@ -62,7 +64,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 
 	tfRunner := runner.NewTerraformRunner()
 	for _, item := range moduleList.Farm {
-		dir, _, err := item.CreateTerraformFile()
+		dir, _, err := item.CreateTerraformFile(flagWorkDir)
 		if err != nil {
 			return err
 		}
