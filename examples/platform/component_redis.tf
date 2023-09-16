@@ -1,4 +1,5 @@
-# component[Redis Cache]: An in-memory data structure store used as a cache or message broker.
+# An in-memory data structure store used as a cache or message broker.
+# @title: Redis Cache
 module "tr_component_redis" {
   source = "cloudposse/elasticache-redis/aws"
 

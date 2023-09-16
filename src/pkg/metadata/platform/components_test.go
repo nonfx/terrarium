@@ -126,3 +126,81 @@ func TestComponent_fetchOutputs(t *testing.T) {
 	assert.NotNil(t, component.Outputs.Properties["output1"], "output1 property should be present in Outputs")
 	assert.NotNil(t, component.Outputs.Properties["output2"], "output2 property should be present in Outputs")
 }
+
+func Test_getLocalInputBlockDocs(t *testing.T) {
+	testModule, _ := tfconfig.LoadModule("./test-component", &tfconfig.ResolvedModulesSchema{})
+	testPostgresLocal := testModule.Locals["tr_component_postgres"]
+	testRedisLocal := testModule.Locals["tr_component_redis"]
+	type args struct {
+		block *tfconfig.Local
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantArgs map[string]map[string]string
+	}{
+		{
+			name: "locals comment",
+			args: args{
+				block: testPostgresLocal,
+			},
+			wantArgs: map[string]map[string]string{
+				"version": {
+					"description": "Version of the PostgreSQL engine to use",
+				},
+				"db_name": {
+					"description": "The name provided here may get prefix and suffix based",
+					"title":       "Database Name",
+				},
+			},
+		},
+		{
+			name: "locals comment with description override",
+			args: args{
+				block: testRedisLocal,
+			},
+			wantArgs: map[string]map[string]string{
+				"version": {
+					"description": "Redis description override",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotArgs := getLocalInputBlockDocs(tt.args.block)
+			assert.Equal(t, tt.wantArgs, gotArgs)
+		})
+	}
+}
+
+func Test_getBlockDoc(t *testing.T) {
+	testModule, _ := tfconfig.LoadModule("./test-component", &tfconfig.ResolvedModulesSchema{})
+	testComponent := testModule.ModuleCalls["tr_component_postgres"]
+	type args struct {
+		blockPos tfconfig.SourcePos
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantArgs map[string]string
+		wantErr  bool
+	}{
+		{
+			name: "component comment",
+			args: args{
+				blockPos: testComponent.Pos,
+			},
+			wantArgs: map[string]string{
+				"description": "A relational database management system using SQL.",
+				"title":       "PostgreSQL Database",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotArgs := getBlockDoc(tt.args.blockPos)
+			assert.Equal(t, tt.wantArgs, gotArgs)
+		})
+	}
+}

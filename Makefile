@@ -111,7 +111,8 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 	@go mod download && go work sync
 
 .PHONY: test
-test:  ## Run go unit tests
+test: start-db --test ## Run go unit tests
+--test:
 	mkdir -p coverage
 	go test -tags=mock,dbtest -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
 	@echo "-- Test coverage for terrarium --"
