@@ -24,6 +24,7 @@ import (
 const (
 	docCommentTitleArgTag = "title"
 	docCommentDescArgTag  = "description"
+	docCommentEnumArgTag  = "enum"
 )
 
 var (
@@ -232,10 +233,23 @@ func tfValueToTitle(value string, prefix *string) string {
 	return cases.Title(language.Und, cases.NoLower).String(strings.ReplaceAll(strings.TrimPrefix(value, *prefix), "_", " "))
 }
 
-func setValueFromDocIfFound(value *string, valueTagName string, fieldDoc map[string]string) {
-	if newValue, ok := fieldDoc[valueTagName]; ok && newValue != "" {
-		*value = newValue
+func setListFromDocIfFound(values *[]interface{}, valueTagName string, fieldDoc map[string]string) {
+	var enumCSV string
+	if ok := setValueFromDocIfFound(&enumCSV, valueTagName, fieldDoc); ok {
+		enumValues := strings.Split(enumCSV, ",")
+		*values = make([]interface{}, 0, len(enumValues))
+		for _, value := range enumValues {
+			*values = append(*values, strings.TrimSpace(value))
+		}
 	}
+}
+
+func setValueFromDocIfFound(value *string, valueTagName string, fieldDoc map[string]string) (ok bool) {
+	if newValue, exists := fieldDoc[valueTagName]; exists && newValue != "" {
+		*value = newValue
+		ok = true
+	}
+	return
 }
 
 func extractSchema(existingSchema *jsonschema.Node, value cty.Value, fieldName string, fieldDocs map[string]map[string]string) {
@@ -243,6 +257,7 @@ func extractSchema(existingSchema *jsonschema.Node, value cty.Value, fieldName s
 	if fieldDoc, ok := fieldDocs[fieldName]; ok {
 		setValueFromDocIfFound(&existingSchema.Title, docCommentTitleArgTag, fieldDoc)
 		setValueFromDocIfFound(&existingSchema.Description, docCommentDescArgTag, fieldDoc)
+		setListFromDocIfFound(&existingSchema.Enum, docCommentEnumArgTag, fieldDoc)
 	}
 
 	switch value.Type().FriendlyName() {

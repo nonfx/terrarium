@@ -16,6 +16,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/tf/parser"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/rotisserie/eris"
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,6 +34,11 @@ func lintPlatform(dir string) error {
 	log.Info("Validating Terraform modules...")
 	if err := validatePlatformTerraform(module); err != nil {
 		log.Infof("Following Terraform issues were found: %v", err)
+		return eris.Wrap(err, "platform lint")
+	}
+
+	if err := validatePlatformMetadata(module); err != nil {
+		log.Infof("Following platform issues were found: %v", err)
 		return eris.Wrap(err, "platform lint")
 	}
 	log.Info("Platform is valid.")
@@ -69,6 +75,7 @@ func lintPlatform(dir string) error {
 	return nil
 }
 
+// validatePlatformTerraform performs platform validation on the language (Terraform) level - e.g. component and input names and data types
 func validatePlatformTerraform(module *tfconfig.Module) error {
 	requiredModuleNames := []string{}
 	for name, expr := range module.Locals {
@@ -111,6 +118,29 @@ func validatePlatformTerraform(module *tfconfig.Module) error {
 	}
 
 	return nil
+}
+
+// validatePlatformTerraform performs platform validation on the metadata level - e.g. compiled validation schema and sanity of default values
+func validatePlatformMetadata(module *tfconfig.Module) error {
+	components := platform.Components{}
+	components.Parse(module)
+	for _, cmp := range components {
+		for name, value := range cmp.Inputs.Properties {
+			if len(value.Enum) > 0 && !slices.Contains(value.Enum, value.Default) {
+				return eris.Errorf("platform component '%s' has default value (%s) for input '%s' that is not one of the enumerated allowed values: %s", cmp.ID, value.Default, name, fmtItems(value.Enum))
+			}
+		}
+	}
+	return nil
+}
+
+// fmtItems formats list [A, B, C] as string "'A', 'B', 'C'"
+func fmtItems(items []interface{}) string {
+	strValues := make([]string, 0, len(items))
+	for _, item := range items {
+		strValues = append(strValues, fmt.Sprintf("%v", item))
+	}
+	return fmt.Sprintf("'%s'", strings.Join(strValues, "', '"))
 }
 
 func fmtExpressionPosition(expr hcl.Expression) string {
