@@ -72,10 +72,6 @@ BUILD_DATE=$(shell date "+%Y-%m-%d")
 BUILD_DIR=.bin
 CLI_NAME = terrarium
 BINARY_NAME = $(BUILD_DIR)/$(CLI_NAME)
-BINARY_NAME_WIN = $(BUILD_DIR)/win/$(CLI_NAME).exe
-BINARY_NAME_LINUX = $(BUILD_DIR)/linux/$(CLI_NAME)
-BINARY_NAME_MACOS_ARM = $(BUILD_DIR)/macos/arm64/$(CLI_NAME)
-BINARY_NAME_MACOS_I386 = $(BUILD_DIR)/macos/i386/$(CLI_NAME)
 
 ifeq (${TAG},)
 	TAG=$(shell git describe --exact-match --tags 2> /dev/null)
@@ -130,29 +126,6 @@ $(BINARY_NAME): $(CLI_SRCS)
 	$(call make_binary, $(BINARY_NAME),$(shell go env GOOS),$(shell go env GOARCH))
 .PHONY: binary
 binary: $(BINARY_NAME)  ## Build application binary (native)
-
-$(BINARY_NAME_WIN): $(CLI_SRCS)
-	$(call make_binary,$@,windows,amd64)
-.PHONY: binary_win
-binary_win: $(BINARY_NAME_WIN)  ## Build application binary for Windows
-
-$(BINARY_NAME_LINUX): $(CLI_SRCS)
-	$(call make_binary,$@,linux,amd64)
-.PHONY: binary_linux
-binary_linux: $(BINARY_NAME_LINUX)  ## Build application binary for Linux
-
-$(BINARY_NAME_MACOS_ARM): $(CLI_SRCS)
-	$(call make_binary,$@,darwin,arm64)
-$(BINARY_NAME_MACOS_I386): $(CLI_SRCS)
-	$(call make_binary,$@,darwin,amd64)
-.PHONY: binary_macos
-binary_macos: $(BINARY_NAME_MACOS_ARM) $(BINARY_NAME_MACOS_I386)  ## Build application binaries for MacOS
-
-$(ZIP_FILE): $(BINARY_NAME_WIN) $(BINARY_NAME_LINUX) binary_macos
-	cd $(BUILD_DIR); \
-	zip -r ../$(ZIP_FILE) *
-.PHONY: binaries
-binaries: $(ZIP_FILE)  ## Build binary for each supported platform and archive to zip
 
 .PHONY: install
 install:  ## Install the CLI native binary into GOBIN
