@@ -58,4 +58,5 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 RUN rm -rf /go/pkg/mod && mv /go/pkg/mod.bak /go/pkg/mod
 COPY Makefile ./
 COPY examples ./examples
-ENTRYPOINT [ "make", "test" ]
+# -- tells Make that everything after is an argument not an option
+ENTRYPOINT [ "make", "--", "--test" ]
