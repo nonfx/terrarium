@@ -22,6 +22,7 @@ type DB interface {
 	CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error)
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
 	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
+	CreateDependencyAttribute(e *DependencyAttribute) (uuid.UUID, error)
 	GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error)
 
 	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
@@ -40,7 +41,7 @@ type DB interface {
 	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
 
 	QueryDependencyByInterfaceID(interfaceID string, filterOps ...FilterOption) (result *Dependency, err error)
-	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
+	QueryDependencies(filterOps ...FilterOption) (result DependencyOutputs, err error)
 
 	ExecuteSQLStatement(string) error
 }

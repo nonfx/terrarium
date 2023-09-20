@@ -13,18 +13,43 @@ import (
 type Dependency struct {
 	Model
 
-	TaxonomyID  uuid.UUID        `gorm:"default:null"` // Given taxonomy's uncertain presence in YAML, setting TaxonomyID default as NULL accommodates potential absence of taxonomy data.
-	InterfaceID string           `gorm:"unique"`
-	Title       string           `gorm:"default:null"`
-	Description string           `gorm:"default:null"`
-	Inputs      *jsonschema.Node `gorm:"type:json"`
-	Outputs     *jsonschema.Node `gorm:"type:json"`
-	ExtendsID   string           `gorm:"-"` //This is yet to be finalized
+	TaxonomyID  uuid.UUID `gorm:"default:null"` // Given taxonomy's uncertain presence in YAML, setting TaxonomyID default as NULL accommodates potential absence of taxonomy data.
+	InterfaceID string    `gorm:"unique"`
+	Title       string    `gorm:"default:null"`
+	Description string    `gorm:"default:null"`
+	ExtendsID   string    `gorm:"-"` //This is yet to be finalized
 
-	Taxonomy *Taxonomy `gorm:"foreignKey:TaxonomyID"`
+	Attributes []DependencyAttribute `gorm:"foreignKey:DependencyID"`
+	Taxonomy   *Taxonomy             `gorm:"foreignKey:TaxonomyID"`
 }
 
 type Dependencies []*Dependency
+
+type DependencyOutput struct {
+	Dependency
+	Inputs  *jsonschema.Node `json:"inputs"`
+	Outputs *jsonschema.Node `json:"outputs"`
+}
+
+type DependencyOutputs []DependencyOutput
+
+func (do DependencyOutputs) ToProto() []*terrariumpb.Dependency {
+	var res []*terrariumpb.Dependency
+	for _, output := range do {
+		res = append(res, output.ToProto())
+	}
+	return res
+}
+
+func (do *DependencyOutput) ToProto() *terrariumpb.Dependency {
+	return &terrariumpb.Dependency{
+		InterfaceId: do.InterfaceID,
+		Title:       do.Title,
+		Description: do.Description,
+		Inputs:      JSONSchemaToProto(do.Inputs),
+		Outputs:     JSONSchemaToProto(do.Outputs),
+	}
+}
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreateDependencyInterface(e *Dependency) (uuid.UUID, error) {
@@ -42,8 +67,6 @@ func (d *Dependency) ToProto() *terrariumpb.Dependency {
 		InterfaceId: d.InterfaceID,
 		Title:       d.Title,
 		Description: d.Description,
-		Inputs:      JSONSchemaToProto(d.Inputs),
-		Outputs:     JSONSchemaToProto(d.Outputs),
 	}
 }
 
@@ -74,15 +97,7 @@ func JSONSchemaToProto(jsn *jsonschema.Node) *terrariumpb.JSONSchema {
 		protoSchema.Properties = make(map[string]*terrariumpb.JSONSchema)
 
 		for key, prop := range jsn.Properties {
-			// Convert each property to its proto representation
-			protoProperty := &terrariumpb.JSONSchema{
-				Title:       prop.Title,
-				Description: prop.Description,
-				Type:        prop.Type,
-			}
-
-			// Set the converted property in the Proto Schema
-			protoSchema.Properties[key] = protoProperty
+			protoSchema.Properties[key] = JSONSchemaToProto(prop)
 		}
 	}
 
@@ -117,21 +132,36 @@ func (db *gDB) QueryDependencyByInterfaceID(interfaceID string, filterOps ...Fil
 	return &dep, nil
 }
 
-func (db *gDB) QueryDependencies(filterOps ...FilterOption) (Dependencies, error) {
+func (db *gDB) QueryDependencies(filterOps ...FilterOption) (DependencyOutputs, error) {
 	q := db.g().Preload("Taxonomy").Model(&Dependency{})
+	q = q.Preload("Attributes")
+	q = q.Joins("left join dependency_attributes on dependency_attributes.dependency_id = dependencies.id")
 
 	// Apply each filter to the query
 	for _, filter := range filterOps {
 		q = filter(q)
 	}
 
-	var deps Dependencies
+	var deps []Dependency
 	err := q.Find(&deps).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return deps, nil
+	depOutputs := make([]DependencyOutput, len(deps))
+	for i, dep := range deps {
+		depOutput := DependencyOutput{Dependency: dep}
+		for _, attr := range dep.Attributes {
+			if *attr.Computed {
+				depOutput.Outputs = attr.Schema
+			} else {
+				depOutput.Inputs = attr.Schema
+			}
+		}
+		depOutputs[i] = depOutput
+	}
+
+	return depOutputs, nil
 }
 
 func DependencySearchFilter(query string) FilterOption {

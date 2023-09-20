@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/google/uuid"
@@ -52,38 +53,64 @@ func processYAMLData(g db.DB, path string, data []byte) error {
 	}
 
 	for _, dep := range yamlData["dependency-interfaces"] {
-		var taxonomyID uuid.UUID
-
-		if dep.Taxonomy != "" {
-			// Split the taxonomy string into levels
-			levels := taxonomy.NewTaxonomy(dep.Taxonomy).Split()
-			// Please refer to TER-209 for more details to update the following snippet of code to match the
-			// taxonomy levels in the dependency interface yaml to the database
-			var dbTax db.Taxonomy
-			for i, level := range levels {
-				tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
-				if err != nil {
-					return eris.Wrap(err, "error getting taxonomy data")
-				}
-				dbTax = tax
-			}
-			taxonomyID = dbTax.ID
-		}
-
-		// Create a db.Dependency instance
-		dbDep := &db.Dependency{
-			TaxonomyID:  taxonomyID,
-			InterfaceID: dep.ID,
-			Title:       dep.Title,
-			Description: dep.Description,
-			Inputs:      dep.Inputs,
-			Outputs:     dep.Outputs,
-		}
-
-		// Call CreateDependencyInterface with the updated Dependency object
-		_, err = g.CreateDependencyInterface(dbDep)
+		err = processDependency(g, dep)
 		if err != nil {
-			return eris.Wrap(err, "error updating the database")
+			return eris.Wrapf(err, "error while updating db")
+		}
+	}
+	return nil
+}
+
+func processDependency(g db.DB, dep dependency.Interface) error {
+	var taxonomyID uuid.UUID
+	if dep.Taxonomy != "" {
+		var dbTax db.Taxonomy
+		// Split the taxonomy string into levels
+		levels := taxonomy.NewTaxonomy(dep.Taxonomy).Split()
+		// Please refer to TER-209 for more details to update the following snippet of code to match the
+		// taxonomy levels in the dependency interface yaml to the database
+		for i, level := range levels {
+			tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
+			if err != nil {
+				return eris.Wrap(err, "error getting taxonomy data")
+			}
+			dbTax = tax
+		}
+		taxonomyID = dbTax.ID
+	}
+
+	// Create a db.Dependency instance
+	dbDep := &db.Dependency{
+		TaxonomyID:  taxonomyID,
+		InterfaceID: dep.ID,
+		Title:       dep.Title,
+		Description: dep.Description,
+	}
+
+	_, err := g.CreateDependencyInterface(dbDep)
+	if err != nil {
+		return eris.Wrap(err, "error updating the database")
+	}
+
+	attrs := []struct {
+		Node     *jsonschema.Node
+		Computed bool
+	}{
+		{dep.Inputs, false}, // For inputs, Computed is false
+		{dep.Outputs, true}, // For outputs, Computed is true
+	}
+
+	for _, attr := range attrs {
+		dbAttr := &db.DependencyAttribute{
+			DependencyID: &dbDep.ID,
+			Name:         &dep.Title,
+			Schema:       attr.Node,
+			Computed:     &attr.Computed,
+		}
+
+		_, err = g.CreateDependencyAttribute(dbAttr)
+		if err != nil {
+			return eris.Wrap(err, "error creating dependency attribute")
 		}
 	}
 	return nil

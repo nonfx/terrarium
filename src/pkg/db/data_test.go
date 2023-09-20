@@ -231,6 +231,16 @@ var resourceMappings = []db.TFResourceAttributesMapping{
 	},
 }
 
+var dependencies = []db.Dependency{
+	{
+		Model:       db.Model{ID: uuid.MustParse("6ba7b81a-9dad-11d1-80b4-00c04fd430d2")},
+		Title:       "dependency-1",
+		InterfaceID: "dependency-1-interface",
+		Description: "this is first test dependency",
+		TaxonomyID:  uuidTax1,
+	},
+}
+
 func saveTestData(t *testing.T, g *gorm.DB) {
 	t.Helper()
 
@@ -241,5 +251,8 @@ func saveTestData(t *testing.T, g *gorm.DB) {
 	require.NoError(t, err)
 
 	err = g.Save(resourceMappings).Error
+	require.NoError(t, err)
+
+	err = g.Save(dependencies).Error
 	require.NoError(t, err)
 }
