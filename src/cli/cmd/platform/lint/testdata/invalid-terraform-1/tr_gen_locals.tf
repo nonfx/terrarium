@@ -4,7 +4,7 @@ locals {
     "default" : {
       # Version of the PostgreSQL engine to use
       # @enum: 11.11,12.3, 13.9
-      "version" : "11.11",
+      "version" : "15", # <------ ERROR: default value not in enum
       # The name provided here may get prefix and suffix based
       # @title: Database Name
       "db_name" : "default_db"

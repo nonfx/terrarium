@@ -18,6 +18,7 @@ components:
           description: Version of the PostgreSQL engine to use
           type: string
           default: "11"
+          enum: ["11", "12", "13"]
     outputs:
       type: object
       properties:
