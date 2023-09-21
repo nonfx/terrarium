@@ -15,11 +15,13 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
+	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func TestNewCmd(t *testing.T) {
@@ -128,4 +130,52 @@ func Test_fetchDependencies(t *testing.T) {
 		},
 	}
 	clitest.RunTests(t, tests)
+}
+
+func TestSchemaToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		schema   *terrariumpb.JSONSchema
+		expected string
+	}{
+		{
+			name:     "schema is nil",
+			schema:   nil,
+			expected: "N/A",
+		},
+		{
+			name:     "schema properties is nil",
+			schema:   &terrariumpb.JSONSchema{Type: "object", Title: "Test"},
+			expected: "Type: object, Title: Test",
+		},
+		{
+			name: "schema with properties but no default",
+			schema: &terrariumpb.JSONSchema{
+				Type:  "object",
+				Title: "Test",
+				Properties: map[string]*terrariumpb.JSONSchema{
+					"prop1": {Type: "string", Title: "Prop1", Description: "Description1"},
+				},
+			},
+			expected: "Type: object, Title: Test, Properties: {prop1: {Type: string, Title: Prop1, Description: Description1}}",
+		},
+		{
+			name: "schema with properties and default",
+			schema: &terrariumpb.JSONSchema{
+				Type:  "object",
+				Title: "Test",
+				Properties: map[string]*terrariumpb.JSONSchema{
+					"prop1": {Type: "string", Title: "Prop1", Description: "Description1", Default: structpb.NewStringValue("default1")},
+				},
+			},
+			expected: "Type: object, Title: Test, Properties: {prop1: {Type: string, Title: Prop1, Description: Description1, Default: default1}}",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := schemaToString(tt.schema)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }

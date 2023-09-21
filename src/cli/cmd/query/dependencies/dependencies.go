@@ -15,6 +15,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
@@ -120,10 +121,14 @@ func schemaToString(schema *terrariumpb.JSONSchema) string {
 
 	var props []string
 	for propName, propValue := range schema.Properties {
-		propStr := fmt.Sprintf("%s: {Type: %s, Title: %s, Description: %s}", propName, propValue.Type, propValue.Title, propValue.Description)
+		propStr := fmt.Sprintf("%s: {Type: %s, Title: %s, Description: %s", propName, propValue.Type, propValue.Title, propValue.Description)
 		if propValue.Default != nil {
-			propStr += fmt.Sprintf(", Default: %v", propValue.Default)
+			// Extracting the string value from the structpb.Value object.
+			if value, ok := propValue.Default.Kind.(*structpb.Value_StringValue); ok {
+				propStr += fmt.Sprintf(", Default: %s", value.StringValue)
+			}
 		}
+		propStr += "}" // closing the bracket for each property
 		props = append(props, propStr)
 	}
 	return fmt.Sprintf("Type: %s, Title: %s, Properties: {%s}", schema.Type, schema.Title, strings.Join(props, ", "))
