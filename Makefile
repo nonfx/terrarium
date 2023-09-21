@@ -117,7 +117,7 @@ test: start-db --test ## Run go unit tests
 
 define make_binary
 	@echo "-- Building application binary $(1) for $(2)-$(3)"
-	GOOS=$(2) GOARCH=$(3) go build $(GO_LDFLAGS) -v -o $(1) ./src/cli/terrarium
+	CGO_ENABLED=1 GOOS=$(2) GOARCH=$(3) go build $(GO_LDFLAGS) -v -o $(1) ./src/cli/terrarium
 endef
 
 $(BINARY_NAME): $(CLI_SRCS)
@@ -128,7 +128,7 @@ binary: $(BINARY_NAME)  ## Build application binary (native)
 .PHONY: install
 install:  ## Install the CLI native binary into GOBIN
 	@echo "-- Installing native binary in $(shell go env GOBIN)"
-	go install $(GO_LDFLAGS) github.com/cldcvr/terrarium/src/cli/terrarium
+	CGO_ENABLED=1 go install $(GO_LDFLAGS) github.com/cldcvr/terrarium/src/cli/terrarium
 
 ######################################################
 # Farm Targets
