@@ -43,7 +43,10 @@ type DB interface {
 
 	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
 
-	ExecuteSQLStatement(string) error
+	ExecuteSQLStatement(statement string) error
+
+	CreateRelease(e *FarmRelease) (uuid.UUID, error)
+	FindReleaseByRepo(e *FarmRelease, repo string) error
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB
