@@ -15,6 +15,7 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/cmd/query"
 	"github.com/cldcvr/terrarium/src/cli/cmd/version"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	intutils "github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,9 +34,10 @@ func init() {
 
 func newCmd() *cobra.Command {
 	rootCmd = &cobra.Command{
-		Use:   "terrarium [command]",
-		Short: "Terrarium is a set of tools for cloud infrastructure provisioning",
-		Long:  `Terrarium is a set of tools meant to simplify cloud infrastructure provisioning. It provides tools for both app developers and DevOps teams. Terrarium helps DevOps teams in writing Terraform code and helps app developer teams in declaring app dependencies to generate working Terraform code.`,
+		Use:               "terrarium [command]",
+		Short:             "Terrarium is a set of tools for cloud infrastructure provisioning",
+		Long:              `Terrarium is a set of tools meant to simplify cloud infrastructure provisioning. It provides tools for both app developers and DevOps teams. Terrarium helps DevOps teams in writing Terraform code and helps app developer teams in declaring app dependencies to generate working Terraform code.`,
+		PersistentPostRun: intutils.IsFarmUpdateRequired,
 	}
 
 	rootCmd.AddCommand(harvest.NewCmd())

@@ -46,9 +46,11 @@ type DB interface {
 	QueryPlatforms(filterOps ...FilterOption) (result Platforms, err error)
 	QueryPlatformComponents(filterOps ...FilterOption) (result PlatformComponents, err error)
 
-	ExecuteSQLStatement(string) error
-
 	Fetchdeps() []DependencyResult
+	ExecuteSQLStatement(statement string) error
+
+	CreateRelease(e *FarmRelease) (uuid.UUID, error)
+	FindReleaseByRepo(e *FarmRelease, repo string) error
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB

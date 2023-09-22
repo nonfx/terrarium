@@ -92,7 +92,7 @@ func listModules(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return eris.Wrap(err, "error formatting module list")
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), string(b))
+		fmt.Fprint(cmd.OutOrStdout(), string(b))
 
 	} else {
 		table := utils.OutFormatForList(cmd.OutOrStdout())
