@@ -6,6 +6,7 @@ package dependencies
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
@@ -14,6 +15,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
@@ -47,7 +49,7 @@ func NewCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flagSearchText, "searchText", "s", "", "optional search text")
 	cmd.Flags().Int32Var(&flagPageSize, "pageSize", 100, "page size flag")
 	cmd.Flags().Int32Var(&flagPageIndex, "pageIndex", 0, "page index flag")
-	cmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "json", "Output format (json or table)")
+	cmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
 
 	return cmd
 }
@@ -71,8 +73,6 @@ func fetchDependencies(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var result []*terrariumpb.Dependency
-
 	// Populate the protobuf response with the result and page information
 	pbRes := &terrariumpb.ListDependenciesResponse{
 		Dependencies: dbDependencies.ToProto(),
@@ -86,7 +86,8 @@ func fetchDependencies(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(b))
 	} else {
-		displayInTable(cmd.OutOrStdout(), result)
+		displayInTable(cmd.OutOrStdout(), pbRes.Dependencies)
+
 	}
 	return nil
 }
@@ -109,7 +110,26 @@ func displayInTable(w io.Writer, dependencies []*terrariumpb.Dependency) {
 }
 
 // Utility function to convert JSONSchema into a readable string.
-// This is a basic version; you can enhance it based on how detailed you want your output.
 func schemaToString(schema *terrariumpb.JSONSchema) string {
-	return fmt.Sprintf("Type: %s, Title: %s", schema.Type, schema.Title)
+	if schema == nil {
+		return "N/A"
+	}
+
+	if schema.Properties == nil || len(schema.Properties) == 0 {
+		return fmt.Sprintf("Type: %s, Title: %s", schema.Type, schema.Title)
+	}
+
+	var props []string
+	for propName, propValue := range schema.Properties {
+		propStr := fmt.Sprintf("%s: {Type: %s, Title: %s, Description: %s", propName, propValue.Type, propValue.Title, propValue.Description)
+		if propValue.Default != nil {
+			// Extracting the string value from the structpb.Value object.
+			if value, ok := propValue.Default.Kind.(*structpb.Value_StringValue); ok {
+				propStr += fmt.Sprintf(", Default: %s", value.StringValue)
+			}
+		}
+		propStr += "}" // closing the bracket for each property
+		props = append(props, propStr)
+	}
+	return fmt.Sprintf("Type: %s, Title: %s, Properties: {%s}", schema.Type, schema.Title, strings.Join(props, ", "))
 }
