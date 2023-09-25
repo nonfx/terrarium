@@ -12,10 +12,10 @@ import (
 type DependencyAttribute struct {
 	Model
 
-	DependencyID *uuid.UUID       `gorm:"uniqueIndex:dependency_attribute_unique"`
-	Name         *string          `gorm:"uniqueIndex:dependency_attribute_unique"`
+	DependencyID uuid.UUID        `gorm:"uniqueIndex:dependency_attribute_unique"`
+	Name         string           `gorm:"uniqueIndex:dependency_attribute_unique"`
 	Schema       *jsonschema.Node `gorm:"type:jsonb"`
-	Computed     *bool            `gorm:"uniqueIndex:dependency_attribute_unique"` // true means output, false means input
+	Computed     bool             `gorm:"uniqueIndex:dependency_attribute_unique"` // true means output, false means input
 
 	Dependency *Dependency `gorm:"foreignKey:DependencyID"`
 }
@@ -26,8 +26,8 @@ func (dbAttr DependencyAttribute) ToProto() *terrariumpb.DependencyInputsAndOutp
 	resp := &terrariumpb.DependencyInputsAndOutputs{}
 
 	// Only set Title if it's not empty
-	if *dbAttr.Name != "" {
-		resp.Title = *dbAttr.Name
+	if dbAttr.Name != "" {
+		resp.Title = dbAttr.Name
 	}
 
 	// Only set values from the Schema if Schema is not nil

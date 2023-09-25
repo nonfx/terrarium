@@ -102,10 +102,10 @@ func processDependency(g db.DB, dep dependency.Interface) error {
 
 	for _, attr := range attrs {
 		dbAttr := &db.DependencyAttribute{
-			DependencyID: &dbDep.ID,
-			Name:         &dep.Title,
+			DependencyID: dbDep.ID,
+			Name:         dep.Title,
 			Schema:       attr.Node,
-			Computed:     &attr.Computed,
+			Computed:     attr.Computed,
 		}
 
 		_, err = g.CreateDependencyAttribute(dbAttr)

@@ -17,7 +17,7 @@ func TestToProtoSingleDependencyAttribute(t *testing.T) {
 	schemaDescription := "TestDescription"
 	schemaType := "TestType"
 	attr := DependencyAttribute{
-		Name: &name,
+		Name: name,
 		Schema: &jsonschema.Node{
 			Description: schemaDescription,
 			Type:        schemaType,
@@ -40,8 +40,8 @@ func TestToProtoMultipleDependencyAttributes(t *testing.T) {
 	desc2 := "Desc2"
 
 	attrs := DependencyAttributes{
-		&DependencyAttribute{Name: &name1},
-		&DependencyAttribute{Name: &name2, Schema: &jsonschema.Node{Description: desc2}},
+		&DependencyAttribute{Name: name1},
+		&DependencyAttribute{Name: name2, Schema: &jsonschema.Node{Description: desc2}},
 		// Add more if needed...
 	}
 
@@ -59,9 +59,9 @@ func TestGetCondition(t *testing.T) {
 	computed := true
 
 	attr := &DependencyAttribute{
-		DependencyID: &dependencyID,
-		Name:         &name,
-		Computed:     &computed,
+		DependencyID: dependencyID,
+		Name:         name,
+		Computed:     computed,
 	}
 
 	// When GetCondition is called
@@ -69,9 +69,9 @@ func TestGetCondition(t *testing.T) {
 
 	// Then the response should match the expected values
 	expected := &DependencyAttribute{
-		DependencyID: &dependencyID,
-		Name:         &name,
-		Computed:     &computed,
+		DependencyID: dependencyID,
+		Name:         name,
+		Computed:     computed,
 	}
 	assert.Equal(t, expected, condition)
 }

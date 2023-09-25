@@ -62,23 +62,6 @@ func (dep *Dependency) GetCondition() entity {
 	}
 }
 
-func (d *Dependency) ToProto() *terrariumpb.Dependency {
-	return &terrariumpb.Dependency{
-		InterfaceId: d.InterfaceID,
-		Title:       d.Title,
-		Description: d.Description,
-	}
-}
-
-func (dArr Dependencies) ToProto() []*terrariumpb.Dependency {
-	res := make([]*terrariumpb.Dependency, len(dArr))
-	for i, m := range dArr {
-		res[i] = m.ToProto()
-	}
-
-	return res
-}
-
 func JSONSchemaToProto(jsn *jsonschema.Node) *terrariumpb.JSONSchema {
 	if jsn == nil {
 		return nil
@@ -152,7 +135,7 @@ func (db *gDB) QueryDependencies(filterOps ...FilterOption) (DependencyOutputs, 
 	for i, dep := range deps {
 		depOutput := DependencyOutput{Dependency: dep}
 		for _, attr := range dep.Attributes {
-			if *attr.Computed {
+			if attr.Computed {
 				depOutput.Outputs = attr.Schema
 			} else {
 				depOutput.Inputs = attr.Schema
