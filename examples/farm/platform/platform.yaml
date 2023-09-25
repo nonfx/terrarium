@@ -1,31 +1,15 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
 platforms:
-  - name: PlatformA
-    repositories:
-      - url: https://github.com/user/repo
-        directory: /path/to/platform/code
-        versions:
-          - number: "1.0"
-            git_ref:
-              branch: test_feature # can be null or omitted, but including null values can make it clearer that the value is intentionally absent rather than forgotten.
-              tag: test_tag       # can be null or omitted
-              commit: test-commit # can be null or omitted
-          - number: "1.1"
-            git_ref:
-              branch: test_feature
-              tag: test_tag
-              commit: test-commit
-  - name: PlatformB
-    repositories:
-      - url: https://github.com/user/repo2
-        directory: /path/to/platform/code
-        versions:
-          - number: "2.0"
-            git_ref:
-              branch: test_feature
-              # tag:
-              # commit:
-          - number: "2.1"
-            git_ref:
-              branch: null
-              tag: null
-              commit: test-commit
+  - name: postgres
+    repo_url: https://github.com/your/repo
+    repo_directory: examples/farm/platform/
+    ref_label: v1.0 # The label can be tag/branch/commit
+    label_type: 2 # 1=branch, 2=tag, 3=commit
+
+  - name: redis
+    repo_url: https://github.com/another/repo
+    repo_directory: examples/farm/platform/
+    ref_label: main
+    label_type: 1
