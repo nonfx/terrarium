@@ -11,7 +11,6 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/go-kit/kit v0.12.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/hashicorp/hcl/v2 v2.17.0
@@ -37,6 +36,7 @@ require (
 )
 
 require (
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
