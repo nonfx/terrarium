@@ -14,6 +14,16 @@ const (
 	ComponentPrefix    = "tr_component_" // Prefix for component identifiers in terraform code
 )
 
+// Profile represents a set of pre-set configuration variables that can be applied to generated Terraform code.
+type Profile struct {
+	ID          string `yaml:",omitempty"` // Unique identifier for the profile
+	Title       string `yaml:",omitempty"` // Descriptive title for the profile
+	Description string `yaml:",omitempty"` // Detailed description of the profile's properties
+}
+
+// Profiles is a slice of Profile objects.
+type Profiles []Profile
+
 // Component represents an implementation of a dependency in the Terrarium platform.
 type Component struct {
 	ID          string           `yaml:",omitempty"` // Unique identifier for the component
@@ -29,6 +39,7 @@ type Components []Component
 // PlatformMetadata represents the metadata for the Terrarium platform.
 // It includes the components and the graph that defines the relationships between terraform blocks.
 type PlatformMetadata struct {
+	Profiles   Profiles   // Configuration profiles in the platform
 	Components Components // Components in the Terrarium platform
 	Graph      Graph      // Graph defining the relationships between terraform blocks
 }
@@ -92,5 +103,6 @@ func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (
 	// Parse the platform module to create the components and the graph
 	p.Components.Parse(platformModule)
 	p.Graph.Parse(platformModule)
+	p.Profiles.Parse(platformModule)
 	return &p, nil
 }

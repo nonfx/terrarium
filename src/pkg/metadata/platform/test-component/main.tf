@@ -1,3 +1,7 @@
+# Auto-generated component input definitions.
+# @title: Component Inputs
+
+# @description: <this should not affect the module description above because there is an empty line between>
 locals {
 
   # Inputs for 'postgres' component instances.
