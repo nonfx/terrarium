@@ -72,10 +72,6 @@ BUILD_DATE=$(shell date "+%Y-%m-%d")
 BUILD_DIR=.bin
 CLI_NAME = terrarium
 BINARY_NAME = $(BUILD_DIR)/$(CLI_NAME)
-BINARY_NAME_WIN = $(BUILD_DIR)/win/$(CLI_NAME).exe
-BINARY_NAME_LINUX = $(BUILD_DIR)/linux/$(CLI_NAME)
-BINARY_NAME_MACOS_ARM = $(BUILD_DIR)/macos/arm64/$(CLI_NAME)
-BINARY_NAME_MACOS_I386 = $(BUILD_DIR)/macos/i386/$(CLI_NAME)
 
 ifeq (${TAG},)
 	TAG=$(shell git describe --exact-match --tags 2> /dev/null)
@@ -115,7 +111,8 @@ mod-tidy:  ## run go mod tidy on each workspace entity, and then sync workspace
 	@go mod download && go work sync
 
 .PHONY: test
-test:  ## Run go unit tests
+test: start-db --test ## Run go unit tests
+--test:
 	mkdir -p coverage
 	go test -tags=mock,dbtest -coverprofile $(COVERAGE_FILE) github.com/cldcvr/terrarium/...
 	@echo "-- Test coverage for terrarium --"
@@ -131,29 +128,6 @@ $(BINARY_NAME): $(CLI_SRCS)
 .PHONY: binary
 binary: $(BINARY_NAME)  ## Build application binary (native)
 
-$(BINARY_NAME_WIN): $(CLI_SRCS)
-	$(call make_binary,$@,windows,amd64)
-.PHONY: binary_win
-binary_win: $(BINARY_NAME_WIN)  ## Build application binary for Windows
-
-$(BINARY_NAME_LINUX): $(CLI_SRCS)
-	$(call make_binary,$@,linux,amd64)
-.PHONY: binary_linux
-binary_linux: $(BINARY_NAME_LINUX)  ## Build application binary for Linux
-
-$(BINARY_NAME_MACOS_ARM): $(CLI_SRCS)
-	$(call make_binary,$@,darwin,arm64)
-$(BINARY_NAME_MACOS_I386): $(CLI_SRCS)
-	$(call make_binary,$@,darwin,amd64)
-.PHONY: binary_macos
-binary_macos: $(BINARY_NAME_MACOS_ARM) $(BINARY_NAME_MACOS_I386)  ## Build application binaries for MacOS
-
-$(ZIP_FILE): $(BINARY_NAME_WIN) $(BINARY_NAME_LINUX) binary_macos
-	cd $(BUILD_DIR); \
-	zip -r ../$(ZIP_FILE) *
-.PHONY: binaries
-binaries: $(ZIP_FILE)  ## Build binary for each supported platform and archive to zip
-
 .PHONY: install
 install:  ## Install the CLI native binary into GOBIN
 	@echo "-- Installing native binary in $(shell go env GOBIN)"
@@ -163,6 +137,10 @@ install:  ## Install the CLI native binary into GOBIN
 # Farm Targets
 # Needs terraform installed on the system
 ######################################################
+
+ifeq ($(HARVEST_WD),)
+HARVEST_WD := /tmp/harvest
+endif
 
 ifeq ($(FARM_DIR),)
 FARM_DIR := examples/farm
@@ -177,15 +155,18 @@ farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  fa
 
 .PHONY: farm-resource-harvest  ## Harvest terraform provider resources from module list file
 farm-resource-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest resources --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest resources --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-module-harvest  ## Harvest terraform modules from module list file
 farm-module-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest modules --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest modules --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-mapping-harvest  ## Harvest attribute mappings from module list file
 farm-mapping-harvest: $(FARM_DIR)/modules.yaml
-	terrarium harvest mappings --module-list-file $(FARM_DIR)/modules.yaml
+	@mkdir -p $(HARVEST_WD)
+	terrarium harvest mappings --module-list-file $(FARM_DIR)/modules.yaml --workdir $(HARVEST_WD)
 
 .PHONY: farm-dependency-harvest  ## Harvest dependency interface from the farm directory
 farm-dependency-harvest: $(FARM_DEPENDENCY_DIR)

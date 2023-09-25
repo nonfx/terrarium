@@ -1,4 +1,5 @@
-# component[PostgreSQL Database]: A relational database management system using SQL.
+# A relational database management system using SQL.
+# @title: PostgreSQL Database
 module "tr_component_postgres" {
   source = "terraform-aws-modules/rds/aws"
 

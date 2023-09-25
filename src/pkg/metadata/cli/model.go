@@ -20,14 +20,42 @@ type FarmModuleRef struct {
 	Export  bool   `yaml:"export,omitempty"`
 }
 
-func (r FarmModuleRef) CreateTerraformFile() (dirPath string, filePath string, err error) {
-	dirPath, err = os.MkdirTemp("", fmt.Sprintf("tr_%s_*", r.Name))
-	if err != nil {
-		return "", "", eris.Wrapf(err, "could not create output directory")
+// CreateTerraformFile writes a terraform module file.
+// The file wil be stored in a sub-directory under a provided root directoy.
+// If the root path is empty the file will be stored in a temporary directory instead.
+// When using a temporary directory each module will need to be freshly initialized by 'terraform init' every time.
+func (r FarmModuleRef) CreateTerraformFile(root string) (dirPath string, filePath string, err error) {
+	if root != "" {
+		// use a given root directory
+		if fp, err := os.Stat(root); err != nil {
+			return "", "", eris.Wrapf(err, "provided working directory '%s' could not be accessed", root)
+		} else if !fp.IsDir() {
+			return "", "", eris.Errorf("provided working directory path '%s' is not a directory", root)
+		}
+
+		dirPath = path.Join(root, r.Name)
+		if fp, err := os.Stat(dirPath); os.IsNotExist(err) {
+			// create a new module output dir inside the root if it does not exist
+			if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+				return "", "", eris.Wrapf(err, "could not create module output directory '%s'", dirPath)
+			}
+		} else if err != nil {
+			return "", "", eris.Wrapf(err, "module output directory '%s' could not be accessed", dirPath)
+		} else if !fp.IsDir() {
+			return "", "", eris.Errorf("module output directory path '%s' is not a directory", dirPath)
+		}
+	} else {
+		// use TEMP dir instead
+		dirPath, err = os.MkdirTemp("", fmt.Sprintf("tr_%s_*", r.Name))
+		if err != nil {
+			return "", "", eris.Wrap(err, "could not create output directory")
+		}
 	}
+
+	// always overwrite the main.tf file to make sure the executed TF code is consistent with the module list entry
 	fp, err := os.Create(path.Join(dirPath, "main.tf"))
 	if err != nil {
-		return "", "", eris.Wrapf(err, "could not open output file")
+		return "", "", eris.Wrap(err, "could not open output file")
 	}
 	defer fp.Close()
 	if _, err := fp.WriteString(r.ToTerraform()); err != nil {

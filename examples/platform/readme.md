@@ -20,9 +20,7 @@ A Terrarium Platform Component is a Terraform module call intended to implement 
 
 #### Inputs
 
-In the framework, dependency interface inputs are provided via Terraform local variables. These variables are named using the convention `local.tr_component_<interface name>`. The variable contains an object that houses the app dependency instance name as the key and an object of dependency input values as the value. As a platform author, you can set default values in this object, which would be replaced at the time of Terraform generation.
-
-All component local variables must be defined in the file `tr_locals.tf` so that the Terrarium tools will be able to regenerate the component input values based on dependencies being asked for.
+In the framework, dependency interface inputs (coming from apps) are provided via Terraform local variables. These variables are named using the convention `local.tr_component_<interface name>`. The variable contains an object that houses the app dependency instance name as the key and an object of dependency input values as the value. As a platform author, you can set default values in this object, which would be replaced at the time of Terraform generation.
 
 #### Outputs
 
@@ -32,9 +30,9 @@ In the framework, dependency interface outputs are provided via Terraform output
 
 The platform metadata contains detailed information about the Terrarium dependency interfaces implemented within the platform. This metadata is contained within the `terrarium.yaml` file, which is saved alongside the platform HCL code.
 
-The Terrarium tools (cli & vs-code) provide commands that parse the Terrarium Platform Template, show lint errors, and generate the `terrarium.yaml` metadata file. The platform author should review this file to add any missing descriptions or other information to the interface attributes. The metadata file format specification can be found [here](../../src/pkg/metadata/platform).
+The Terrarium tools (cli & vs-code) provide commands that parse the Terrarium Platform Template, show lint errors, and generate the `terrarium.yaml` metadata file. The metadata file format specification can be found [here](../../src/pkg/metadata/platform/readme.md).
 
-Using the platform metadata and the app dependency data, the Terrarium tools can determine whether the required app dependencies are implemented within a given Terrarium platform template.
+Using the platform metadata and the app manifest, the Terrarium tools can determine whether the required app dependencies are implemented within a given Terrarium platform template.
 
 ### Generating Terraform Template
 
@@ -141,20 +139,40 @@ components:
         type: string
 ```
 
-## Command
+### Command
 
 Run following commands in the platform directory.
-
-To generate working terraform code based on App dependencies:
-
-```sh
-terrarium generate -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
-```
 
 To lint platform code:
 
 ```sh
 terrarium platform lint
+```
+
+To generate working terraform code based on App dependencies:
+
+```sh
+terrarium generate -c dev -a ../apps/voting-be -a ../apps/voting-fe -a ../apps/voting-worker
+```
+
+The `terrarium generate` command generates the terraform code, a `tr_gen_profile.auto.tfvars` profile and `*.env.mustache` files for each app in the destination folder (`./.terrarium`).
+
+These files looks something like this:
+
+`app_voting_be.env.mustache`
+
+```sh
+BA_LEDGERDB_HOST="{{ tr_component_postgres_host.value.ledgerdb }}"
+BA_LEDGERDB_PASSWORD="{{ tr_component_postgres_password.value.ledgerdb }}"
+BA_LEDGERDB_PORT="{{ tr_component_postgres_port.value.ledgerdb }}"
+BA_LEDGERDB_USERNAME="{{ tr_component_postgres_username.value.ledgerdb }}"
+```
+
+As you can see, the env vars personalised for the app are templated referring to a value in terraform state file.
+after provisioning infrastructure with terraform, one can render the above template by providing the terraform state file outputs to it. like this:
+
+```sh
+terraform output -json | mustache app_banking_app.env.mustache
 ```
 
 ---

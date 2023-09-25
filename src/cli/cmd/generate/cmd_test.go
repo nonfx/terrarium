@@ -34,7 +34,7 @@ func TestCmd(t *testing.T) {
 		},
 		{
 			Name:           "Success (with profile)",
-			Args:           []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium", "-c", "low-cost"},
+			Args:           []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium", "-c", "dev"},
 			ValidateOutput: clitesting.ValidateOutputMatch("Successfully pulled 13 of 22 terraform blocks at: ./testdata/.terrarium\n"),
 		},
 		{

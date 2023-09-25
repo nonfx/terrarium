@@ -10,6 +10,7 @@ import (
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/utils"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
@@ -59,7 +60,7 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 
 	pm, _ := platform.NewPlatformMetadata(m, existingYaml)
 
-	err = matchAppAndPlatform(pm, apps)
+	err = utils.MatchAppAndPlatform(pm, apps)
 	if err != nil {
 		return err
 	}
@@ -67,6 +68,11 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 	blockCount, err := writeTF(pm.Graph, flagOutDir, apps, m, flagProfile)
 	if err != nil {
 		return eris.Wrapf(err, "failed to write terraform code to dir: %s", flagOutDir)
+	}
+
+	err = writeAppsEnv(pm, apps)
+	if err != nil {
+		return err
 	}
 
 	cmd.Printf("Successfully pulled %d of %d terraform blocks at: %s\n", blockCount, len(pm.Graph), flagOutDir)
