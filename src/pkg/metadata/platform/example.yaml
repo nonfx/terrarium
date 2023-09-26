@@ -3,7 +3,6 @@
 
 components:
   - id: postgres
-    implements: postgres
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:

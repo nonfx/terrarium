@@ -3,26 +3,28 @@
 
 package db
 
-type GitRef struct {
-	Branch *string `json:"branch"`
-	Tag    *string `json:"tag"`
-	Commit *string `json:"commit"`
-}
-
-type GitVersion struct {
-	Number string `json:"number"`
-	GitRef GitRef `json:"git_ref"`
-}
-
-type Repository struct {
-	URL         string       `json:"url"`
-	Directory   string       `json:"directory"`
-	GitVersions []GitVersion `json:"gitversions"`
-}
+import "github.com/google/uuid"
 
 type Platform struct {
 	Model
 
-	Name         string `gorm:"column:name"`
-	Repositories string `gorm:"column:repositories;type:TEXT"` // JSON string of repositories
+	Name          string `gorm:"unique"`
+	RepoURL       string
+	RepoDirectory string
+	CommitSHA     string
+	RefLabel      string // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
+	LabelType     int    // 1=branch, 2=tag, 3=commit
+
+	Components []PlatformComponents `gorm:"foreignKey:PlatformID"` // Attributes of the module
+}
+
+// insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
+func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
+	return createOrUpdate(db.g(), p, []string{"name"})
+}
+
+func (pl *Platform) GetCondition() entity {
+	return &Platform{
+		Name: pl.Name,
+	}
 }
