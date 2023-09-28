@@ -14,6 +14,32 @@ type DB struct {
 	mock.Mock
 }
 
+// CreateDependencyAttribute provides a mock function with given fields: e
+func (_m *DB) CreateDependencyAttribute(e *db.DependencyAttribute) (uuid.UUID, error) {
+	ret := _m.Called(e)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.DependencyAttribute) (uuid.UUID, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.DependencyAttribute) uuid.UUID); ok {
+		r0 = rf(e)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.DependencyAttribute) error); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateDependencyInterface provides a mock function with given fields: e
 func (_m *DB) CreateDependencyInterface(e *db.Dependency) (uuid.UUID, error) {
 	ret := _m.Called(e)
@@ -368,7 +394,7 @@ func (_m *DB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (
 }
 
 // QueryDependencies provides a mock function with given fields: filterOps
-func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.Dependencies, error) {
+func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.DependencyOutputs, error) {
 	_va := make([]interface{}, len(filterOps))
 	for _i := range filterOps {
 		_va[_i] = filterOps[_i]
@@ -377,16 +403,16 @@ func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.Dependencies, 
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 db.Dependencies
+	var r0 db.DependencyOutputs
 	var r1 error
-	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.Dependencies, error)); ok {
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.DependencyOutputs, error)); ok {
 		return rf(filterOps...)
 	}
-	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.Dependencies); ok {
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.DependencyOutputs); ok {
 		r0 = rf(filterOps...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(db.Dependencies)
+			r0 = ret.Get(0).(db.DependencyOutputs)
 		}
 	}
 

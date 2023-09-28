@@ -18,6 +18,8 @@ func AutoMigrate(db *gorm.DB) (DB, error) {
 		TFModuleAttribute{},
 		Taxonomy{},
 		Dependency{},
+		DependencyAttribute{},
+		DependencyAttributeMappings{},
 	)
 	if err != nil {
 		return nil, eris.Wrap(err, "failed to perform database migration")

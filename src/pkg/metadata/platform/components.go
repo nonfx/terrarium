@@ -4,8 +4,6 @@
 package platform
 
 import (
-	"io"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -13,17 +11,10 @@ import (
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	"github.com/icza/backscanner"
 	"github.com/xeipuuv/gojsonschema"
 	"github.com/zclconf/go-cty/cty"
-	"golang.org/x/exp/slices"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-)
-
-const (
-	docCommentTitleArgTag = "title"
-	docCommentDescArgTag  = "description"
 )
 
 var (
@@ -67,8 +58,8 @@ func (cArr *Components) Parse(platformModule *tfconfig.Module) {
 		docs := getBlockDoc(mc.Pos)
 
 		c.Title = tfValueToTitle(id, nil) // default to component name in title format
-		setValueFromDocIfFound(&c.Title, docCommentTitleArgTag, docs)
-		setValueFromDocIfFound(&c.Description, docCommentDescArgTag, docs)
+		SetValueFromDocIfFound(&c.Title, docCommentTitleArgTag, docs)
+		SetValueFromDocIfFound(&c.Description, docCommentDescArgTag, docs)
 
 		c.fetchInputs(platformModule)
 		c.fetchOutputs(platformModule)
@@ -124,75 +115,8 @@ func getLocalInputBlockDocs(block *tfconfig.Local) (docsByKey map[string]map[str
 }
 
 func getBlockDoc(blockPos tfconfig.SourcePos) (args map[string]string) {
-	head, args, _, _ := parseBlockDocComment(blockPos)
-
-	if _, ok := args[docCommentDescArgTag]; !ok && head != nil { // if there is no description tag use the head lines instead
-		args[docCommentDescArgTag] = strings.Join(head, "\n")
-	}
-
+	args, _ = GetDoc(blockPos.Filename, blockPos.StartByte, true)
 	return
-}
-
-// parseBlockDocComment parses docummentation comment to sections:
-//
-// # Quo in officia nobis autem pariatur sit tenetur ut dolores.		<--- head line
-// # Deleniti asperiores quaerat.										<--- head line
-// # @title: Incidunt aperiam sit facilis.								<--- argument tag
-// # Voluptatem officiis aperiam.										<--- reminder
-//
-// It returns head (lines before the first argument tag with comment symbol removed), args (argument tags grouped by tag name), lines (list of all lines).
-func parseBlockDocComment(blockPos tfconfig.SourcePos) (head []string, args map[string]string, lines []string, err error) {
-	if blockPos.Filename == "" {
-		return
-	}
-	lines, err = readCommentLinesAbove(blockPos.Filename, blockPos.StartByte)
-	if err != nil {
-		return
-	}
-	slices.Reverse(lines) // lines are read bottom-up
-
-	head = make([]string, 0, len(lines))
-	args = make(map[string]string, len(lines))
-	for _, line := range lines {
-		if groups := docCommentArgMatcher.FindStringSubmatch(line); groups != nil {
-			args[groups[1]] = groups[2]
-		}
-		if len(args) < 1 { // all lines before the first argument tag form the comment head
-			head = append(head, strings.TrimSpace(strings.TrimPrefix(line, "#")))
-		}
-	}
-
-	return
-}
-
-// read all comment lines (ignoring empty lines) above a given end byte until the first non-comment or the end of file
-func readCommentLinesAbove(filename string, endPos int) ([]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := backscanner.New(file, endPos)
-	for {
-		line, _, err := scanner.Line()
-		if err == io.EOF {
-			return lines, nil
-		} else if err != nil {
-			return lines, err
-		}
-
-		trimmedLine := strings.TrimSpace(line)
-		if trimmedLine == "" {
-			continue
-		} else if docCommentMatcher.MatchString(trimmedLine) {
-			lines = append(lines, trimmedLine)
-			continue
-		}
-
-		return lines, nil
-	}
 }
 
 func (c *Component) fetchOutputs(m *tfconfig.Module) {
@@ -232,17 +156,12 @@ func tfValueToTitle(value string, prefix *string) string {
 	return cases.Title(language.Und, cases.NoLower).String(strings.ReplaceAll(strings.TrimPrefix(value, *prefix), "_", " "))
 }
 
-func setValueFromDocIfFound(value *string, valueTagName string, fieldDoc map[string]string) {
-	if newValue, ok := fieldDoc[valueTagName]; ok && newValue != "" {
-		*value = newValue
-	}
-}
-
 func extractSchema(existingSchema *jsonschema.Node, value cty.Value, fieldName string, fieldDocs map[string]map[string]string) {
 	existingSchema.Title = tfValueToTitle(fieldName, nil) // default to field name in title format
 	if fieldDoc, ok := fieldDocs[fieldName]; ok {
-		setValueFromDocIfFound(&existingSchema.Title, docCommentTitleArgTag, fieldDoc)
-		setValueFromDocIfFound(&existingSchema.Description, docCommentDescArgTag, fieldDoc)
+		SetValueFromDocIfFound(&existingSchema.Title, docCommentTitleArgTag, fieldDoc)
+		SetValueFromDocIfFound(&existingSchema.Description, docCommentDescArgTag, fieldDoc)
+		SetListFromDocIfFound(&existingSchema.Enum, docCommentEnumArgTag, fieldDoc)
 	}
 
 	switch value.Type().FriendlyName() {

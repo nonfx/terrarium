@@ -1,6 +1,12 @@
 # Copyright (c) CloudCover
 # SPDX-License-Identifier: Apache-2.0
-
+profiles:
+  - id: dev
+    description: Infrastructure configuration optimized for development deployment.
+    title: Development Configuration
+  - id: prod
+    description: Infrastructure configuration optimized for production deployment.
+    title: Production Configuration
 components:
   - id: postgres
     title: PostgreSQL Database
@@ -18,6 +24,7 @@ components:
           description: Version of the PostgreSQL engine to use
           type: string
           default: "11"
+          enum: ["11", "12", "13"]
     outputs:
       type: object
       properties:
