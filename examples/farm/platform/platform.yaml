@@ -7,7 +7,7 @@ platforms:
     repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
     revisions:
-      - label: v1.0
+      - label: v0.1
         type: tag
       - label: main
         type: branch
@@ -17,9 +17,9 @@ platforms:
     repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
     revisions:
-      - label: v2.0
+      - label: v0.2
         type: commit
-      - label: develop
+      - label: christy/TER-277
         type: branch
 
   - title: GCP GKE
@@ -27,7 +27,7 @@ platforms:
     repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
     revisions:
-      - label: v3.0
+      - label: v0.3
         type: tag
 
   - title: GCP Serverless
@@ -35,6 +35,5 @@ platforms:
     repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
     revisions:
-      - label: main
+      - label: christy/TER-272
         type: branch
-

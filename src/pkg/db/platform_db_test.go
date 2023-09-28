@@ -23,7 +23,7 @@ func Test_gDB_CreatePlatform(t *testing.T) {
 	}{
 		{
 			name:     "first new insert",
-			platform: &db.Platform{Name: "test-1", RepoURL: "test-url", RepoDirectory: "test-dir", CommitSHA: "test-sha", RefLabel: "test-ref", LabelType: 1},
+			platform: &db.Platform{Title: "test-1", RepoURL: "test-url", RepoDirectory: "test-dir", CommitSHA: "test-sha", RefLabel: "test-ref", LabelType: 1},
 		},
 	}
 

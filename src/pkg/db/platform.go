@@ -3,17 +3,21 @@
 
 package db
 
-import "github.com/google/uuid"
+import (
+	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"github.com/google/uuid"
+)
 
 type Platform struct {
 	Model
 
-	Name          string
+	Title         string
+	Description   string
 	RepoURL       string
 	RepoDirectory string
-	CommitSHA     string `gorm:"unique"`
-	RefLabel      string // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
-	LabelType     int    // 1=branch, 2=tag, 3=commit
+	CommitSHA     string              `gorm:"unique"`
+	RefLabel      string              // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
+	LabelType     terrpb.GitLabelEnum // 1=branch, 2=tag, 3=commit
 
 	Components []PlatformComponents `gorm:"foreignKey:PlatformID"`
 }

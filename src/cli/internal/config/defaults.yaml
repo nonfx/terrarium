@@ -39,3 +39,7 @@ terraform:
 farm:
   default: github.com/cldcvr/terrarium-farm  # link of the farm repo to use by default
   version: latest # release tag to use
+
+github:
+  username: ""  # github username
+  password: ""  # github password

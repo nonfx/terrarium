@@ -1554,29 +1554,31 @@ func file_terrariumpb_service_proto_rawDescGZIP() []byte {
 	return file_terrariumpb_service_proto_rawDescData
 }
 
+var file_terrariumpb_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_terrariumpb_service_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_terrariumpb_service_proto_goTypes = []interface{}{
-	(*Module)(nil),                               // 0: terrarium.v0.Module
-	(*CompletionRequest)(nil),                    // 1: terrarium.v0.CompletionRequest
-	(*CompletionResponse)(nil),                   // 2: terrarium.v0.CompletionResponse
-	(*Page)(nil),                                 // 3: terrarium.v0.Page
-	(*ListModulesRequest)(nil),                   // 4: terrarium.v0.ListModulesRequest
-	(*ListModulesResponse)(nil),                  // 5: terrarium.v0.ListModulesResponse
-	(*ListModuleAttributesRequest)(nil),          // 6: terrarium.v0.listModuleAttributesRequest
-	(*ListModuleAttributesResponse)(nil),         // 7: terrarium.v0.listModuleAttributesResponse
-	(*ModuleAttribute)(nil),                      // 8: terrarium.v0.ModuleAttribute
-	(*Dependency)(nil),                           // 9: terrarium.v0.Dependency
-	(*JSONSchema)(nil),                           // 10: terrarium.v0.JSONSchema
-	(*ListDependenciesResponse)(nil),             // 11: terrarium.v0.ListDependenciesResponse
-	(*Schema)(nil),                               // 12: terrarium.v0.Schema
-	(*DependencyInputsAndOutputs)(nil),           // 13: terrarium.v0.DependencyInputsAndOutputs
-	(*DependencyInputsAndOutputsJSONSchema)(nil), // 14: terrarium.v0.DependencyInputsAndOutputsJSONSchema
-	(*DependencyInputsAndOutputsDependency)(nil), // 15: terrarium.v0.DependencyInputsAndOutputsDependency
-	nil,                    // 16: terrarium.v0.JSONSchema.PropertiesEntry
-	nil,                    // 17: terrarium.v0.Schema.PropertiesEntry
-	nil,                    // 18: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
-	(*structpb.Value)(nil), // 19: google.protobuf.Value
-	(*emptypb.Empty)(nil),  // 20: google.protobuf.Empty
+	(GitLabelEnum)(0),                            // 0: terrarium.v0.gitLabelEnum
+	(*Module)(nil),                               // 1: terrarium.v0.Module
+	(*CompletionRequest)(nil),                    // 2: terrarium.v0.CompletionRequest
+	(*CompletionResponse)(nil),                   // 3: terrarium.v0.CompletionResponse
+	(*Page)(nil),                                 // 4: terrarium.v0.Page
+	(*ListModulesRequest)(nil),                   // 5: terrarium.v0.ListModulesRequest
+	(*ListModulesResponse)(nil),                  // 6: terrarium.v0.ListModulesResponse
+	(*ListModuleAttributesRequest)(nil),          // 7: terrarium.v0.listModuleAttributesRequest
+	(*ListModuleAttributesResponse)(nil),         // 8: terrarium.v0.listModuleAttributesResponse
+	(*ModuleAttribute)(nil),                      // 9: terrarium.v0.ModuleAttribute
+	(*Dependency)(nil),                           // 10: terrarium.v0.Dependency
+	(*JSONSchema)(nil),                           // 11: terrarium.v0.JSONSchema
+	(*ListDependenciesResponse)(nil),             // 12: terrarium.v0.ListDependenciesResponse
+	(*Schema)(nil),                               // 13: terrarium.v0.Schema
+	(*DependencyInputsAndOutputs)(nil),           // 14: terrarium.v0.DependencyInputsAndOutputs
+	(*DependencyInputsAndOutputsJSONSchema)(nil), // 15: terrarium.v0.DependencyInputsAndOutputsJSONSchema
+	(*DependencyInputsAndOutputsDependency)(nil), // 16: terrarium.v0.DependencyInputsAndOutputsDependency
+	nil,                    // 17: terrarium.v0.JSONSchema.PropertiesEntry
+	nil,                    // 18: terrarium.v0.Schema.PropertiesEntry
+	nil,                    // 19: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
+	(*structpb.Value)(nil), // 20: google.protobuf.Value
+	(*emptypb.Empty)(nil),  // 21: google.protobuf.Empty
 }
 var file_terrariumpb_service_proto_depIdxs = []int32{
 	8,  // 0: terrarium.v0.Module.inputAttributes:type_name -> terrarium.v0.ModuleAttribute
@@ -1825,13 +1827,14 @@ func file_terrariumpb_service_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_terrariumpb_service_proto_rawDesc,
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_terrariumpb_service_proto_goTypes,
 		DependencyIndexes: file_terrariumpb_service_proto_depIdxs,
+		EnumInfos:         file_terrariumpb_service_proto_enumTypes,
 		MessageInfos:      file_terrariumpb_service_proto_msgTypes,
 	}.Build()
 	File_terrariumpb_service_proto = out.File
