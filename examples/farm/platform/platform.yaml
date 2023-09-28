@@ -2,14 +2,39 @@
 # SPDX-License-Identifier: Apache-2.0
 
 platforms:
-  - name: postgres
-    repo_url: https://github.com/your/repo
+  - title: AWS EKS
+    description: Amazon Elastic Kubernetes Service
+    repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
-    ref_label: v1.0 # The label can be tag/branch/commit
-    label_type: 2 # 1=branch, 2=tag, 3=commit
+    revisions:
+      - label: v1.0
+        type: tag
+      - label: main
+        type: branch
 
-  - name: redis
-    repo_url: https://github.com/another/repo
+  - title: AWS Serverless
+    description: AWS Serverless
+    repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
-    ref_label: main
-    label_type: 1
+    revisions:
+      - label: v2.0
+        type: commit
+      - label: develop
+        type: branch
+
+  - title: GCP GKE
+    description: Google Kubernetes Engine
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: v3.0
+        type: tag
+
+  - title: GCP Serverless
+    description: GCP Serverless
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: main
+        type: branch
+
