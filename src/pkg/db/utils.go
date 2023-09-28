@@ -37,9 +37,6 @@ type DB interface {
 	// QueryTFModuleAttributes list terraform module attributes
 	QueryTFModuleAttributes(filterOps ...FilterOption) (result TFModuleAttributes, err error)
 
-	// FindOutputMappingsByModuleID DEPRECATED fetch the terraform module along with it's attribute and output mappings of the attribute.
-	FindOutputMappingsByModuleID(ids ...uuid.UUID) (result TFModules, err error)
-
 	QueryDependencyByInterfaceID(interfaceID string, filterOps ...FilterOption) (result *Dependency, err error)
 	QueryDependencies(filterOps ...FilterOption) (result DependencyOutputs, err error)
 
