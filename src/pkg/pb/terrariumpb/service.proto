@@ -97,16 +97,6 @@ service TerrariumService {
     };
   }
 
-  // CodeCompletion DEPRECATED returns HCL code snippet from the requested terraform module that includes the requested module,
-  // and the modules that it refers to. In case the linked-modules are already there in the provided code-context, then the
-  // returned code suggestion omits the existing modules and instead refers to it's attributes directly.
-  rpc CodeCompletion(CompletionRequest) returns (CompletionResponse) {
-    option (google.api.http) = {
-      post: "/v0/completion"
-      body: "*"
-    };
-  }
-
   // ListModuleAttributes returns a list of attributes of the given module.
   // Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
   rpc ListModuleAttributes(listModuleAttributesRequest) returns (listModuleAttributesResponse) {

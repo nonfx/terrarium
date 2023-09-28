@@ -16,32 +16,6 @@ type TerrariumServiceServer struct {
 	mock.Mock
 }
 
-// CodeCompletion provides a mock function with given fields: _a0, _a1
-func (_m *TerrariumServiceServer) CodeCompletion(_a0 context.Context, _a1 *terrariumpb.CompletionRequest) (*terrariumpb.CompletionResponse, error) {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 *terrariumpb.CompletionResponse
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.CompletionRequest) (*terrariumpb.CompletionResponse, error)); ok {
-		return rf(_a0, _a1)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.CompletionRequest) *terrariumpb.CompletionResponse); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*terrariumpb.CompletionResponse)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *terrariumpb.CompletionRequest) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // HealthCheck provides a mock function with given fields: _a0, _a1
 func (_m *TerrariumServiceServer) HealthCheck(_a0 context.Context, _a1 *emptypb.Empty) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)
@@ -125,12 +99,13 @@ func (_m *TerrariumServiceServer) mustEmbedUnimplementedTerrariumServiceServer()
 	_m.Called()
 }
 
-// NewTerrariumServiceServer creates a new instance of TerrariumServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewTerrariumServiceServer(t interface {
+type mockConstructorTestingTNewTerrariumServiceServer interface {
 	mock.TestingT
 	Cleanup(func())
-}) *TerrariumServiceServer {
+}
+
+// NewTerrariumServiceServer creates a new instance of TerrariumServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewTerrariumServiceServer(t mockConstructorTestingTNewTerrariumServiceServer) *TerrariumServiceServer {
 	mock := &TerrariumServiceServer{}
 	mock.Mock.Test(t)
 
