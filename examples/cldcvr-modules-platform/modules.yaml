@@ -1,0 +1,36 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+
+farm:
+  # public modules
+  - name: ec2
+    source: "terraform-aws-modules/ec2-instance/aws"
+    version: "5.5.0"
+    export: true
+  # private modules
+  - name: xa_vpc
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-vpc?ref=v0.1.0"
+    export: true
+  - name: xa_security_group
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
+    export: true
+  - name: xa_db_instance
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-db-instance?ref=v0.1.0"
+    export: true
+  - name: xa_s3_bucket
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-s3-bucket?ref=v0.1.0"
+    export: true
+  - name: xa_key_pair
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-key-pair?ref=v0.1.0"
+    export: true
+  - name: xa_elasticache_cluster
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-elasticache-cluster?ref=v0.1.0"
+    export: true
+  - name: xa_ecr_repository
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-ecr-repository"
+    export: true
+  - name: xa_aws_iam_role
+    source: "github.com/cldcvr/cldcvr-xa-terraform-aws-iam-role?ref=v0.1.0"
+    export: true
+

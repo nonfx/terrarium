@@ -1,0 +1,25 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+id: banking_app
+name: Banking App
+env_prefix: BA
+
+compute:
+  use: service_web
+  inputs:
+    cpu: 1024
+    image: public.ecr.aws/nginx/nginx:mainline-alpine
+    name: banking
+    memory: 2048
+    path: /
+    port: 80
+    protocol: tcp
+    site: platform.test.codepipes.io
+
+dependencies:
+  - id: ledgerdb
+    use: postgres
+    inputs:
+      version: "11.20"
+
