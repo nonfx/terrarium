@@ -24,6 +24,6 @@ type Platform struct {
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
-	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"name"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"commit_sha"})
 	return id, err
 }

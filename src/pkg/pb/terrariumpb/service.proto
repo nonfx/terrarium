@@ -183,3 +183,10 @@ service TerrariumService {
     };
   }
 }
+
+enum gitLabelEnum {
+  label_no = 0;
+  label_branch = 1;
+  label_tag = 2;
+  label_commit = 3;
+}

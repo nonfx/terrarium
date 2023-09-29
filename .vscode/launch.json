@@ -129,6 +129,8 @@
       "args": [
         "query",
         "dependencies",
+        "-o",
+        "json"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

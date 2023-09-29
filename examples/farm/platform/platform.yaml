@@ -35,5 +35,5 @@ platforms:
     repo_url: https://github.com/cldcvr/terrarium
     repo_directory: examples/farm/platform/
     revisions:
-      - label: christy/TER-272
-        type: branch
+      - label: v0.5
+        type: tag
