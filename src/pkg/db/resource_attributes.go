@@ -31,19 +31,12 @@ func (a TFResourceAttribute) GetConnectedModuleOutputs() TFModuleAttributes {
 	return resp
 }
 
-func (a *TFResourceAttribute) GetCondition() entity {
-	return &TFResourceAttribute{
-		ResourceTypeID: a.ResourceTypeID,
-		ProviderID:     a.ProviderID,
-		AttributePath:  a.AttributePath,
-	}
-}
-
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateTFResourceAttribute(e *TFResourceAttribute) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"resource_type_id", "provider_id", "attribute_path"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), e, []string{"resource_type_id", "provider_id", "attribute_path"})
+	return id, err
 }
 
 func (db *gDB) GetTFResourceAttribute(e *TFResourceAttribute, where *TFResourceAttribute) error {
-	return get(db.g(), e, where)
+	return db.g().First(e, where).Error
 }

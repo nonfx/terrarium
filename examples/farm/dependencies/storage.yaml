@@ -3,7 +3,7 @@
 
 dependency-interfaces:
   - id: postgres
-    # taxonomy: storage/database/rdbms/postgres
+    taxonomy: storage/database/rdbms/postgres
     title: PostgreSQL Database
     description: A relational database management system using SQL.
     inputs:
@@ -39,7 +39,7 @@ dependency-interfaces:
               type: string
 
   - id: redis
-    # taxonomy: storage/database/cache/redis
+    taxonomy: storage/database/cache/redis
     title: Redis Database
     description: An in-memory data structure store, used as a database, cache, and message broker.
     inputs:

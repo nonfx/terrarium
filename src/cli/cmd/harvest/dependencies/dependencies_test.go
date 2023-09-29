@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -45,12 +44,7 @@ func Test_processYAMLData(t *testing.T) {
           type: string
     `),
 			mockDB: func(dbMocks *mocks.DB) {
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
+				dbMocks.On("CreateTaxonomy", mock.Anything).Return(uuid.New(), nil).Once()
 				dbMocks.On("CreateDependencyInterface", mock.Anything).Return(uuid.New(), nil).Once()
 				dbMocks.On("CreateDependencyAttribute", mock.Anything).Return(uuid.New(), nil).Twice()
 			},
@@ -75,7 +69,6 @@ dependency-interfaces:
 `),
 			mockDB: func(dbMocks *mocks.DB) {
 				dbMocks.On("CreateDependencyInterface", mock.Anything).Return(uuid.New(), nil).Once()
-				dbMocks.On("CreateDependencyAttribute", mock.Anything).Return(uuid.New(), nil).Twice()
 			},
 		},
 		{
@@ -90,8 +83,7 @@ dependency-interfaces:
     outputs: {}
 `),
 			mockDB: func(dbMocks *mocks.DB) {
-				dbMocks.On("GetTaxonomyByFieldName", mock.Anything, "storage").Return(
-					db.Taxonomy{}, fmt.Errorf("mocked error")).Once()
+				dbMocks.On("CreateTaxonomy", mock.Anything).Return(uuid.Nil, fmt.Errorf("mocked error")).Once()
 			},
 			wantErr: true,
 		},
@@ -119,7 +111,7 @@ dependency-interfaces:
 				tt.mockDB(dbMocks)
 			}
 
-			err := processYAMLData(dbMocks, "dummy.yaml", []byte(tt.yamlData))
+			err := processYAMLData(dbMocks, []byte(tt.yamlData))
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -156,12 +148,7 @@ func Test_processYAMLFiles(t *testing.T) {
 			name:      "success with valid YAML file",
 			directory: "testdata/success",
 			mockDB: func(dbMocks *mocks.DB) {
-				dbMocks.On("GetTaxonomyByFieldName", "level1", mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", "level2", mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
-				dbMocks.On("GetTaxonomyByFieldName", "level3", mock.Anything).Return(
-					db.Taxonomy{Level1: "level1", Level2: "level2", Level3: "level3"}, nil).Once()
+				dbMocks.On("CreateTaxonomy", mock.Anything).Return(uuid.New(), nil).Once()
 				dbMocks.On("CreateDependencyInterface", mock.Anything).Return(uuid.New(), nil).Once()
 				dbMocks.On("CreateDependencyAttribute", mock.Anything).Return(uuid.New(), nil).Twice()
 			},

@@ -7,7 +7,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -199,6 +201,59 @@ func TestNodeValue(t *testing.T) {
 			if tt.want != nil && !errors.Is(err, tt.want) {
 				t.Fatalf("expected error %v, got: %v", tt.want, err)
 			}
+		})
+	}
+}
+
+func TestNode_ToProto(t *testing.T) {
+	tests := []struct {
+		name      string
+		jsn       *Node
+		validator func(*testing.T, *terrariumpb.JSONSchema)
+		wantErr   bool
+	}{
+		{
+			name: "valid JSONSchema",
+			jsn: &Node{
+				Title:       "Test Title",
+				Description: "Test Description",
+				Type:        "object",
+				Properties: map[string]*Node{
+					"property1": {
+						Title: "Property 1",
+						Type:  "string",
+					},
+					"property2": {
+						Title: "Property 2",
+						Type:  "integer",
+					},
+				},
+			},
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.NotNil(t, result)
+				assert.Equal(t, "Test Title", result.Title)
+				assert.Equal(t, "Test Description", result.Description)
+				assert.Equal(t, "object", result.Type)
+				require.Len(t, result.Properties, 2)
+				assert.NotNil(t, result.Properties["property1"])
+				assert.NotNil(t, result.Properties["property2"])
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil JSONSchema",
+			jsn:  nil,
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.Nil(t, result)
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.jsn.ToProto()
+			tt.validator(t, result)
 		})
 	}
 }

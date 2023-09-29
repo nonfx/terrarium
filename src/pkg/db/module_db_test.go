@@ -61,6 +61,7 @@ func Test_gDB_CreateTFModule(t *testing.T) {
 						if wantID, ok := moduleIDByNames[uniqueFieldsJoined]; ok {
 							assert.Equal(t, wantID, id)
 						} else {
+							assert.NotEqual(t, uuid.Nil, id)
 							moduleIDByNames[uniqueFieldsJoined] = id
 						}
 					}

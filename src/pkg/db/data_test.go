@@ -10,8 +10,10 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/xeipuuv/gojsonschema"
 	"gorm.io/gorm"
 )
 
@@ -37,6 +39,10 @@ var (
 	uuidRes2Attr3   = uuid.MustParse("6ba7b819-9dad-11d1-80b4-00c04fd430d1")
 	uuidResMapping1 = uuid.MustParse("12345678-1234-5678-1234-567812345678")
 	uuidResMapping2 = uuid.MustParse("87654321-8765-4321-8765-432187654321")
+	uuidDep1        = uuid.MustParse("6ba7b81a-9dad-11d1-80b4-00c04fd430d2")
+	uuidDepAttr1    = uuid.MustParse("84c189b3-a85d-456a-abc0-eb9985ad3abf")
+	uuidDepAttr2    = uuid.MustParse("76fb7d75-51cf-41fc-a390-b51753395b0c")
+	uuidDepAttr3    = uuid.MustParse("eeddc51b-0afd-4d55-95bb-bf07a7b52016")
 )
 
 var modules = db.TFModules{
@@ -233,11 +239,46 @@ var resourceMappings = []db.TFResourceAttributesMapping{
 
 var dependencies = []db.Dependency{
 	{
-		Model:       db.Model{ID: uuid.MustParse("6ba7b81a-9dad-11d1-80b4-00c04fd430d2")},
+		Model:       db.Model{ID: uuidDep1},
 		Title:       "dependency-1",
 		InterfaceID: "dependency-1-interface",
 		Description: "this is first test dependency",
 		TaxonomyID:  uuidTax1,
+		Attributes: db.DependencyAttributes{
+			{
+				Model:        db.Model{ID: uuidDepAttr1},
+				DependencyID: uuidDep1,
+				Name:         "dep-1-attr-1",
+				Schema: &jsonschema.Node{
+					Title:       "Attr 1",
+					Description: "attribute 1",
+					Type:        gojsonschema.TYPE_NUMBER,
+				},
+				Computed: false, //input
+			},
+			{
+				Model:        db.Model{ID: uuidDepAttr2},
+				DependencyID: uuidDep1,
+				Name:         "dep-1-attr-2",
+				Schema: &jsonschema.Node{
+					Title:       "Attr 2",
+					Description: "attribute 2",
+					Type:        gojsonschema.TYPE_NUMBER,
+				},
+				Computed: true, //output
+			},
+			{
+				Model:        db.Model{ID: uuidDepAttr3},
+				DependencyID: uuidDep1,
+				Name:         "dep-1-attr-3",
+				Schema: &jsonschema.Node{
+					Title:       "Attr 3",
+					Description: "attribute 3",
+					Type:        gojsonschema.TYPE_NUMBER,
+				},
+				Computed: true, //output
+			},
+		},
 	},
 }
 

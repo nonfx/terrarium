@@ -82,36 +82,14 @@ message ModuleAttribute {
   bool optional = 5;
 }
 
-service TerrariumService {
-  // Health check endpoint
-  rpc HealthCheck(google.protobuf.Empty) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      get: "/v0/healthcheck"
-    };
-  }
-
-  // List modules matching the source pattern
-  rpc ListModules(ListModulesRequest) returns (ListModulesResponse) {
-    option (google.api.http) = {
-      get: "/v0/modules"
-    };
-  }
-
-  // ListModuleAttributes returns a list of attributes of the given module.
-  // Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
-  rpc ListModuleAttributes(listModuleAttributesRequest) returns (listModuleAttributesResponse) {
-    option (google.api.http) = {
-      get: "/v0/modules/{moduleId=*}/attributes"
-    };
-  }
-}
-
 message Dependency {
-  string interface_id = 1;
-  string title = 2;
-  string description = 3;
-  JSONSchema inputs = 4; // JSON serialized Inputs
-  JSONSchema outputs = 5; // JSON serialized Outputs
+  string id = 1;
+  string interface_id = 2;
+  repeated string taxonomy = 3;
+  string title = 4;
+  string description = 5;
+  JSONSchema inputs = 6;
+  JSONSchema outputs = 7;
 }
 
 message JSONSchema {
@@ -152,7 +130,6 @@ message JSONSchema {
   repeated string required = 22;
 }
 
-
 message ListDependenciesResponse {
   repeated Dependency dependencies = 1;
   Page page = 2;
@@ -181,4 +158,28 @@ message DependencyInputsAndOutputsJSONSchema {
 message DependencyInputsAndOutputsDependency {
   DependencyInputsAndOutputsJSONSchema inputs = 1;
   DependencyInputsAndOutputsJSONSchema outputs = 2;
+}
+
+service TerrariumService {
+  // HealthCheck check endpoint
+  rpc HealthCheck(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/v0/healthcheck"
+    };
+  }
+
+  // ListModules modules matching the source pattern
+  rpc ListModules(ListModulesRequest) returns (ListModulesResponse) {
+    option (google.api.http) = {
+      get: "/v0/modules"
+    };
+  }
+
+  // ListModuleAttributes returns a list of attributes of the given module.
+  // Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
+  rpc ListModuleAttributes(listModuleAttributesRequest) returns (listModuleAttributesResponse) {
+    option (google.api.http) = {
+      get: "/v0/modules/{moduleId=*}/attributes"
+    };
+  }
 }

@@ -4,15 +4,13 @@
 package dependencies
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/dependency"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
+	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
 	"gopkg.in/yaml.v3"
@@ -26,17 +24,19 @@ func processYAMLFiles(g db.DB, directory string) error {
 		}
 
 		// Check if the file is a YAML file (ends with .yaml or .yml)
-		if info.IsDir() || (!strings.HasSuffix(info.Name(), ".yaml") && !strings.HasSuffix(info.Name(), ".yml")) {
+		if info.IsDir() || !utils.IsYaml(info.Name()) {
 			return nil
 		}
+
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			return eris.Wrapf(err, "error reading file '%s'", path)
 		}
+
 		// Process the YAML data and insert into the database
-		err = processYAMLData(g, path, data)
+		err = processYAMLData(g, data)
 		if err != nil {
-			return err
+			return eris.Wrapf(err, "error processing file '%s'", path)
 		}
 
 		return nil
@@ -44,39 +44,27 @@ func processYAMLFiles(g db.DB, directory string) error {
 }
 
 // processYAMLData processes the YAML data and inserts it into the database.
-func processYAMLData(g db.DB, path string, data []byte) error {
-	var yamlData map[string][]dependency.Interface
+func processYAMLData(g db.DB, data []byte) error {
+	var yamlData dependency.File
 
 	err := yaml.Unmarshal(data, &yamlData)
 	if err != nil {
-		return eris.Wrapf(err, "error parsing YAML file %s", path)
+		return eris.Wrapf(err, "error parsing YAML content")
 	}
 
-	for _, dep := range yamlData["dependency-interfaces"] {
+	for _, dep := range yamlData.DependencyInterfaces {
 		err = processDependency(g, dep)
 		if err != nil {
-			return eris.Wrapf(err, "error while updating db")
+			return eris.Wrapf(err, "error while processing interface '%s'", dep.ID)
 		}
 	}
 	return nil
 }
 
 func processDependency(g db.DB, dep dependency.Interface) error {
-	var taxonomyID uuid.UUID
-	if dep.Taxonomy != "" {
-		var dbTax db.Taxonomy
-		// Split the taxonomy string into levels
-		levels := taxonomy.NewTaxonomy(dep.Taxonomy).Split()
-		// Please refer to TER-209 for more details to update the following snippet of code to match the
-		// taxonomy levels in the dependency interface yaml to the database
-		for i, level := range levels {
-			tax, err := g.GetTaxonomyByFieldName(fmt.Sprintf("level%d", i+1), level)
-			if err != nil {
-				return eris.Wrap(err, "error getting taxonomy data")
-			}
-			dbTax = tax
-		}
-		taxonomyID = dbTax.ID
+	taxonomyID, err := getTaxonomy(g, dep)
+	if err != nil {
+		return err
 	}
 
 	// Create a db.Dependency instance
@@ -87,7 +75,7 @@ func processDependency(g db.DB, dep dependency.Interface) error {
 		Description: dep.Description,
 	}
 
-	_, err := g.CreateDependencyInterface(dbDep)
+	_, err = g.CreateDependencyInterface(dbDep)
 	if err != nil {
 		return eris.Wrap(err, "error updating the database")
 	}
@@ -101,17 +89,40 @@ func processDependency(g db.DB, dep dependency.Interface) error {
 	}
 
 	for _, attr := range attrs {
-		dbAttr := &db.DependencyAttribute{
-			DependencyID: dbDep.ID,
-			Name:         dep.Title,
-			Schema:       attr.Node,
-			Computed:     attr.Computed,
+		if attr.Node == nil || attr.Node.Properties == nil {
+			continue
 		}
 
-		_, err = g.CreateDependencyAttribute(dbAttr)
-		if err != nil {
-			return eris.Wrap(err, "error creating dependency attribute")
+		for k, n := range attr.Node.Properties {
+			dbAttr := &db.DependencyAttribute{
+				DependencyID: dbDep.ID,
+				Name:         k,
+				Schema:       n,
+				Computed:     attr.Computed,
+			}
+
+			_, err = g.CreateDependencyAttribute(dbAttr)
+			if err != nil {
+				return eris.Wrap(err, "error creating dependency attribute")
+			}
 		}
 	}
 	return nil
+}
+
+func getTaxonomy(g db.DB, dep dependency.Interface) (id uuid.UUID, err error) {
+	levels := dep.Taxonomy.Split()
+	if len(levels) == 0 {
+		// no error, empty id.
+		return
+	}
+
+	dbTax := db.TaxonomyFromLevels(levels...)
+	id, err = g.CreateTaxonomy(dbTax)
+	if err != nil {
+		err = eris.Wrapf(err, "failed to get or create taxon '%s'", dep.Taxonomy)
+		return
+	}
+
+	return
 }

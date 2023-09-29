@@ -32,13 +32,6 @@ type TFModule struct {
 
 type TFModules []TFModule
 
-func (m *TFModule) GetCondition() entity {
-	return &TFModule{
-		Source:  m.Source,
-		Version: m.Version,
-	}
-}
-
 func (m TFModule) GetInputAttributesWithMappings() (input TFModuleAttributes) {
 	input = make(TFModuleAttributes, 0, len(m.Attributes))
 	for _, a := range m.Attributes {
@@ -97,7 +90,8 @@ func ModuleByIDsFilter(ids ...uuid.UUID) FilterOption {
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateTFModule(e *TFModule) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"source", "version"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), e, []string{"source", "version"})
+	return id, err
 }
 
 // QueryTFModules based on the given filters

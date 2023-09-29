@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/rotisserie/eris"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -127,4 +128,29 @@ func (n *Node) Scan(value interface{}) error {
 //	into a format suitable for storing in the database.
 func (n Node) Value() (driver.Value, error) {
 	return json.Marshal(n)
+}
+
+func (n *Node) ToProto() *terrariumpb.JSONSchema {
+	if n == nil {
+		return nil
+	}
+
+	// Create the base proto representation
+	protoSchema := &terrariumpb.JSONSchema{
+		Title:       n.Title,
+		Description: n.Description,
+		Type:        n.Type,
+	}
+
+	// If properties exist OR the type is an "object",
+	// then we can convert each property
+	if n.Properties != nil || n.Type == "object" {
+		protoSchema.Properties = make(map[string]*terrariumpb.JSONSchema)
+
+		for key, prop := range n.Properties {
+			protoSchema.Properties[key] = prop.ToProto()
+		}
+	}
+
+	return protoSchema
 }

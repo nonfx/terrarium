@@ -841,6 +841,8 @@ func (m *Dependency) Validate() error {
 		return nil
 	}
 
+	// no validation rules for Id
+
 	// no validation rules for InterfaceId
 
 	// no validation rules for Title

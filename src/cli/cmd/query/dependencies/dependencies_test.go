@@ -51,14 +51,12 @@ func Test_fetchDependencies(t *testing.T) {
 	mockDB.On("QueryDependencies", mock.AnythingOfType(filterOptionType), mock.AnythingOfType(filterOptionType)).
 		Return(nil, fmt.Errorf("mock error")).Once()
 	mockDB.On("QueryDependencies", mock.AnythingOfType(filterOptionType), mock.AnythingOfType(filterOptionType)).
-		Return(db.DependencyOutputs{
+		Return(db.Dependencies{
 			{
-				Dependency: db.Dependency{
-					Model:       db.Model{ID: mockUuid1},
-					InterfaceID: "test_id",
-					Title:       "test_title",
-					Description: "testing",
-				},
+				Model:       db.Model{ID: mockUuid1},
+				InterfaceID: "test_id",
+				Title:       "test_title",
+				Description: "testing",
 			},
 		}, nil)
 	config.SetDBMocks(mockDB)
@@ -76,7 +74,7 @@ func Test_fetchDependencies(t *testing.T) {
 				cmd.SetArgs(args)
 			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				expectedOutput := "{\"dependencies\":[{\"interfaceId\":\"test_id\",\"title\":\"test_title\",\"description\":\"testing\",\"inputs\":null,\"outputs\":null}],\"page\":{\"size\":100,\"index\":0,\"total\":0}}"
+				expectedOutput := `{"dependencies":[{"interfaceId":"test_id","title":"test_title","description":"testing","inputs":null,"outputs":null, "id":"` + mockUuid1.String() + `", "taxonomy":[]}],"page":{"size":100,"index":0,"total":0}}`
 				return assert.JSONEq(t, expectedOutput, string(output))
 			},
 		},
@@ -107,6 +105,8 @@ func Test_fetchDependencies(t *testing.T) {
 				expected := map[string]interface{}{
 					"dependencies": []interface{}{
 						map[string]interface{}{
+							"id":          mockUuid1.String(),
+							"taxonomy":    []interface{}{},
 							"description": "testing",
 							"interfaceId": "test_id",
 							"inputs":      nil,

@@ -34,9 +34,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TerrariumServiceClient interface {
-	// Health check endpoint
+	// HealthCheck check endpoint
 	HealthCheck(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// List modules matching the source pattern
+	// ListModules modules matching the source pattern
 	ListModules(ctx context.Context, in *ListModulesRequest, opts ...grpc.CallOption) (*ListModulesResponse, error)
 	// ListModuleAttributes returns a list of attributes of the given module.
 	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
@@ -82,9 +82,9 @@ func (c *terrariumServiceClient) ListModuleAttributes(ctx context.Context, in *L
 // All implementations must embed UnimplementedTerrariumServiceServer
 // for forward compatibility
 type TerrariumServiceServer interface {
-	// Health check endpoint
+	// HealthCheck check endpoint
 	HealthCheck(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// List modules matching the source pattern
+	// ListModules modules matching the source pattern
 	ListModules(context.Context, *ListModulesRequest) (*ListModulesResponse, error)
 	// ListModuleAttributes returns a list of attributes of the given module.
 	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.

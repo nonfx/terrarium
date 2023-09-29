@@ -11,9 +11,9 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/app"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/utils"
+	metautils "github.com/cldcvr/terrarium/src/pkg/metadata/utils"
+	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/rotisserie/eris"
-	"golang.org/x/exp/slices"
 )
 
 const (
@@ -58,7 +58,7 @@ func readAppDependency(appYamlPath string) ([]byte, error) {
 	// If it's a directory, append terrarium.yaml to the path
 	if info.IsDir() {
 		appYamlPath = path.Join(appYamlPath, defaultYAMLFileName)
-	} else if !slices.Contains([]string{".yml", ".yaml"}, path.Ext(appYamlPath)) {
+	} else if !utils.IsYaml(appYamlPath) {
 		// If it's a file but not a .yaml, return an error
 		return nil, eris.New("provided path is not a directory or a .yaml|.yml file")
 	}
@@ -74,7 +74,7 @@ func readAppDependency(appYamlPath string) ([]byte, error) {
 
 func writeAppsEnv(pm *platform.PlatformMetadata, apps app.Apps) error {
 	for _, appObj := range apps {
-		vars := utils.GetAppEnvTemplate(pm, appObj)
+		vars := metautils.GetAppEnvTemplate(pm, appObj)
 		sort.Sort(vars)
 		fileName := "app_" + appObj.ID + ".env.mustache"
 		err := os.WriteFile(path.Join(flagOutDir, fileName), []byte(vars.RenderWithQuotes()), constants.ReadWritePermissions)

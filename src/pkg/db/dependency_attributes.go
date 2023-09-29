@@ -7,6 +7,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/google/uuid"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 type DependencyAttribute struct {
@@ -20,7 +21,7 @@ type DependencyAttribute struct {
 	Dependency *Dependency `gorm:"foreignKey:DependencyID"`
 }
 
-type DependencyAttributes []*DependencyAttribute
+type DependencyAttributes []DependencyAttribute
 
 func (dbAttr DependencyAttribute) ToProto() *terrariumpb.DependencyInputsAndOutputs {
 	resp := &terrariumpb.DependencyInputsAndOutputs{}
@@ -57,15 +58,31 @@ func (dbAttrs DependencyAttributes) ToProto() []*terrariumpb.DependencyInputsAnd
 	return resp
 }
 
-func (a *DependencyAttribute) GetCondition() entity {
-	return &DependencyAttribute{
-		DependencyID: a.DependencyID,
-		Name:         a.Name,
-		Computed:     a.Computed,
-	}
-}
-
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateDependencyAttribute(e *DependencyAttribute) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"dependency_id", "name"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), e, []string{"dependency_id", "name"})
+	return id, err
+}
+
+func (dbAttrs DependencyAttributes) GetByCompute(wantComputed bool) DependencyAttributes {
+	respAttrs := DependencyAttributes{}
+	for _, a := range dbAttrs {
+		if a.Computed == wantComputed {
+			respAttrs = append(respAttrs, a)
+		}
+	}
+	return respAttrs
+}
+
+func (dbAttrs DependencyAttributes) ToJSONSchema() *jsonschema.Node {
+	rootNode := &jsonschema.Node{
+		Type:       gojsonschema.TYPE_OBJECT,
+		Properties: map[string]*jsonschema.Node{},
+	}
+
+	for _, a := range dbAttrs {
+		rootNode.Properties[a.Name] = a.Schema
+	}
+
+	return rootNode
 }
