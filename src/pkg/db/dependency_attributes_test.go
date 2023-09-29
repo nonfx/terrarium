@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,8 +39,8 @@ func TestToProtoMultipleDependencyAttributes(t *testing.T) {
 	desc2 := "Desc2"
 
 	attrs := DependencyAttributes{
-		&DependencyAttribute{Name: name1},
-		&DependencyAttribute{Name: name2, Schema: &jsonschema.Node{Description: desc2}},
+		{Name: name1},
+		{Name: name2, Schema: &jsonschema.Node{Description: desc2}},
 		// Add more if needed...
 	}
 
@@ -50,28 +49,4 @@ func TestToProtoMultipleDependencyAttributes(t *testing.T) {
 
 	// Then the length of responses should match
 	assert.Len(t, protoResps, 2)
-}
-
-func TestGetCondition(t *testing.T) {
-	// Given a DependencyAttribute
-	dependencyID := uuid.MustParse("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-	name := "TestName"
-	computed := true
-
-	attr := &DependencyAttribute{
-		DependencyID: dependencyID,
-		Name:         name,
-		Computed:     computed,
-	}
-
-	// When GetCondition is called
-	condition := attr.GetCondition()
-
-	// Then the response should match the expected values
-	expected := &DependencyAttribute{
-		DependencyID: dependencyID,
-		Name:         name,
-		Computed:     computed,
-	}
-	assert.Equal(t, expected, condition)
 }

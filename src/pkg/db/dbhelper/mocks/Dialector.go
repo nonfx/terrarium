@@ -117,12 +117,13 @@ func (_m *Dialector) QuoteTo(_a0 clause.Writer, _a1 string) {
 	_m.Called(_a0, _a1)
 }
 
-// NewDialector creates a new instance of Dialector. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewDialector(t interface {
+type mockConstructorTestingTNewDialector interface {
 	mock.TestingT
 	Cleanup(func())
-}) *Dialector {
+}
+
+// NewDialector creates a new instance of Dialector. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewDialector(t mockConstructorTestingTNewDialector) *Dialector {
 	mock := &Dialector{}
 	mock.Mock.Test(t)
 

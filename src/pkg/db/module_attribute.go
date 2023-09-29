@@ -94,16 +94,10 @@ func ModuleAttrByIDsFilter(moduleId uuid.UUID, ids ...uuid.UUID) FilterOption {
 	}
 }
 
-func (ma *TFModuleAttribute) GetCondition() entity {
-	return &TFModuleAttribute{
-		ModuleID:            ma.ModuleID,
-		ModuleAttributeName: ma.ModuleAttributeName,
-	}
-}
-
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateTFModuleAttribute(e *TFModuleAttribute) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"module_id", "module_attribute_name"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), e, []string{"module_id", "module_attribute_name"})
+	return id, err
 }
 
 // QueryTFModuleAttributes based on the given filters

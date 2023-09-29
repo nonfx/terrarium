@@ -86,6 +86,7 @@ services:
       TR_DB_PORT: ${TR_DB_PORT:-}
       TR_DB_SSL_MODE: ${TR_DB_SSL_MODE:-}
       TR_DB_PASSWORD: ${TR_DB_PASSWORD:-}
+      TR_LOG_LEVEL: ${TR_LOG_LEVEL:-}
     volumes:
       - ./examples/farm:/app/farm
     profiles:

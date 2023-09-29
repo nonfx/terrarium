@@ -50,3 +50,80 @@ func TestToRefArr(t *testing.T) {
 		}
 	})
 }
+
+func TestTrimEmpty(t *testing.T) {
+	tests := []struct {
+		name string
+		inp  []string
+		outp []string
+	}{
+		{
+			name: "nil input",
+			inp:  nil,
+			outp: nil,
+		},
+		{
+			name: "empty input",
+			inp:  []string{},
+			outp: []string{},
+		},
+		{
+			name: "one empty",
+			inp:  []string{""},
+			outp: []string{},
+		},
+		{
+			name: "array with no empty",
+			inp:  []string{"a", "b"},
+			outp: []string{"a", "b"},
+		},
+		{
+			name: "array with no empty at ends",
+			inp:  []string{"a", "", "b"},
+			outp: []string{"a", "", "b"},
+		},
+		{
+			name: "array with empty at ends",
+			inp:  []string{"", "", "a", "", "b", "", ""},
+			outp: []string{"a", "", "b"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotOutp := TrimEmpty(tt.inp)
+			assert.Equal(t, tt.outp, gotOutp)
+		})
+	}
+}
+
+func TestToIfaceArr(t *testing.T) {
+	tests := []struct {
+		name string
+		inp  []string
+		outp []interface{}
+	}{
+		{
+			name: "nil",
+			inp:  nil,
+			outp: []interface{}{},
+		},
+		{
+			name: "empty",
+			inp:  []string{},
+			outp: []interface{}{},
+		},
+		{
+			name: "regular array",
+			inp:  []string{"a", "b", "c"},
+			outp: []interface{}{"a", "b", "c"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotOutp := ToIfaceArr(tt.inp)
+			assert.Equal(t, tt.outp, gotOutp)
+		})
+	}
+}

@@ -4,10 +4,13 @@
 package db
 
 import (
+	"errors"
 	"math"
 	"time"
 
+	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/rotisserie/eris"
 	"gorm.io/gorm"
 )
 
@@ -25,9 +28,8 @@ type DB interface {
 	CreateDependencyAttribute(e *DependencyAttribute) (uuid.UUID, error)
 	CreatePlatform(p *Platform) (uuid.UUID, error)
 	CreatePlatformComponents(p *PlatformComponents) (uuid.UUID, error)
-	GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error)
 
-	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
+	// GetOrCreateTFProvider finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
 	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)
 
 	GetTFProvider(e *TFProvider, where *TFProvider) error
@@ -39,8 +41,7 @@ type DB interface {
 	// QueryTFModuleAttributes list terraform module attributes
 	QueryTFModuleAttributes(filterOps ...FilterOption) (result TFModuleAttributes, err error)
 
-	QueryDependencyByInterfaceID(interfaceID string, filterOps ...FilterOption) (result *Dependency, err error)
-	QueryDependencies(filterOps ...FilterOption) (result DependencyOutputs, err error)
+	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
 
 	ExecuteSQLStatement(string) error
 }
@@ -67,50 +68,61 @@ func (m *Model) SetID(id uuid.UUID) {
 	m.ID = id
 }
 
-type entity interface {
+type entity[E any] interface {
+	*E
+
 	GetID() uuid.UUID
 	SetID(id uuid.UUID)
 	GenerateID()
-	GetCondition() entity
 }
 
-func createOrUpdate[T entity](g *gorm.DB, e T, uniqueFields []string) (uuid.UUID, error) {
-	res := Model{}
-	err := g.Model(e).Where(e.GetCondition()).First(&res).Error
-	if err != nil && !IsNotFoundError(err) {
-		return uuid.Nil, err
+type entityEq[E any] interface {
+	// IsEq checks if the entity is equal to the given entity.
+	// When an entity implements this, we skip update if the
+	// their is no change in the entity row.
+	IsEq(*E) bool
+}
+
+// createOrGetOrUpdate if the record does not exist, then create new and return id,
+// if the record exists, and has no change, then return id,
+// if the record exists, and may have change (has change or non deterministic), then update and return id.
+func createOrGetOrUpdate[T entity[E], E any](g *gorm.DB, e T, uniqueFields []string) (id uuid.UUID, isNew bool, isUpdated bool, err error) {
+	var dbObj E // create new empty object
+
+	err = g.Where(e, utils.ToIfaceArr(uniqueFields)...).First(&dbObj).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil // ignore not found error
+	} else if err != nil {
+		err = eris.Wrap(err, "db get failed")
+		return
 	}
 
-	if res.GetID() != uuid.Nil {
-		// update
-		e.SetID(res.GetID())
-		err = g.Save(e).Error
-	} else {
+	if T(&dbObj).GetID() == uuid.Nil {
 		// create
+		isNew = true
 		e.GenerateID()
 		err = g.Create(e).Error
+		if err != nil {
+			err = eris.Wrap(err, "db create failed")
+			return
+		}
+	} else if eEq, ok := ((interface{})(e)).(entityEq[E]); ok && eEq.IsEq(&dbObj) {
+		// no update when the object in DB vs given objects are equal.
+		e.SetID(T(&dbObj).GetID())
+	} else {
+		// update
+		isUpdated = true
+		e.SetID(T(&dbObj).GetID())
+		err = g.Save(e).Error
+		if err != nil {
+			err = eris.Wrap(err, "db update failed")
+			return
+		}
 	}
 
-	if err != nil {
-		return uuid.Nil, err
-	}
-	return e.GetID(), nil
-}
+	id = e.GetID()
 
-func (db *gDB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error) {
-	var taxonomy Taxonomy
-	uniqueFields := map[string]interface{}{
-		fieldName: fieldValue,
-	}
-	err := db.g().Where(uniqueFields).First(&taxonomy).Error
-	if err != nil {
-		return Taxonomy{}, err
-	}
-	return taxonomy, nil
-}
-
-func get[T entity](g *gorm.DB, e T, where T) error {
-	return g.First(e, where).Error
+	return
 }
 
 type gDB gorm.DB

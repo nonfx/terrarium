@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/pkg/db"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,10 +34,11 @@ func Test_gDB_CreatePlatform(t *testing.T) {
 		t.Run(dbName, func(t *testing.T) {
 			for _, tt := range tests {
 				t.Run(tt.name, func(t *testing.T) {
-					_, err := dbObj.CreatePlatform(tt.platform)
+					id, err := dbObj.CreatePlatform(tt.platform)
 					if tt.wantErr {
 						assert.Error(t, err)
 					} else {
+						assert.NotEqual(t, uuid.Nil, id)
 						assert.NoError(t, err)
 					}
 				})

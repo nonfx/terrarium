@@ -15,14 +15,8 @@ type TFResourceAttributesMapping struct {
 	OutputAttribute TFResourceAttribute `gorm:"foreignKey:OutputAttributeID"` // Resource attribute object that provides the input-attribute
 }
 
-func (ram *TFResourceAttributesMapping) GetCondition() entity {
-	return &TFResourceAttributesMapping{
-		InputAttributeID:  ram.InputAttributeID,
-		OutputAttributeID: ram.OutputAttributeID,
-	}
-}
-
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set existing record ID in the given object
 func (db *gDB) CreateTFResourceAttributesMapping(e *TFResourceAttributesMapping) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), e, []string{"input_attribute_id", "output_attribute_id"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), e, []string{"input_attribute_id", "output_attribute_id"})
+	return id, err
 }

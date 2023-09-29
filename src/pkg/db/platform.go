@@ -20,11 +20,6 @@ type Platform struct {
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
-	return createOrUpdate(db.g(), p, []string{"name"})
-}
-
-func (pl *Platform) GetCondition() entity {
-	return &Platform{
-		Name: pl.Name,
-	}
+	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"name"})
+	return id, err
 }

@@ -389,32 +389,8 @@ func (_m *DB) GetTFResourceType(e *db.TFResourceType, where *db.TFResourceType) 
 	return r0
 }
 
-// GetTaxonomyByFieldName provides a mock function with given fields: fieldName, fieldValue
-func (_m *DB) GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (db.Taxonomy, error) {
-	ret := _m.Called(fieldName, fieldValue)
-
-	var r0 db.Taxonomy
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, interface{}) (db.Taxonomy, error)); ok {
-		return rf(fieldName, fieldValue)
-	}
-	if rf, ok := ret.Get(0).(func(string, interface{}) db.Taxonomy); ok {
-		r0 = rf(fieldName, fieldValue)
-	} else {
-		r0 = ret.Get(0).(db.Taxonomy)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, interface{}) error); ok {
-		r1 = rf(fieldName, fieldValue)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // QueryDependencies provides a mock function with given fields: filterOps
-func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.DependencyOutputs, error) {
+func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.Dependencies, error) {
 	_va := make([]interface{}, len(filterOps))
 	for _i := range filterOps {
 		_va[_i] = filterOps[_i]
@@ -423,54 +399,21 @@ func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.DependencyOutp
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 db.DependencyOutputs
+	var r0 db.Dependencies
 	var r1 error
-	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.DependencyOutputs, error)); ok {
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.Dependencies, error)); ok {
 		return rf(filterOps...)
 	}
-	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.DependencyOutputs); ok {
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.Dependencies); ok {
 		r0 = rf(filterOps...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(db.DependencyOutputs)
+			r0 = ret.Get(0).(db.Dependencies)
 		}
 	}
 
 	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
 		r1 = rf(filterOps...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// QueryDependencyByInterfaceID provides a mock function with given fields: interfaceID, filterOps
-func (_m *DB) QueryDependencyByInterfaceID(interfaceID string, filterOps ...db.FilterOption) (*db.Dependency, error) {
-	_va := make([]interface{}, len(filterOps))
-	for _i := range filterOps {
-		_va[_i] = filterOps[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, interfaceID)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 *db.Dependency
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, ...db.FilterOption) (*db.Dependency, error)); ok {
-		return rf(interfaceID, filterOps...)
-	}
-	if rf, ok := ret.Get(0).(func(string, ...db.FilterOption) *db.Dependency); ok {
-		r0 = rf(interfaceID, filterOps...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*db.Dependency)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string, ...db.FilterOption) error); ok {
-		r1 = rf(interfaceID, filterOps...)
 	} else {
 		r1 = ret.Error(1)
 	}

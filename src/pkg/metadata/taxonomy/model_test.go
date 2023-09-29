@@ -28,7 +28,7 @@ func TestSplit(t *testing.T) {
 		{
 			name:     "Empty taxonomy",
 			taxon:    "",
-			expected: []string{""},
+			expected: []string{},
 		},
 	}
 
