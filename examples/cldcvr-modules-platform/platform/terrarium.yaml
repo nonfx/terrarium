@@ -1,0 +1,159 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+components:
+    - id: postgres
+      title: Postgres
+      inputs:
+        type: object
+        properties:
+            engine_version:
+                title: Engine Version
+                type: string
+                default: "11.20"
+            family:
+                title: Family
+                type: string
+                default: postgres
+      outputs:
+        type: object
+    - id: redis
+      title: Redis
+      inputs:
+        type: object
+        properties:
+            version:
+                title: Version
+                type: string
+                default: 5.0.6
+      outputs:
+        type: object
+    - id: service_web
+      title: Service Web
+      inputs:
+        type: object
+        properties:
+            port:
+                title: Port
+                type: number
+                default: 80
+      outputs:
+        type: object
+graph:
+    - id: data.aws_availability_zones.available
+      requirements:
+        - provider.aws
+    - id: local.azs
+      requirements:
+        - data.aws_availability_zones.available
+    - id: local.database_configuration
+      requirements:
+        - local.tr_component_postgres
+        - var.db_config
+    - id: local.name
+      requirements:
+        - var.common_name_prefix
+        - var.environment
+    - id: local.redis_configuration
+      requirements:
+        - local.tr_component_redis
+        - var.redis_config
+    - id: local.tags
+      requirements:
+        - var.common_tags
+    - id: local.tr_component_postgres
+      requirements: []
+    - id: local.tr_component_redis
+      requirements: []
+    - id: local.tr_component_service_web
+      requirements: []
+    - id: local.vpc_cidr
+      requirements:
+        - var.vpc_cidr
+    - id: module.db_sg
+      requirements:
+        - local.database_configuration
+        - local.name
+        - local.vpc_cidr
+        - module.vpc
+        - var.environment
+    - id: module.ec2_sg
+      requirements:
+        - local.name
+        - local.tr_component_service_web
+        - local.vpc_cidr
+        - module.vpc
+        - var.ec2_config
+        - var.environment
+    - id: module.redis_sg
+      requirements:
+        - local.name
+        - local.redis_configuration
+        - local.vpc_cidr
+        - module.vpc
+        - var.environment
+    - id: module.tr_component_postgres
+      requirements:
+        - local.database_configuration
+        - local.name
+        - module.db_sg
+        - module.vpc
+        - resource.random_password.rds_password
+        - var.common_name_prefix
+    - id: module.tr_component_redis
+      requirements:
+        - local.name
+        - local.redis_configuration
+        - local.tags
+        - module.redis_sg
+        - module.vpc
+    - id: module.tr_component_service_web
+      requirements:
+        - local.name
+        - local.tags
+        - local.tr_component_service_web
+        - module.ec2_sg
+        - module.vpc
+        - var.ec2_config
+    - id: module.vpc
+      requirements:
+        - local.azs
+        - local.name
+        - local.tags
+        - local.vpc_cidr
+    - id: output.db_host
+      requirements:
+        - module.tr_component_postgres
+    - id: output.public_dns
+      requirements:
+        - module.tr_component_service_web
+    - id: output.public_ip
+      requirements:
+        - module.tr_component_service_web
+    - id: output.redis_host
+      requirements:
+        - module.tr_component_redis
+    - id: output.vpc_id
+      requirements:
+        - module.vpc
+    - id: provider.aws
+      requirements: []
+    - id: provider.random
+      requirements: []
+    - id: resource.random_password.rds_password
+      requirements:
+        - provider.random
+    - id: var.common_name_prefix
+      requirements: []
+    - id: var.common_tags
+      requirements: []
+    - id: var.db_config
+      requirements: []
+    - id: var.ec2_config
+      requirements: []
+    - id: var.environment
+      requirements: []
+    - id: var.redis_config
+      requirements: []
+    - id: var.vpc_cidr
+      requirements: []

@@ -1,0 +1,193 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+components:
+    - id: postgres
+      title: Postgres
+      inputs:
+        type: object
+        properties:
+            family:
+                title: Family
+                type: string
+                default: postgres
+            version:
+                title: Version
+                type: string
+                default: "11.20"
+      outputs:
+        type: object
+        properties:
+            host:
+                title: Host
+            password:
+                title: Password
+    - id: redis
+      title: Redis
+      inputs:
+        type: object
+        properties:
+            version:
+                title: Version
+                type: string
+                default: 5.0.6
+      outputs:
+        type: object
+        properties:
+            host:
+                title: Host
+    - id: service_private
+      title: Service Private
+      inputs:
+        type: object
+        properties:
+            cpu:
+                title: Cpu
+                type: number
+                default: 1024
+            memory:
+                title: Memory
+                type: number
+                default: 2048
+            path:
+                title: Path
+                type: string
+                default: /
+            port:
+                title: Port
+                type: number
+                default: 80
+            protocol:
+                title: Protocol
+                type: string
+                default: tcp
+      outputs:
+        type: object
+    - id: service_web
+      title: Service Web
+      inputs:
+        type: object
+        properties:
+            cpu:
+                title: Cpu
+                type: number
+                default: 1024
+            memory:
+                title: Memory
+                type: number
+                default: 2048
+            path:
+                title: Path
+                type: string
+                default: /
+            port:
+                title: Port
+                type: number
+                default: 80
+            protocol:
+                title: Protocol
+                type: string
+                default: tcp
+      outputs:
+        type: object
+graph:
+    - id: local.app_vars_service_private
+      requirements:
+        - local.tr_component_service_private
+        - var.domain_name
+    - id: local.app_vars_service_web
+      requirements:
+        - local.tr_component_service_web
+        - var.domain_name
+    - id: local.extract_resource_name
+      requirements:
+        - var.common_name_prefix
+        - var.environment
+    - id: local.tr_component_postgres
+      requirements: []
+    - id: local.tr_component_redis
+      requirements: []
+    - id: local.tr_component_service_private
+      requirements: []
+    - id: local.tr_component_service_web
+      requirements: []
+    - id: module.acm
+      requirements:
+        - var.domain_name
+        - var.zone_id
+    - id: module.ecs
+      requirements:
+        - local.app_vars_service_private
+        - local.app_vars_service_web
+        - local.extract_resource_name
+        - module.acm
+        - module.vpc
+        - var.domain_name
+        - var.ecs_config
+        - var.environment
+        - var.lb_config
+        - var.zone_id
+    - id: module.tr_component_postgres
+      requirements:
+        - local.tr_component_postgres
+        - module.vpc
+    - id: module.tr_component_redis
+      requirements:
+        - local.extract_resource_name
+        - local.tr_component_redis
+        - module.vpc
+        - var.common_name_prefix
+        - var.environment
+        - var.redis_config
+    - id: module.tr_component_service_private
+      requirements:
+        - module.ecs
+    - id: module.tr_component_service_web
+      requirements:
+        - module.ecs
+    - id: module.vpc
+      requirements:
+        - local.extract_resource_name
+        - var.common_name_prefix
+        - var.environment
+        - var.vpc_config
+    - id: output.availability_zones
+      requirements:
+        - module.vpc
+    - id: output.private_subnets
+      requirements:
+        - module.vpc
+    - id: output.public_subnets
+      requirements:
+        - module.vpc
+    - id: output.tr_component_postgres_host
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_postgres_password
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_redis_host
+      requirements:
+        - module.tr_component_redis
+    - id: output.vpc_cidr_block
+      requirements:
+        - module.vpc
+    - id: output.vpc_id
+      requirements:
+        - module.vpc
+    - id: var.common_name_prefix
+      requirements: []
+    - id: var.domain_name
+      requirements: []
+    - id: var.ecs_config
+      requirements: []
+    - id: var.environment
+      requirements: []
+    - id: var.lb_config
+      requirements: []
+    - id: var.redis_config
+      requirements: []
+    - id: var.vpc_config
+      requirements: []
+    - id: var.zone_id
+      requirements: []
