@@ -1,0 +1,40 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+platforms:
+  - title: AWS EKS
+    description: Amazon Elastic Kubernetes Service
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: v1.0
+        type: tag
+      - label: main
+        type: branch
+
+  - title: AWS Serverless
+    description: AWS Serverless
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: v2.0
+        type: commit
+      - label: develop
+        type: branch
+
+  - title: GCP GKE
+    description: Google Kubernetes Engine
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: v3.0
+        type: tag
+
+  - title: GCP Serverless
+    description: GCP Serverless
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/farm/platform/
+    revisions:
+      - label: main
+        type: branch
+

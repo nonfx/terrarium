@@ -40,3 +40,7 @@ Read more - [src/pkg/metadata/dependency/readme.md](./src/pkg/metadata/dependenc
 ---
 
 We hope this documentation provides you with a clear understanding of the Terrarium Farm modules and dependency interfaces. If you have any further questions or need assistance, please refer to the official Terrarium documentation or reach out to the Terrarium community for support.
+
+## Terrarium Farm Platform
+
+The YAML file encapsulates essential repository details required for accessing the 'terrarium.yaml' file. In addition to managing repository details, the YAML configuration is used in mapping relationships between platforms and dependency interfaces. This is done by mapping the components in the terrarium.yaml and dependency interface already stored in the db. The mapping details are then stored in the platform_components table
