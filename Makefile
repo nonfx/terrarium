@@ -53,9 +53,6 @@ docker-tools-build:  ## Build CLI & farm-harvester images
 docker-harvest: docker-tools-build start-db  ## Run harvest scripts on the Farm folder in a containerized environment
 	docker compose run --rm farm-harvester
 
-docker-seed: docker-harvest  ## DEPRECATED. alias to docker-harvest target
-	@echo "\nNOTE: This target is deprecated. Use make docker-harvest instead"
-
 docker-api-test: ## Run API unit tests in a containerized environment
 	docker compose run --build --rm terrarium-unit-test
 

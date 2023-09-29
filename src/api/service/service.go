@@ -15,7 +15,6 @@ import (
 type Service interface {
 	HealthCheck(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error)
 	ListModules(ctx context.Context, req *terrariumpb.ListModulesRequest) (*terrariumpb.ListModulesResponse, error)
-	CodeCompletion(ctx context.Context, req *terrariumpb.CompletionRequest) (*terrariumpb.CompletionResponse, error)
 	ListModuleAttributes(ctx context.Context, req *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error)
 }
 

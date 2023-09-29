@@ -262,38 +262,6 @@ func (_m *DB) ExecuteSQLStatement(_a0 string) error {
 	return r0
 }
 
-// FindOutputMappingsByModuleID provides a mock function with given fields: ids
-func (_m *DB) FindOutputMappingsByModuleID(ids ...uuid.UUID) (db.TFModules, error) {
-	_va := make([]interface{}, len(ids))
-	for _i := range ids {
-		_va[_i] = ids[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 db.TFModules
-	var r1 error
-	if rf, ok := ret.Get(0).(func(...uuid.UUID) (db.TFModules, error)); ok {
-		return rf(ids...)
-	}
-	if rf, ok := ret.Get(0).(func(...uuid.UUID) db.TFModules); ok {
-		r0 = rf(ids...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(db.TFModules)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(...uuid.UUID) error); ok {
-		r1 = rf(ids...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetOrCreateTFProvider provides a mock function with given fields: e
 func (_m *DB) GetOrCreateTFProvider(e *db.TFProvider) (uuid.UUID, bool, error) {
 	ret := _m.Called(e)
@@ -522,12 +490,13 @@ func (_m *DB) QueryTFModules(filterOps ...db.FilterOption) (db.TFModules, error)
 	return r0, r1
 }
 
-// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewDB(t interface {
+type mockConstructorTestingTNewDB interface {
 	mock.TestingT
 	Cleanup(func())
-}) *DB {
+}
+
+// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewDB(t mockConstructorTestingTNewDB) *DB {
 	mock := &DB{}
 	mock.Mock.Test(t)
 

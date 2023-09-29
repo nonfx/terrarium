@@ -11,12 +11,11 @@ import (
 	"net/mail"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	"google.golang.org/protobuf/types/known/anypb"
+	"github.com/golang/protobuf/ptypes"
 )
 
 // ensure the imports are used
@@ -31,33 +30,18 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = anypb.Any{}
-	_ = sort.Sort
+	_ = ptypes.DynamicAny{}
 )
 
 // define the regex for a UUID once up-front
 var _service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on Module with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// proto definition for this message. If any rules are violated, an error is returned.
 func (m *Module) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Module with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in ModuleMultiError, or nil if none found.
-func (m *Module) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Module) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for Id
 
@@ -74,26 +58,7 @@ func (m *Module) validate(all bool) error {
 	for idx, item := range m.GetInputAttributes() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ModuleValidationError{
-						field:  fmt.Sprintf("InputAttributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ModuleValidationError{
-						field:  fmt.Sprintf("InputAttributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ModuleValidationError{
 					field:  fmt.Sprintf("InputAttributes[%v]", idx),
@@ -107,28 +72,8 @@ func (m *Module) validate(all bool) error {
 
 	// no validation rules for Namespace
 
-	if len(errors) > 0 {
-		return ModuleMultiError(errors)
-	}
-
 	return nil
 }
-
-// ModuleMultiError is an error wrapping multiple validation errors returned by
-// Module.ValidateAll() if the designated constraints aren't met.
-type ModuleMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ModuleMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ModuleMultiError) AllErrors() []error { return m }
 
 // ModuleValidationError is the validation error returned by Module.Validate if
 // the designated constraints aren't met.
@@ -185,38 +130,20 @@ var _ interface {
 } = ModuleValidationError{}
 
 // Validate checks the field values on CompletionRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
 func (m *CompletionRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CompletionRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CompletionRequestMultiError, or nil if none found.
-func (m *CompletionRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CompletionRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	// no validation rules for CodeContext
 
 	if len(m.GetModules()) < 1 {
-		err := CompletionRequestValidationError{
+		return CompletionRequestValidationError{
 			field:  "Modules",
 			reason: "value must contain at least 1 item(s)",
 		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
 	}
 
 	_CompletionRequest_Modules_Unique := make(map[string]struct{}, len(m.GetModules()))
@@ -225,34 +152,22 @@ func (m *CompletionRequest) validate(all bool) error {
 		_, _ = idx, item
 
 		if _, exists := _CompletionRequest_Modules_Unique[item]; exists {
-			err := CompletionRequestValidationError{
+			return CompletionRequestValidationError{
 				field:  fmt.Sprintf("Modules[%v]", idx),
 				reason: "repeated value must contain unique items",
 			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
 		} else {
 			_CompletionRequest_Modules_Unique[item] = struct{}{}
 		}
 
 		if err := m._validateUuid(item); err != nil {
-			err = CompletionRequestValidationError{
+			return CompletionRequestValidationError{
 				field:  fmt.Sprintf("Modules[%v]", idx),
 				reason: "value must be a valid UUID",
 				cause:  err,
 			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
 		}
 
-	}
-
-	if len(errors) > 0 {
-		return CompletionRequestMultiError(errors)
 	}
 
 	return nil
@@ -265,23 +180,6 @@ func (m *CompletionRequest) _validateUuid(uuid string) error {
 
 	return nil
 }
-
-// CompletionRequestMultiError is an error wrapping multiple validation errors
-// returned by CompletionRequest.ValidateAll() if the designated constraints
-// aren't met.
-type CompletionRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CompletionRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CompletionRequestMultiError) AllErrors() []error { return m }
 
 // CompletionRequestValidationError is the validation error returned by
 // CompletionRequest.Validate if the designated constraints aren't met.
@@ -341,49 +239,14 @@ var _ interface {
 
 // Validate checks the field values on CompletionResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *CompletionResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CompletionResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CompletionResponseMultiError, or nil if none found.
-func (m *CompletionResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CompletionResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
-	if len(errors) > 0 {
-		return CompletionResponseMultiError(errors)
-	}
-
 	return nil
 }
-
-// CompletionResponseMultiError is an error wrapping multiple validation errors
-// returned by CompletionResponse.ValidateAll() if the designated constraints
-// aren't met.
-type CompletionResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CompletionResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CompletionResponseMultiError) AllErrors() []error { return m }
 
 // CompletionResponseValidationError is the validation error returned by
 // CompletionResponse.Validate if the designated constraints aren't met.
@@ -442,25 +305,11 @@ var _ interface {
 } = CompletionResponseValidationError{}
 
 // Validate checks the field values on Page with the rules defined in the proto
-// definition for this message. If any rules are violated, the first error
-// encountered is returned, or nil if there are no violations.
+// definition for this message. If any rules are violated, an error is returned.
 func (m *Page) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Page with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in PageMultiError, or nil if none found.
-func (m *Page) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Page) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for Size
 
@@ -468,28 +317,8 @@ func (m *Page) validate(all bool) error {
 
 	// no validation rules for Total
 
-	if len(errors) > 0 {
-		return PageMultiError(errors)
-	}
-
 	return nil
 }
-
-// PageMultiError is an error wrapping multiple validation errors returned by
-// Page.ValidateAll() if the designated constraints aren't met.
-type PageMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m PageMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m PageMultiError) AllErrors() []error { return m }
 
 // PageValidationError is the validation error returned by Page.Validate if the
 // designated constraints aren't met.
@@ -547,46 +376,13 @@ var _ interface {
 
 // Validate checks the field values on ListModulesRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *ListModulesRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ListModulesRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ListModulesRequestMultiError, or nil if none found.
-func (m *ListModulesRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ListModulesRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
-	if all {
-		switch v := interface{}(m.GetPage()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListModulesRequestValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListModulesRequestValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListModulesRequestValidationError{
 				field:  "Page",
@@ -600,29 +396,8 @@ func (m *ListModulesRequest) validate(all bool) error {
 
 	// no validation rules for PopulateMappings
 
-	if len(errors) > 0 {
-		return ListModulesRequestMultiError(errors)
-	}
-
 	return nil
 }
-
-// ListModulesRequestMultiError is an error wrapping multiple validation errors
-// returned by ListModulesRequest.ValidateAll() if the designated constraints
-// aren't met.
-type ListModulesRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ListModulesRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ListModulesRequestMultiError) AllErrors() []error { return m }
 
 // ListModulesRequestValidationError is the validation error returned by
 // ListModulesRequest.Validate if the designated constraints aren't met.
@@ -682,49 +457,16 @@ var _ interface {
 
 // Validate checks the field values on ListModulesResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *ListModulesResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ListModulesResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ListModulesResponseMultiError, or nil if none found.
-func (m *ListModulesResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ListModulesResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	for idx, item := range m.GetModules() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListModulesResponseValidationError{
-						field:  fmt.Sprintf("Modules[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ListModulesResponseValidationError{
-						field:  fmt.Sprintf("Modules[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ListModulesResponseValidationError{
 					field:  fmt.Sprintf("Modules[%v]", idx),
@@ -736,26 +478,7 @@ func (m *ListModulesResponse) validate(all bool) error {
 
 	}
 
-	if all {
-		switch v := interface{}(m.GetPage()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListModulesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListModulesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListModulesResponseValidationError{
 				field:  "Page",
@@ -765,29 +488,8 @@ func (m *ListModulesResponse) validate(all bool) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return ListModulesResponseMultiError(errors)
-	}
-
 	return nil
 }
-
-// ListModulesResponseMultiError is an error wrapping multiple validation
-// errors returned by ListModulesResponse.ValidateAll() if the designated
-// constraints aren't met.
-type ListModulesResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ListModulesResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ListModulesResponseMultiError) AllErrors() []error { return m }
 
 // ListModulesResponseValidationError is the validation error returned by
 // ListModulesResponse.Validate if the designated constraints aren't met.
@@ -847,58 +549,21 @@ var _ interface {
 
 // Validate checks the field values on ListModuleAttributesRequest with the
 // rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *ListModuleAttributesRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ListModuleAttributesRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ListModuleAttributesRequestMultiError, or nil if none found.
-func (m *ListModuleAttributesRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ListModuleAttributesRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	if err := m._validateUuid(m.GetModuleId()); err != nil {
-		err = ListModuleAttributesRequestValidationError{
+		return ListModuleAttributesRequestValidationError{
 			field:  "ModuleId",
 			reason: "value must be a valid UUID",
 			cause:  err,
 		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
 	}
 
-	if all {
-		switch v := interface{}(m.GetPage()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListModuleAttributesRequestValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListModuleAttributesRequestValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListModuleAttributesRequestValidationError{
 				field:  "Page",
@@ -912,10 +577,6 @@ func (m *ListModuleAttributesRequest) validate(all bool) error {
 
 	// no validation rules for PopulateMappings
 
-	if len(errors) > 0 {
-		return ListModuleAttributesRequestMultiError(errors)
-	}
-
 	return nil
 }
 
@@ -926,23 +587,6 @@ func (m *ListModuleAttributesRequest) _validateUuid(uuid string) error {
 
 	return nil
 }
-
-// ListModuleAttributesRequestMultiError is an error wrapping multiple
-// validation errors returned by ListModuleAttributesRequest.ValidateAll() if
-// the designated constraints aren't met.
-type ListModuleAttributesRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ListModuleAttributesRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ListModuleAttributesRequestMultiError) AllErrors() []error { return m }
 
 // ListModuleAttributesRequestValidationError is the validation error returned
 // by ListModuleAttributesRequest.Validate if the designated constraints
@@ -1003,49 +647,16 @@ var _ interface {
 
 // Validate checks the field values on ListModuleAttributesResponse with the
 // rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *ListModuleAttributesResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ListModuleAttributesResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ListModuleAttributesResponseMultiError, or nil if none found.
-func (m *ListModuleAttributesResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ListModuleAttributesResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	for idx, item := range m.GetAttributes() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListModuleAttributesResponseValidationError{
-						field:  fmt.Sprintf("Attributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ListModuleAttributesResponseValidationError{
-						field:  fmt.Sprintf("Attributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ListModuleAttributesResponseValidationError{
 					field:  fmt.Sprintf("Attributes[%v]", idx),
@@ -1057,26 +668,7 @@ func (m *ListModuleAttributesResponse) validate(all bool) error {
 
 	}
 
-	if all {
-		switch v := interface{}(m.GetPage()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListModuleAttributesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListModuleAttributesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListModuleAttributesResponseValidationError{
 				field:  "Page",
@@ -1086,29 +678,8 @@ func (m *ListModuleAttributesResponse) validate(all bool) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return ListModuleAttributesResponseMultiError(errors)
-	}
-
 	return nil
 }
-
-// ListModuleAttributesResponseMultiError is an error wrapping multiple
-// validation errors returned by ListModuleAttributesResponse.ValidateAll() if
-// the designated constraints aren't met.
-type ListModuleAttributesResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ListModuleAttributesResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ListModuleAttributesResponseMultiError) AllErrors() []error { return m }
 
 // ListModuleAttributesResponseValidationError is the validation error returned
 // by ListModuleAttributesResponse.Validate if the designated constraints
@@ -1168,51 +739,18 @@ var _ interface {
 } = ListModuleAttributesResponseValidationError{}
 
 // Validate checks the field values on ModuleAttribute with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
 func (m *ModuleAttribute) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ModuleAttribute with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ModuleAttributeMultiError, or nil if none found.
-func (m *ModuleAttribute) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ModuleAttribute) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for Name
 
 	// no validation rules for Description
 
-	if all {
-		switch v := interface{}(m.GetParentModule()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ModuleAttributeValidationError{
-					field:  "ParentModule",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ModuleAttributeValidationError{
-					field:  "ParentModule",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetParentModule()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetParentModule()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ModuleAttributeValidationError{
 				field:  "ParentModule",
@@ -1225,26 +763,7 @@ func (m *ModuleAttribute) validate(all bool) error {
 	for idx, item := range m.GetOutputModuleAttributes() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ModuleAttributeValidationError{
-						field:  fmt.Sprintf("OutputModuleAttributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ModuleAttributeValidationError{
-						field:  fmt.Sprintf("OutputModuleAttributes[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ModuleAttributeValidationError{
 					field:  fmt.Sprintf("OutputModuleAttributes[%v]", idx),
@@ -1258,29 +777,8 @@ func (m *ModuleAttribute) validate(all bool) error {
 
 	// no validation rules for Optional
 
-	if len(errors) > 0 {
-		return ModuleAttributeMultiError(errors)
-	}
-
 	return nil
 }
-
-// ModuleAttributeMultiError is an error wrapping multiple validation errors
-// returned by ModuleAttribute.ValidateAll() if the designated constraints
-// aren't met.
-type ModuleAttributeMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ModuleAttributeMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ModuleAttributeMultiError) AllErrors() []error { return m }
 
 // ModuleAttributeValidationError is the validation error returned by
 // ModuleAttribute.Validate if the designated constraints aren't met.
@@ -1337,26 +835,11 @@ var _ interface {
 } = ModuleAttributeValidationError{}
 
 // Validate checks the field values on Dependency with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// proto definition for this message. If any rules are violated, an error is returned.
 func (m *Dependency) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Dependency with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in DependencyMultiError, or
-// nil if none found.
-func (m *Dependency) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Dependency) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for InterfaceId
 
@@ -1364,26 +847,7 @@ func (m *Dependency) validate(all bool) error {
 
 	// no validation rules for Description
 
-	if all {
-		switch v := interface{}(m.GetInputs()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DependencyValidationError{
-					field:  "Inputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DependencyValidationError{
-					field:  "Inputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DependencyValidationError{
 				field:  "Inputs",
@@ -1393,26 +857,7 @@ func (m *Dependency) validate(all bool) error {
 		}
 	}
 
-	if all {
-		switch v := interface{}(m.GetOutputs()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DependencyValidationError{
-					field:  "Outputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DependencyValidationError{
-					field:  "Outputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DependencyValidationError{
 				field:  "Outputs",
@@ -1422,28 +867,8 @@ func (m *Dependency) validate(all bool) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return DependencyMultiError(errors)
-	}
-
 	return nil
 }
-
-// DependencyMultiError is an error wrapping multiple validation errors
-// returned by Dependency.ValidateAll() if the designated constraints aren't met.
-type DependencyMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DependencyMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DependencyMultiError) AllErrors() []error { return m }
 
 // DependencyValidationError is the validation error returned by
 // Dependency.Validate if the designated constraints aren't met.
@@ -1500,26 +925,11 @@ var _ interface {
 } = DependencyValidationError{}
 
 // Validate checks the field values on JSONSchema with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// proto definition for this message. If any rules are violated, an error is returned.
 func (m *JSONSchema) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on JSONSchema with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in JSONSchemaMultiError, or
-// nil if none found.
-func (m *JSONSchema) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *JSONSchema) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for Title
 
@@ -1527,26 +937,7 @@ func (m *JSONSchema) validate(all bool) error {
 
 	// no validation rules for Type
 
-	if all {
-		switch v := interface{}(m.GetDefault()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, JSONSchemaValidationError{
-					field:  "Default",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, JSONSchemaValidationError{
-					field:  "Default",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return JSONSchemaValidationError{
 				field:  "Default",
@@ -1559,26 +950,7 @@ func (m *JSONSchema) validate(all bool) error {
 	for idx, item := range m.GetExamples() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, JSONSchemaValidationError{
-						field:  fmt.Sprintf("Examples[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, JSONSchemaValidationError{
-						field:  fmt.Sprintf("Examples[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return JSONSchemaValidationError{
 					field:  fmt.Sprintf("Examples[%v]", idx),
@@ -1593,26 +965,7 @@ func (m *JSONSchema) validate(all bool) error {
 	for idx, item := range m.GetEnum() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, JSONSchemaValidationError{
-						field:  fmt.Sprintf("Enum[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, JSONSchemaValidationError{
-						field:  fmt.Sprintf("Enum[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return JSONSchemaValidationError{
 					field:  fmt.Sprintf("Enum[%v]", idx),
@@ -1642,26 +995,7 @@ func (m *JSONSchema) validate(all bool) error {
 
 	// no validation rules for MultipleOf
 
-	if all {
-		switch v := interface{}(m.GetItems()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, JSONSchemaValidationError{
-					field:  "Items",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, JSONSchemaValidationError{
-					field:  "Items",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetItems()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetItems()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return JSONSchemaValidationError{
 				field:  "Items",
@@ -1679,74 +1013,25 @@ func (m *JSONSchema) validate(all bool) error {
 
 	// no validation rules for UniqueItems
 
-	{
-		sorted_keys := make([]string, len(m.GetProperties()))
-		i := 0
-		for key := range m.GetProperties() {
-			sorted_keys[i] = key
-			i++
-		}
-		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
-		for _, key := range sorted_keys {
-			val := m.GetProperties()[key]
-			_ = val
+	for key, val := range m.GetProperties() {
+		_ = val
 
-			// no validation rules for Properties[key]
+		// no validation rules for Properties[key]
 
-			if all {
-				switch v := interface{}(val).(type) {
-				case interface{ ValidateAll() error }:
-					if err := v.ValidateAll(); err != nil {
-						errors = append(errors, JSONSchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				case interface{ Validate() error }:
-					if err := v.Validate(); err != nil {
-						errors = append(errors, JSONSchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				}
-			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
-				if err := v.Validate(); err != nil {
-					return JSONSchemaValidationError{
-						field:  fmt.Sprintf("Properties[%v]", key),
-						reason: "embedded message failed validation",
-						cause:  err,
-					}
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return JSONSchemaValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
 				}
 			}
-
 		}
-	}
 
-	if len(errors) > 0 {
-		return JSONSchemaMultiError(errors)
 	}
 
 	return nil
 }
-
-// JSONSchemaMultiError is an error wrapping multiple validation errors
-// returned by JSONSchema.ValidateAll() if the designated constraints aren't met.
-type JSONSchemaMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m JSONSchemaMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m JSONSchemaMultiError) AllErrors() []error { return m }
 
 // JSONSchemaValidationError is the validation error returned by
 // JSONSchema.Validate if the designated constraints aren't met.
@@ -1804,49 +1089,16 @@ var _ interface {
 
 // Validate checks the field values on ListDependenciesResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *ListDependenciesResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ListDependenciesResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ListDependenciesResponseMultiError, or nil if none found.
-func (m *ListDependenciesResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ListDependenciesResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	for idx, item := range m.GetDependencies() {
 		_, _ = idx, item
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListDependenciesResponseValidationError{
-						field:  fmt.Sprintf("Dependencies[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ListDependenciesResponseValidationError{
-						field:  fmt.Sprintf("Dependencies[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ListDependenciesResponseValidationError{
 					field:  fmt.Sprintf("Dependencies[%v]", idx),
@@ -1858,26 +1110,7 @@ func (m *ListDependenciesResponse) validate(all bool) error {
 
 	}
 
-	if all {
-		switch v := interface{}(m.GetPage()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListDependenciesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListDependenciesResponseValidationError{
-					field:  "Page",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ListDependenciesResponseValidationError{
 				field:  "Page",
@@ -1887,29 +1120,8 @@ func (m *ListDependenciesResponse) validate(all bool) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return ListDependenciesResponseMultiError(errors)
-	}
-
 	return nil
 }
-
-// ListDependenciesResponseMultiError is an error wrapping multiple validation
-// errors returned by ListDependenciesResponse.ValidateAll() if the designated
-// constraints aren't met.
-type ListDependenciesResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ListDependenciesResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ListDependenciesResponseMultiError) AllErrors() []error { return m }
 
 // ListDependenciesResponseValidationError is the validation error returned by
 // ListDependenciesResponse.Validate if the designated constraints aren't met.
@@ -1968,96 +1180,33 @@ var _ interface {
 } = ListDependenciesResponseValidationError{}
 
 // Validate checks the field values on Schema with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// proto definition for this message. If any rules are violated, an error is returned.
 func (m *Schema) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Schema with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in SchemaMultiError, or nil if none found.
-func (m *Schema) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Schema) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	// no validation rules for Type
 
-	{
-		sorted_keys := make([]string, len(m.GetProperties()))
-		i := 0
-		for key := range m.GetProperties() {
-			sorted_keys[i] = key
-			i++
-		}
-		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
-		for _, key := range sorted_keys {
-			val := m.GetProperties()[key]
-			_ = val
+	for key, val := range m.GetProperties() {
+		_ = val
 
-			// no validation rules for Properties[key]
+		// no validation rules for Properties[key]
 
-			if all {
-				switch v := interface{}(val).(type) {
-				case interface{ ValidateAll() error }:
-					if err := v.ValidateAll(); err != nil {
-						errors = append(errors, SchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				case interface{ Validate() error }:
-					if err := v.Validate(); err != nil {
-						errors = append(errors, SchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				}
-			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
-				if err := v.Validate(); err != nil {
-					return SchemaValidationError{
-						field:  fmt.Sprintf("Properties[%v]", key),
-						reason: "embedded message failed validation",
-						cause:  err,
-					}
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SchemaValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
 				}
 			}
-
 		}
-	}
 
-	if len(errors) > 0 {
-		return SchemaMultiError(errors)
 	}
 
 	return nil
 }
-
-// SchemaMultiError is an error wrapping multiple validation errors returned by
-// Schema.ValidateAll() if the designated constraints aren't met.
-type SchemaMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m SchemaMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m SchemaMultiError) AllErrors() []error { return m }
 
 // SchemaValidationError is the validation error returned by Schema.Validate if
 // the designated constraints aren't met.
@@ -2115,25 +1264,11 @@ var _ interface {
 
 // Validate checks the field values on DependencyInputsAndOutputs with the
 // rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
+// violated, an error is returned.
 func (m *DependencyInputsAndOutputs) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DependencyInputsAndOutputs with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// DependencyInputsAndOutputsMultiError, or nil if none found.
-func (m *DependencyInputsAndOutputs) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *DependencyInputsAndOutputs) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
-
-	var errors []error
 
 	// no validation rules for Title
 
@@ -2141,58 +1276,18 @@ func (m *DependencyInputsAndOutputs) validate(all bool) error {
 
 	// no validation rules for Type
 
-	switch v := m.DefaultValue.(type) {
-	case *DependencyInputsAndOutputs_DefaultNumber:
-		if v == nil {
-			err := DependencyInputsAndOutputsValidationError{
-				field:  "DefaultValue",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-		// no validation rules for DefaultNumber
-	case *DependencyInputsAndOutputs_DefaultString:
-		if v == nil {
-			err := DependencyInputsAndOutputsValidationError{
-				field:  "DefaultValue",
-				reason: "oneof value cannot be a typed-nil",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-		// no validation rules for DefaultString
-	default:
-		_ = v // ensures v is used
-	}
+	switch m.DefaultValue.(type) {
 
-	if len(errors) > 0 {
-		return DependencyInputsAndOutputsMultiError(errors)
+	case *DependencyInputsAndOutputs_DefaultNumber:
+		// no validation rules for DefaultNumber
+
+	case *DependencyInputsAndOutputs_DefaultString:
+		// no validation rules for DefaultString
+
 	}
 
 	return nil
 }
-
-// DependencyInputsAndOutputsMultiError is an error wrapping multiple
-// validation errors returned by DependencyInputsAndOutputs.ValidateAll() if
-// the designated constraints aren't met.
-type DependencyInputsAndOutputsMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DependencyInputsAndOutputsMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DependencyInputsAndOutputsMultiError) AllErrors() []error { return m }
 
 // DependencyInputsAndOutputsValidationError is the validation error returned
 // by DependencyInputsAndOutputs.Validate if the designated constraints aren't met.
@@ -2252,99 +1347,33 @@ var _ interface {
 
 // Validate checks the field values on DependencyInputsAndOutputsJSONSchema
 // with the rules defined in the proto definition for this message. If any
-// rules are violated, the first error encountered is returned, or nil if
-// there are no violations.
+// rules are violated, an error is returned.
 func (m *DependencyInputsAndOutputsJSONSchema) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DependencyInputsAndOutputsJSONSchema
-// with the rules defined in the proto definition for this message. If any
-// rules are violated, the result is a list of violation errors wrapped in
-// DependencyInputsAndOutputsJSONSchemaMultiError, or nil if none found.
-func (m *DependencyInputsAndOutputsJSONSchema) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *DependencyInputsAndOutputsJSONSchema) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
 	// no validation rules for Type
 
-	{
-		sorted_keys := make([]string, len(m.GetProperties()))
-		i := 0
-		for key := range m.GetProperties() {
-			sorted_keys[i] = key
-			i++
-		}
-		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
-		for _, key := range sorted_keys {
-			val := m.GetProperties()[key]
-			_ = val
+	for key, val := range m.GetProperties() {
+		_ = val
 
-			// no validation rules for Properties[key]
+		// no validation rules for Properties[key]
 
-			if all {
-				switch v := interface{}(val).(type) {
-				case interface{ ValidateAll() error }:
-					if err := v.ValidateAll(); err != nil {
-						errors = append(errors, DependencyInputsAndOutputsJSONSchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				case interface{ Validate() error }:
-					if err := v.Validate(); err != nil {
-						errors = append(errors, DependencyInputsAndOutputsJSONSchemaValidationError{
-							field:  fmt.Sprintf("Properties[%v]", key),
-							reason: "embedded message failed validation",
-							cause:  err,
-						})
-					}
-				}
-			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
-				if err := v.Validate(); err != nil {
-					return DependencyInputsAndOutputsJSONSchemaValidationError{
-						field:  fmt.Sprintf("Properties[%v]", key),
-						reason: "embedded message failed validation",
-						cause:  err,
-					}
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return DependencyInputsAndOutputsJSONSchemaValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
 				}
 			}
-
 		}
-	}
 
-	if len(errors) > 0 {
-		return DependencyInputsAndOutputsJSONSchemaMultiError(errors)
 	}
 
 	return nil
 }
-
-// DependencyInputsAndOutputsJSONSchemaMultiError is an error wrapping multiple
-// validation errors returned by
-// DependencyInputsAndOutputsJSONSchema.ValidateAll() if the designated
-// constraints aren't met.
-type DependencyInputsAndOutputsJSONSchemaMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DependencyInputsAndOutputsJSONSchemaMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DependencyInputsAndOutputsJSONSchemaMultiError) AllErrors() []error { return m }
 
 // DependencyInputsAndOutputsJSONSchemaValidationError is the validation error
 // returned by DependencyInputsAndOutputsJSONSchema.Validate if the designated
@@ -2405,47 +1434,13 @@ var _ interface {
 
 // Validate checks the field values on DependencyInputsAndOutputsDependency
 // with the rules defined in the proto definition for this message. If any
-// rules are violated, the first error encountered is returned, or nil if
-// there are no violations.
+// rules are violated, an error is returned.
 func (m *DependencyInputsAndOutputsDependency) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DependencyInputsAndOutputsDependency
-// with the rules defined in the proto definition for this message. If any
-// rules are violated, the result is a list of violation errors wrapped in
-// DependencyInputsAndOutputsDependencyMultiError, or nil if none found.
-func (m *DependencyInputsAndOutputsDependency) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *DependencyInputsAndOutputsDependency) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
-	if all {
-		switch v := interface{}(m.GetInputs()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
-					field:  "Inputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
-					field:  "Inputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DependencyInputsAndOutputsDependencyValidationError{
 				field:  "Inputs",
@@ -2455,26 +1450,7 @@ func (m *DependencyInputsAndOutputsDependency) validate(all bool) error {
 		}
 	}
 
-	if all {
-		switch v := interface{}(m.GetOutputs()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
-					field:  "Outputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DependencyInputsAndOutputsDependencyValidationError{
-					field:  "Outputs",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetOutputs()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return DependencyInputsAndOutputsDependencyValidationError{
 				field:  "Outputs",
@@ -2484,30 +1460,8 @@ func (m *DependencyInputsAndOutputsDependency) validate(all bool) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return DependencyInputsAndOutputsDependencyMultiError(errors)
-	}
-
 	return nil
 }
-
-// DependencyInputsAndOutputsDependencyMultiError is an error wrapping multiple
-// validation errors returned by
-// DependencyInputsAndOutputsDependency.ValidateAll() if the designated
-// constraints aren't met.
-type DependencyInputsAndOutputsDependencyMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DependencyInputsAndOutputsDependencyMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DependencyInputsAndOutputsDependencyMultiError) AllErrors() []error { return m }
 
 // DependencyInputsAndOutputsDependencyValidationError is the validation error
 // returned by DependencyInputsAndOutputsDependency.Validate if the designated
