@@ -23,6 +23,8 @@ type DB interface {
 	CreateTaxonomy(e *Taxonomy) (uuid.UUID, error)
 	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
 	CreateDependencyAttribute(e *DependencyAttribute) (uuid.UUID, error)
+	CreatePlatform(p *Platform) (uuid.UUID, error)
+	CreatePlatformComponents(p *PlatformComponents) (uuid.UUID, error)
 	GetTaxonomyByFieldName(fieldName string, fieldValue interface{}) (Taxonomy, error)
 
 	// GetOrCreate finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.

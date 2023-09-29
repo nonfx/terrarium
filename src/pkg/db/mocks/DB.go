@@ -66,6 +66,58 @@ func (_m *DB) CreateDependencyInterface(e *db.Dependency) (uuid.UUID, error) {
 	return r0, r1
 }
 
+// CreatePlatform provides a mock function with given fields: p
+func (_m *DB) CreatePlatform(p *db.Platform) (uuid.UUID, error) {
+	ret := _m.Called(p)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.Platform) (uuid.UUID, error)); ok {
+		return rf(p)
+	}
+	if rf, ok := ret.Get(0).(func(*db.Platform) uuid.UUID); ok {
+		r0 = rf(p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.Platform) error); ok {
+		r1 = rf(p)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreatePlatformComponents provides a mock function with given fields: p
+func (_m *DB) CreatePlatformComponents(p *db.PlatformComponents) (uuid.UUID, error) {
+	ret := _m.Called(p)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.PlatformComponents) (uuid.UUID, error)); ok {
+		return rf(p)
+	}
+	if rf, ok := ret.Get(0).(func(*db.PlatformComponents) uuid.UUID); ok {
+		r0 = rf(p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.PlatformComponents) error); ok {
+		r1 = rf(p)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateTFModule provides a mock function with given fields: e
 func (_m *DB) CreateTFModule(e *db.TFModule) (uuid.UUID, error) {
 	ret := _m.Called(e)
