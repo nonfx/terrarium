@@ -35,7 +35,7 @@ rm ${CLI_NAME}
 for i in ${!ZIP_TARGETS_IN[@]}; do
     mv ${CLI_NAME}-${VERSION}-${ZIP_TARGETS_IN[$i]}.exe ${CLI_NAME}.exe
     zip -r ${CLI_NAME}-${VERSION}-${ZIP_TARGETS_OUT[$i]}.zip ${CLI_NAME}.exe
-    sha256sum ${CLI_NAME}-${VERSION}-${GZIP_TARGETS_OUT[$i]}.tar.gz >> SHA256SUM
+    sha256sum ${CLI_NAME}-${VERSION}-${ZIP_TARGETS_OUT[$i]}.zip >> SHA256SUM
 done
 rm ${CLI_NAME}.exe
 
