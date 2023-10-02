@@ -30,4 +30,5 @@ jobs:
           files: |
             ./.bin/terrarium-${{ github.ref_name }}-*.tar.gz
             ./.bin/terrarium-${{ github.ref_name }}-*.zip
+            ./.bin/SHA256SUM
 
