@@ -4,6 +4,7 @@
 package generate
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -75,7 +76,6 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cmd.Printf("Successfully pulled %d of %d terraform blocks at: %s\n", blockCount, len(pm.Graph), flagOutDir)
-
+	fmt.Fprintf(cmd.OutOrStdout(), "Successfully pulled %d of %d terraform blocks at: %s\n", blockCount, len(pm.Graph), flagOutDir)
 	return nil
 }
