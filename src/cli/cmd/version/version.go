@@ -24,7 +24,7 @@ func NewCmd() *cobra.Command {
 }
 
 func cmdRunE(cmd *cobra.Command, args []string) (err error) {
-	cmd.Print(format(build.Version, build.Date))
+	fmt.Fprintf(cmd.OutOrStdout(), format(build.Version, build.Date))
 	return
 }
 

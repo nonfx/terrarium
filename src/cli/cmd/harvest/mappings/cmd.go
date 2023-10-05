@@ -4,6 +4,7 @@
 package mappings
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/charmbracelet/log"
@@ -46,11 +47,11 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	if flagModuleListFile == "" {
-		cmd.Printf("Loading modules from provided directory '%s'...\n", flagTFDir)
+		fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided directory '%s'...\n", flagTFDir)
 		return loadFrom(g, flagTFDir)
 	}
 
-	cmd.Printf("Loading modules from provided list file '%s'...\n", flagModuleListFile)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided list file '%s'...\n", flagModuleListFile)
 	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
@@ -77,7 +78,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 
 func loadFrom(g db.DB, dir string) error {
 	resourceTypeByName := make(map[string]*db.TFResourceType)
-	cmd.Printf("Loading modules from '%s'...\n", dir)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from '%s'...\n", dir)
 	configs, _, err := tfconfig.LoadModulesFromResolvedSchema(filepath.Join(dir, constants.ModuleSchemaFilePath))
 	if err != nil {
 		return eris.Wrapf(err, "error loading module")
@@ -96,7 +97,7 @@ func loadFrom(g db.DB, dir string) error {
 		totalMappingsCreatedCount += len(mappings)
 	}
 
-	cmd.Printf("Processed %d resource declarations in %d modules and created %d mappings...\n", totalResourceDeclarationsCount, moduleCount, totalMappingsCreatedCount)
+	fmt.Fprintf(cmd.OutOrStdout(), "Processed %d resource declarations in %d modules and created %d mappings...\n", totalResourceDeclarationsCount, moduleCount, totalMappingsCreatedCount)
 
 	return nil
 }

@@ -4,6 +4,7 @@
 package resources
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -52,11 +53,11 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	if flagModuleListFile == "" {
-		cmd.Printf("Loading modules from the provider schema JSON file at '%s'...\n", flagSchemaFile)
+		fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from the provider schema JSON file at '%s'...\n", flagSchemaFile)
 		return loadFrom(g, flagSchemaFile)
 	}
 
-	cmd.Printf("Loading modules from modules list YAML file '%s'...\n", flagModuleListFile)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from modules list YAML file '%s'...\n", flagModuleListFile)
 	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
@@ -83,7 +84,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 }
 
 func loadFrom(g db.DB, schemaFilePath string) error {
-	cmd.Printf("Loading providers from '%s'\n", schemaFilePath)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading providers from '%s'\n", schemaFilePath)
 
 	// Load providers schema from file
 	providersSchema, err := loadProvidersSchema(schemaFilePath)
@@ -99,7 +100,7 @@ func loadFrom(g db.DB, schemaFilePath string) error {
 		return eris.Wrapf(err, "error writing data to db")
 	}
 
-	cmd.Printf("Successfully added %d Providers, %d Resources, and %d Attributes.\n", providerCount, resCount, attrCount)
+	fmt.Fprintf(cmd.OutOrStdout(), "Successfully added %d Providers, %d Resources, and %d Attributes.\n", providerCount, resCount, attrCount)
 
 	return nil
 }
