@@ -38,3 +38,7 @@ func (t terrariumAPIImplementor) ListModules(ctx context.Context, req *terrarium
 func (t terrariumAPIImplementor) ListModuleAttributes(ctx context.Context, req *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error) {
 	return transporthelper.DefaultAPI(ctx, req, t.service.ListModuleAttributes, t.defaultMiddlewareOpts...)
 }
+
+func (t terrariumAPIImplementor) ListTaxonomy(ctx context.Context, req *terrariumpb.ListTaxonomyRequest) (*terrariumpb.ListTaxonomyResponse, error) {
+	return transporthelper.DefaultAPI(ctx, req, t.service.ListTaxonomy, t.defaultMiddlewareOpts...)
+}

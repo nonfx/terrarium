@@ -35,7 +35,7 @@ func Test_gDB_QueryDependencies(t *testing.T) {
 					InterfaceId: "dependency-1-interface",
 					Title:       "dependency-1",
 					Description: "this is first test dependency",
-					Taxonomy:    []string{"module-1-l1", "module-1-l2", "module-1-l3", "module-1-l4", "module-1-l5", "module-1-l6", "module-1-l7"},
+					Taxonomy:    []string{"mockdata-l1", "mockdata-l2", "mockdata-l3", "mockdata-l4", "mockdata-l5", "mockdata-l6", "mockdata-l7"},
 					Inputs: &terrariumpb.JSONSchema{
 						Type: gojsonschema.TYPE_OBJECT,
 						Properties: map[string]*terrariumpb.JSONSchema{

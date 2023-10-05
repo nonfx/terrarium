@@ -42,6 +42,7 @@ type DB interface {
 	QueryTFModuleAttributes(filterOps ...FilterOption) (result TFModuleAttributes, err error)
 
 	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
+	QueryTaxonomies(filterOps ...FilterOption) (result Taxonomies, err error)
 
 	ExecuteSQLStatement(string) error
 }

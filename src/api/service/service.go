@@ -16,6 +16,7 @@ type Service interface {
 	HealthCheck(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error)
 	ListModules(ctx context.Context, req *terrariumpb.ListModulesRequest) (*terrariumpb.ListModulesResponse, error)
 	ListModuleAttributes(ctx context.Context, req *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error)
+	ListTaxonomy(ctx context.Context, req *terrariumpb.ListTaxonomyRequest) (resp *terrariumpb.ListTaxonomyResponse, err error)
 }
 
 func New() (Service, error) {

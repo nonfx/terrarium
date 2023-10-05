@@ -17,15 +17,20 @@ type Taxon string
 // separator is a constant that defines the character used to separate different levels within a Taxon.
 const separator = "/"
 
+// NewTaxonomy function takes a variadic parameter of strings representing levels and joins them into a single Taxon using the separator.
+// This function is used to create a new Taxon. For example, NewTaxonomy("storage", "database", "rdbms", "postgres") would return a Taxon
+// "storage/database/rdbms/postgres".
+func NewTaxonomy(levels ...string) Taxon {
+	return Taxon(strings.Join(utils.TrimEmpty(levels), separator))
+}
+
 // Split method of a Taxon splits the Taxon into its constituent levels based on the separator and returns them as a slice of strings.
 // For example, if the Taxon is "storage/database/rdbms/postgres", Split would return ["storage", "database", "rdbms", "postgres"].
 func (t Taxon) Split() (levels []string) {
 	return utils.TrimEmpty(strings.Split(string(t), separator))
 }
 
-// NewTaxonomy function takes a variadic parameter of strings representing levels and joins them into a single Taxon using the separator.
-// This function is used to create a new Taxon. For example, NewTaxonomy("storage", "database", "rdbms", "postgres") would return a Taxon
-// "storage/database/rdbms/postgres".
-func NewTaxonomy(levels ...string) Taxon {
-	return Taxon(strings.Join(levels, separator))
+// String returns string representation of the taxon
+func (t Taxon) String() string {
+	return string(t)
 }

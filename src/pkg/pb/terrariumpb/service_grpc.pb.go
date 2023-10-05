@@ -28,6 +28,7 @@ const (
 	TerrariumService_HealthCheck_FullMethodName          = "/terrarium.v0.TerrariumService/HealthCheck"
 	TerrariumService_ListModules_FullMethodName          = "/terrarium.v0.TerrariumService/ListModules"
 	TerrariumService_ListModuleAttributes_FullMethodName = "/terrarium.v0.TerrariumService/ListModuleAttributes"
+	TerrariumService_ListTaxonomy_FullMethodName         = "/terrarium.v0.TerrariumService/ListTaxonomy"
 )
 
 // TerrariumServiceClient is the client API for TerrariumService service.
@@ -41,6 +42,8 @@ type TerrariumServiceClient interface {
 	// ListModuleAttributes returns a list of attributes of the given module.
 	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
 	ListModuleAttributes(ctx context.Context, in *ListModuleAttributesRequest, opts ...grpc.CallOption) (*ListModuleAttributesResponse, error)
+	// ListTaxonomy returns list of taxonomies based on the given filters
+	ListTaxonomy(ctx context.Context, in *ListTaxonomyRequest, opts ...grpc.CallOption) (*ListTaxonomyResponse, error)
 }
 
 type terrariumServiceClient struct {
@@ -78,6 +81,15 @@ func (c *terrariumServiceClient) ListModuleAttributes(ctx context.Context, in *L
 	return out, nil
 }
 
+func (c *terrariumServiceClient) ListTaxonomy(ctx context.Context, in *ListTaxonomyRequest, opts ...grpc.CallOption) (*ListTaxonomyResponse, error) {
+	out := new(ListTaxonomyResponse)
+	err := c.cc.Invoke(ctx, TerrariumService_ListTaxonomy_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TerrariumServiceServer is the server API for TerrariumService service.
 // All implementations must embed UnimplementedTerrariumServiceServer
 // for forward compatibility
@@ -89,6 +101,8 @@ type TerrariumServiceServer interface {
 	// ListModuleAttributes returns a list of attributes of the given module.
 	// Optionally, it can also include output suggestions that is attributes from other modules that can fullfil this module.
 	ListModuleAttributes(context.Context, *ListModuleAttributesRequest) (*ListModuleAttributesResponse, error)
+	// ListTaxonomy returns list of taxonomies based on the given filters
+	ListTaxonomy(context.Context, *ListTaxonomyRequest) (*ListTaxonomyResponse, error)
 	mustEmbedUnimplementedTerrariumServiceServer()
 }
 
@@ -104,6 +118,9 @@ func (UnimplementedTerrariumServiceServer) ListModules(context.Context, *ListMod
 }
 func (UnimplementedTerrariumServiceServer) ListModuleAttributes(context.Context, *ListModuleAttributesRequest) (*ListModuleAttributesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListModuleAttributes not implemented")
+}
+func (UnimplementedTerrariumServiceServer) ListTaxonomy(context.Context, *ListTaxonomyRequest) (*ListTaxonomyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTaxonomy not implemented")
 }
 func (UnimplementedTerrariumServiceServer) mustEmbedUnimplementedTerrariumServiceServer() {}
 
@@ -172,6 +189,24 @@ func _TerrariumService_ListModuleAttributes_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TerrariumService_ListTaxonomy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTaxonomyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TerrariumServiceServer).ListTaxonomy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TerrariumService_ListTaxonomy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TerrariumServiceServer).ListTaxonomy(ctx, req.(*ListTaxonomyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TerrariumService_ServiceDesc is the grpc.ServiceDesc for TerrariumService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +225,10 @@ var TerrariumService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListModuleAttributes",
 			Handler:    _TerrariumService_ListModuleAttributes_Handler,
+		},
+		{
+			MethodName: "ListTaxonomy",
+			Handler:    _TerrariumService_ListTaxonomy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
