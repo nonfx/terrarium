@@ -59,13 +59,13 @@ var modules = db.TFModules{
 		Taxonomy: &db.Taxonomy{
 			Model: db.Model{ID: uuidTax1},
 
-			Level1: "module-1-l1",
-			Level2: "module-1-l2",
-			Level3: "module-1-l3",
-			Level4: "module-1-l4",
-			Level5: "module-1-l5",
-			Level6: "module-1-l6",
-			Level7: "module-1-l7",
+			Level1: "mockdata-l1",
+			Level2: "mockdata-l2",
+			Level3: "mockdata-l3",
+			Level4: "mockdata-l4",
+			Level5: "mockdata-l5",
+			Level6: "mockdata-l6",
+			Level7: "mockdata-l7",
 		},
 
 		Attributes: []db.TFModuleAttribute{
@@ -155,13 +155,13 @@ var modules = db.TFModules{
 		Taxonomy: &db.Taxonomy{
 			Model: db.Model{ID: uuidTax2},
 
-			Level1: "module-2-l1",
-			Level2: "module-2-l2",
-			Level3: "module-2-l3",
-			Level4: "module-2-l4",
-			Level5: "module-2-l5",
-			Level6: "module-2-l6",
-			Level7: "module-2-l7",
+			Level1: "mockdata-l1",
+			Level2: "mockdata-l2",
+			Level3: "mockdata-l3.2",
+			Level4: "mockdata-l4.2",
+			Level5: "mockdata-l5.2",
+			Level6: "mockdata-l6.2",
+			Level7: "mockdata-l7.2",
 		},
 
 		Attributes: []db.TFModuleAttribute{

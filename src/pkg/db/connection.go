@@ -4,6 +4,7 @@
 package db
 
 import (
+	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ func AutoMigrate(db *gorm.DB) (DB, error) {
 		return nil, eris.Wrap(err, "failed to perform database migration")
 	}
 
-	db.Exec("insert into taxonomies(id) values('00000000-0000-0000-0000-000000000000')")
+	db.FirstOrCreate(&Taxonomy{Model: Model{ID: uuid.Nil}})
 
 	return (*gDB)(db), nil
 }

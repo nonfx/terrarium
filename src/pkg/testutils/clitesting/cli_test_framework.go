@@ -338,6 +338,13 @@ func ValidateOutputMatch(expectedString string) ValidateOutputFunc {
 	return validateOutputAsserter(expectedString, true)
 }
 
+// ValidateOutputJson helper to assert if the json output
+func ValidateOutputJson(expectedJsonString string) ValidateOutputFunc {
+	return func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool {
+		return assert.JSONEq(t, expectedJsonString, string(output))
+	}
+}
+
 func validateOutputAsserter(expectedString string, exactMatch bool) ValidateOutputFunc {
 	return func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool {
 		if exactMatch {
