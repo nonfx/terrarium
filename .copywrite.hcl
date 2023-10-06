@@ -19,5 +19,7 @@ project {
     ".git",
     "coverage",
     ".bin",
+    "dist",
+    "**/.goreleaser.yaml"
   ]
 }

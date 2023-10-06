@@ -1,0 +1,60 @@
+builds:
+  - id: terrarium
+    prebuilt_binary_dir: ../../../.bin
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - arm64
+      - amd64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}-
+      {{- .Tag }}-
+      {{- if eq .Os "darwin" }}macos
+      {{- else }}{{- .Os }}{{ end }}-
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'SHA256SUMS'
+
+release:
+  github:
+    owner: cldcvr
+    name: terrarium
+  draft: true
+  replace_existing_draft: true
+  make_latest: false
+  mode: replace
+
+brews:
+  - name: terrarium
+    description: "Create reusable Terraform templates and build powerful platforms"
+    homepage: "https://github.com/cldcvr/terrarium"
+    license: "Apache-2.0"
+    url_template: "https://github.com/cldcvr/terrarium/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    test: |
+      system "#{bin}/terrarium", "version"
+    # skip_upload: true
+    repository:
+      owner: cldcvr
+      name: homebrew-tap
+      branch: tap-update-{{ .Version }}-{{ .ShortCommit }}
+      pull_request:
+        enabled: true
+    commit_author:
+      name: "Doug Shelley"
+      email: dougshelley66@gmail.com
+    folder: Formula
+
