@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
@@ -65,6 +66,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 
 	tfRunner := runner.NewTerraformRunner()
 	for _, item := range moduleList.Farm {
+		log.Info("harvesting resources from module", "name", item.Name, "source", item.Source)
 		dir, _, err := item.CreateTerraformFile(flagWorkDir)
 		if err != nil {
 			return err
