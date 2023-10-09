@@ -4,7 +4,7 @@
 package platforms
 
 import (
-	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -16,7 +16,8 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/git"
 	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
+	"github.com/google/uuid"
+	"github.com/rotisserie/eris"
 	"gopkg.in/yaml.v2"
 
 	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
@@ -25,65 +26,100 @@ import (
 func harvestPlatforms(g db.DB, directoryPath string) error {
 	platforms, err := parsePlatformYAML(directoryPath)
 	if err != nil {
-		return err
+		return eris.Wrap(err, "error parsing platform YAML")
 	}
 
 	for _, platform := range platforms {
-		owner, repo, _, err := getOwnerRepoRef(platform)
+		err := processPlatform(g, platform)
 		if err != nil {
 			return err
-		}
-
-		for _, revision := range platform.Revisions {
-			commitSHA, err := fetchCommitSHA(owner, repo, revision.Label)
-			if err != nil {
-				return err
-			}
-
-			terrariumYAMLPath, err := findTerrariumYAMLInGitHubDir(owner, repo, revision.Label, platform.RepoDir, "")
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(terrariumYAMLPath)
-
-			dbPlatform := db.Platform{
-				Title:         platform.Title,
-				Description:   platform.Description,
-				RepoURL:       platform.RepoURL,
-				RepoDirectory: platform.RepoDir,
-				CommitSHA:     commitSHA,
-				RefLabel:      revision.Label,
-				LabelType:     terrpb.GitLabelEnum(GitLabelEnumFromYAML(revision.Type)),
-			}
-
-			_, err = g.CreatePlatform(&dbPlatform)
-			if err != nil {
-				return err
-			}
-
-			// gc, err := gitGetContents(owner, repo, revision.Label, platform.RepoDir)
-			// if err != nil {
-			// 	return err
-			// }
-			// decodedContent, err := base64.StdEncoding.DecodeString(gc)
-			// if err != nil {
-			// 	fmt.Println("Error decoding content:", err)
-			// 	return err
-			// }
-			// fmt.Println(string(decodedContent))
-
-			// _, err = g.CreatePlatformComponents(&db.PlatformComponents{
-			// 	PlatformID:   dbPlatform.ID,
-			// 	DependencyID: db.Dependency{InterfaceID: "test"}.ID,
-			// })
-			// if err != nil {
-			// 	return err
-			// }
 		}
 	}
 
 	return nil
+}
+
+func processPlatform(g db.DB, platform Platform) error {
+	owner, repo, _, err := getOwnerRepoRef(platform)
+	if err != nil {
+		return err
+	}
+
+	for _, revision := range platform.Revisions {
+		err = processRevision(g, platform, owner, repo, revision)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func processRevision(g db.DB, platform Platform, owner, repo string, revision Revision) error {
+	commitSHA, err := fetchCommitSHA(owner, repo, revision.Label)
+	if err != nil {
+		return err
+	}
+
+	dbPlatform := createDBPlatform(platform, commitSHA, revision)
+
+	if _, err := g.CreatePlatform(&dbPlatform); err != nil {
+		return err
+	}
+
+	terrariumYAMLPath, err := findTerrariumYAMLInGitHubDir(owner, repo, revision.Label, platform.RepoDir)
+	if err != nil {
+		return err
+	}
+
+	gc, _, err := gitGetContents(owner, repo, revision.Label, terrariumYAMLPath)
+	if err != nil {
+		return err
+	}
+
+	decodedContent, err := base64.StdEncoding.DecodeString(*gc.Content)
+	if err != nil {
+		return err
+	}
+
+	data, err := parseYAML(decodedContent)
+	if err != nil {
+		return err
+	}
+
+	// Fetch all the dependency id and interface id from the table
+	q := g.Fetchdeps()
+	for _, c := range data.Components {
+		compareYAMLWithSQLData(g, c, q, dbPlatform.ID)
+	}
+
+	return nil
+}
+
+func createDBPlatform(platform Platform, commitSHA string, revision Revision) db.Platform {
+	return db.Platform{
+		Title:         platform.Title,
+		Description:   platform.Description,
+		RepoURL:       platform.RepoURL,
+		RepoDirectory: platform.RepoDir,
+		CommitSHA:     commitSHA,
+		RefLabel:      revision.Label,
+		LabelType:     terrpb.GitLabelEnum(GitLabelEnumFromYAML(revision.Type)),
+	}
+}
+
+type YAMLData struct {
+	Components []Component `yaml:"components"`
+}
+
+func parseYAML(decodedContent []byte) (YAMLData, error) {
+	var data YAMLData
+
+	if err := yaml.Unmarshal([]byte(decodedContent), &data); err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 func parsePlatformYAML(directoryPath string) ([]Platform, error) {
@@ -101,19 +137,6 @@ func parsePlatformYAML(directoryPath string) ([]Platform, error) {
 	}
 
 	return config.Platforms, nil
-}
-
-type Platform struct {
-	Title       string     `yaml:"title"`
-	Description string     `yaml:"description"`
-	RepoURL     string     `yaml:"repo_url"`
-	RepoDir     string     `yaml:"repo_directory"`
-	Revisions   []Revision `yaml:"revisions"`
-}
-
-type Revision struct {
-	Label string `yaml:"label"`
-	Type  string `yaml:"type"`
 }
 
 func getOwnerRepoRef(platform Platform) (owner, repo, ref string, err error) {
@@ -144,12 +167,12 @@ func fetchCommitSHA(owner, repo, ref string) (string, error) {
 	return sha, nil
 }
 
-func gitGetContents(owner, repo, ref, path string) (string, error) {
-	gc, err := gitClient().GetContents(owner, repo, ref, path)
+func gitGetContents(owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	gc, gl, err := gitClient().GetContents(owner, repo, ref, path)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
-	return gc, nil
+	return gc, gl, nil
 }
 
 func readPlatformYAML(directoryPath string) (string, error) {
@@ -175,7 +198,6 @@ func readPlatformYAML(directoryPath string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		fmt.Println(string(yamlContents))
 		return string(yamlContents), nil
 	} else {
 		return "", fmt.Errorf("invalid file or directory: %s", directoryPath)
@@ -228,97 +250,56 @@ func GitLabelEnumFromYAML(language string) int32 {
 	}
 }
 
-// func findTerrariumYAML(owner, repo, ref, dir string) (string, error) {
-// 	// Fetch the contents of the directory in the GitHub repository.
-// 	contents, err := gitClient().GetContents(owner, repo, ref, dir)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	fmt.Println(contents)
-
-// yamlFilenames := []string{"terrarium.yaml", "terrarium.yml"}
-
-// Iterate through the fetched contents to check for the YAML file.
-// for _, content := range contents {
-// 	if content.Type == "file" {
-// 		for _, filename := range yamlFilenames {
-// 			if content.Name == filename {
-// 				return content.Path, nil
-// 			}
-// 		}
-// 	}
-// }
-
-// 	return "", fmt.Errorf("terrarium.yaml or terrarium.yml not found in directory: %s", dir)
-// }
-
-// func findTerrariumYAMLPath(directoryPath, owner, repo, reference string) (string, error) {
-// 	// Check if the directory path ends with terrarium.yaml or terrarium.yml
-// 	if isTerrariumYAMLFile(directoryPath) {
-// 		return directoryPath, nil
-// 	}
-
-// 	// Try appending terrarium.yaml to the directory path and check if it exists
-// 	terrariumYAMLPath := filepath.Join(directoryPath, "terrarium.yaml")
-// 	if fileExists(terrariumYAMLPath) {
-// 		return terrariumYAMLPath, nil
-// 	}
-
-// 	// Try appending terrarium.yml to the directory path and check if it exists
-// 	terrariumYMLPath := filepath.Join(directoryPath, "terrarium.yml")
-// 	if fileExists(terrariumYMLPath) {
-// 		return terrariumYMLPath, nil
-// 	}
-
-// 	// If none of the options exist, return an error
-// 	return "", fmt.Errorf("terrarium.yaml or terrarium.yml not found in directory: %s", directoryPath)
-// }
-
-// func isTerrariumYAMLFile(filePath string) bool {
-// 	return filepath.Ext(filePath) == ".yaml" || filepath.Ext(filePath) == ".yml"
-// }
-
-// func fileExists(filePath string) bool {
-// 	_, err := os.Stat(filePath)
-// 	return err == nil
-// }
-
-func findTerrariumYAMLInGitHubDir(owner, repo, reference, dirPath, token string) (string, error) {
-	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-
-	// Get the contents of the directory in the GitHub repository as a list of RepositoryContent items.
-	_, _, _, err := client.Repositories.GetContents(ctx, owner, repo, dirPath, &github.RepositoryContentGetOptions{
-		Ref: reference,
-	})
+func findTerrariumYAMLInGitHubDir(owner, repo, reference, dirPath string) (string, error) {
+	gc, gl, err := gitGetContents(owner, repo, reference, dirPath)
 	if err != nil {
 		return "", err
 	}
 
-	// Loop through the contents in the directory.
-	// for _, content := range contents {
-	// 	if content.Type != nil {
-	// 		if *content.Type == "file" {
-	// 			// Check if the file is named "terrarium.yaml" or "terrarium.yml".
-	// 			if strings.EqualFold(*content.Name, "terrarium.yaml") || strings.EqualFold(*content.Name, "terrarium.yml") {
-	// 				// If found, return the path to the file.
-	// 				return *content.Path, nil
-	// 			}
-	// 		} else if *content.Type == "dir" {
-	// 			// If it's a subdirectory, recursively search for the file within it.
-	// 			subdirPath := *content.Path
-	// 			subfilePath, err := findTerrariumYAMLInGitHubDir(owner, repo, reference, subdirPath, token)
-	// 			if err == nil {
-	// 				return subfilePath, nil
-	// 			}
-	// 		}
-	// 	}
-	// }
+	if gc == nil {
+		p, err := findTerrariumYaml(gl, owner, repo, reference, dirPath)
+		if err != nil {
+			return "", err
+		}
+		return p, nil
+	}
 
-	// If the file is not found in the directory or its subdirectories, return an error.
-	return "", fmt.Errorf("terrarium.yaml or terrarium.yml not found in directory: %s", dirPath)
+	return "", fmt.Errorf("terrarium.yaml or terrarium.yml is not found in %s in directory: %s", reference, dirPath)
+}
+
+func findTerrariumYaml(gl []*github.RepositoryContent, owner, repo, reference, dirPath string) (string, error) {
+	for _, content := range gl {
+		if content.Type == nil {
+			continue
+		}
+
+		if *content.Type == "file" && (strings.EqualFold(*content.Name, "terrarium.yaml") || strings.EqualFold(*content.Name, "terrarium.yml")) {
+			return *content.Path, nil
+		}
+
+		if *content.Type == "dir" {
+			subdirPath := *content.Path
+			subfilePath, err := findTerrariumYAMLInGitHubDir(owner, repo, reference, subdirPath)
+			if err != nil {
+				return "", nil
+			}
+			return subfilePath, err
+		}
+	}
+	return "", fmt.Errorf("terrarium.yaml or terrarium.yml is not found in %s in directory: %s", reference, dirPath)
+}
+
+func compareYAMLWithSQLData(g db.DB, c Component, queryResult []db.DependencyResult, u uuid.UUID) error {
+	for _, r := range queryResult {
+		if c.ID == r.InterfaceID {
+			_, err := g.CreatePlatformComponents(&db.PlatformComponents{
+				PlatformID:   u,
+				DependencyID: r.DependencyID,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

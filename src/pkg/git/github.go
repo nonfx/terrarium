@@ -30,10 +30,10 @@ func (gf *GitClient) FetchCommitSHA(owner, repo, ref string) (string, error) {
 	return commit, nil
 }
 
-func (gf *GitClient) GetContents(owner, repo, ref, path string) (string, error) {
-	content, _, _, err := gf.client.Repositories.GetContents(context.Background(), owner, repo, path, &github.RepositoryContentGetOptions{Ref: ref})
+func (gf *GitClient) GetContents(owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	content, list, _, err := gf.client.Repositories.GetContents(context.Background(), owner, repo, path, &github.RepositoryContentGetOptions{Ref: ref})
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
-	return *content.Content, nil
+	return content, list, nil
 }

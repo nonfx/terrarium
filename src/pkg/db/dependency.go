@@ -86,3 +86,14 @@ func DependencySearchFilter(query string) FilterOption {
 		return g.Where("interface_id LIKE ? OR title LIKE ?", q, q)
 	}
 }
+
+var results []DependencyResult
+
+func (db *gDB) Fetchdeps() []DependencyResult {
+	db.g().Model(&Dependency{}).
+		Select("dependencies.id AS DependencyID, dependencies.interface_id AS InterfaceID").
+		Joins("INNER JOIN dependency_attributes ON dependencies.id = dependency_attributes.dependency_id").
+		Scan(&results)
+
+	return results
+}

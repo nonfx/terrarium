@@ -5,7 +5,7 @@ platforms:
   - title: AWS EKS
     description: Amazon Elastic Kubernetes Service
     repo_url: https://github.com/cldcvr/terrarium
-    repo_directory: examples/farm/platform/
+    repo_directory: examples/platform/
     revisions:
       - label: v0.1
         type: tag
@@ -15,7 +15,7 @@ platforms:
   - title: AWS Serverless
     description: AWS Serverless
     repo_url: https://github.com/cldcvr/terrarium
-    repo_directory: examples/farm/platform/
+    repo_directory: examples/platform/
     revisions:
       - label: v0.2
         type: commit
@@ -25,7 +25,7 @@ platforms:
   - title: GCP GKE
     description: Google Kubernetes Engine
     repo_url: https://github.com/cldcvr/terrarium
-    repo_directory: examples/farm/platform/
+    repo_directory: examples/platform/
     revisions:
       - label: v0.3
         type: tag
@@ -33,7 +33,7 @@ platforms:
   - title: GCP Serverless
     description: GCP Serverless
     repo_url: https://github.com/cldcvr/terrarium
-    repo_directory: examples/farm/platform/
+    repo_directory: examples/platform/
     revisions:
       - label: v0.5
         type: tag

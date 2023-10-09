@@ -53,7 +53,6 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	// fmt.Println(string(out))
 	cmd.Printf("Platform successfully updated to the db\n")
 	return nil
 }

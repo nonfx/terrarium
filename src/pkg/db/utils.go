@@ -44,6 +44,8 @@ type DB interface {
 	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
 
 	ExecuteSQLStatement(string) error
+
+	Fetchdeps() []DependencyResult
 }
 
 type FilterOption func(*gorm.DB) *gorm.DB
