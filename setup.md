@@ -5,6 +5,11 @@ CLI connects with sqlite Database to store the persistent data.
 1. Install CLI
 
     There are multiple ways to install the terrarium CLI:
+    - Using Homebrew (for MacOS or Linux)
+      ```sh
+      brew tap cldcvr/tap
+      brew install terrarium
+      ```
 
     - Clone the repo and compile:
 

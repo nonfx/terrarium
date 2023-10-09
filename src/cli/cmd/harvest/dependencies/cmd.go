@@ -4,6 +4,8 @@
 package dependencies
 
 import (
+	"fmt"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/rotisserie/eris"
@@ -52,6 +54,6 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	cmd.Printf("Dependency interfaces successfully updated to the db\n")
+	fmt.Fprintf(cmd.OutOrStdout(), "Dependency interfaces successfully updated to the db\n")
 	return nil
 }

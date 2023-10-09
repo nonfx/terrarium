@@ -45,3 +45,4 @@ src/pkg/pb/protoc-gen-openapiv2/*
 *coverage*.txt
 coverage
 *.db
+

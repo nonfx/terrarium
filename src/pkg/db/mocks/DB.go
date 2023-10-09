@@ -501,6 +501,38 @@ func (_m *DB) QueryTFModules(filterOps ...db.FilterOption) (db.TFModules, error)
 	return r0, r1
 }
 
+// QueryTaxonomies provides a mock function with given fields: filterOps
+func (_m *DB) QueryTaxonomies(filterOps ...db.FilterOption) (db.Taxonomies, error) {
+	_va := make([]interface{}, len(filterOps))
+	for _i := range filterOps {
+		_va[_i] = filterOps[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 db.Taxonomies
+	var r1 error
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.Taxonomies, error)); ok {
+		return rf(filterOps...)
+	}
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.Taxonomies); ok {
+		r0 = rf(filterOps...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.Taxonomies)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
+		r1 = rf(filterOps...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewDB(t interface {

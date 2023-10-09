@@ -2567,3 +2567,400 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DependencyInputsAndOutputsDependencyValidationError{}
+
+// Validate checks the field values on ListTaxonomyRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListTaxonomyRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListTaxonomyRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListTaxonomyRequestMultiError, or nil if none found.
+func (m *ListTaxonomyRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListTaxonomyRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetPage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListTaxonomyRequestValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListTaxonomyRequestValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListTaxonomyRequestValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ListTaxonomyRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListTaxonomyRequestMultiError is an error wrapping multiple validation
+// errors returned by ListTaxonomyRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListTaxonomyRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListTaxonomyRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListTaxonomyRequestMultiError) AllErrors() []error { return m }
+
+// ListTaxonomyRequestValidationError is the validation error returned by
+// ListTaxonomyRequest.Validate if the designated constraints aren't met.
+type ListTaxonomyRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListTaxonomyRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListTaxonomyRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListTaxonomyRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListTaxonomyRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListTaxonomyRequestValidationError) ErrorName() string {
+	return "ListTaxonomyRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListTaxonomyRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListTaxonomyRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListTaxonomyRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListTaxonomyRequestValidationError{}
+
+// Validate checks the field values on ListTaxonomyResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListTaxonomyResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListTaxonomyResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListTaxonomyResponseMultiError, or nil if none found.
+func (m *ListTaxonomyResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListTaxonomyResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetTaxonomy() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListTaxonomyResponseValidationError{
+						field:  fmt.Sprintf("Taxonomy[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListTaxonomyResponseValidationError{
+						field:  fmt.Sprintf("Taxonomy[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListTaxonomyResponseValidationError{
+					field:  fmt.Sprintf("Taxonomy[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if all {
+		switch v := interface{}(m.GetPage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListTaxonomyResponseValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListTaxonomyResponseValidationError{
+					field:  "Page",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListTaxonomyResponseValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ListTaxonomyResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListTaxonomyResponseMultiError is an error wrapping multiple validation
+// errors returned by ListTaxonomyResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListTaxonomyResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListTaxonomyResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListTaxonomyResponseMultiError) AllErrors() []error { return m }
+
+// ListTaxonomyResponseValidationError is the validation error returned by
+// ListTaxonomyResponse.Validate if the designated constraints aren't met.
+type ListTaxonomyResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListTaxonomyResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListTaxonomyResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListTaxonomyResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListTaxonomyResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListTaxonomyResponseValidationError) ErrorName() string {
+	return "ListTaxonomyResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListTaxonomyResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListTaxonomyResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListTaxonomyResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListTaxonomyResponseValidationError{}
+
+// Validate checks the field values on Taxonomy with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Taxonomy) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Taxonomy with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in TaxonomyMultiError, or nil
+// if none found.
+func (m *Taxonomy) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Taxonomy) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return TaxonomyMultiError(errors)
+	}
+
+	return nil
+}
+
+// TaxonomyMultiError is an error wrapping multiple validation errors returned
+// by Taxonomy.ValidateAll() if the designated constraints aren't met.
+type TaxonomyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TaxonomyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TaxonomyMultiError) AllErrors() []error { return m }
+
+// TaxonomyValidationError is the validation error returned by
+// Taxonomy.Validate if the designated constraints aren't met.
+type TaxonomyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TaxonomyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TaxonomyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TaxonomyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TaxonomyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TaxonomyValidationError) ErrorName() string { return "TaxonomyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e TaxonomyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTaxonomy.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TaxonomyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TaxonomyValidationError{}

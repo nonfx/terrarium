@@ -1,0 +1,18 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+id: demo_app
+name: Demo App
+env_prefix: DA
+
+compute:
+  use: service_web
+  inputs:
+    port: 80
+
+
+dependencies:
+  - id: testdb
+    use: postgres
+    no_provision: true
+

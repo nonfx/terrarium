@@ -44,8 +44,15 @@ func (tc TestCase[REQ, RESP]) Run(t *testing.T, fu serviceFunc[REQ, RESP]) {
 		if tc.wantErr == nil {
 			assert.NoError(t, err)
 			assert.Equal(t, tc.wantResp, resp)
-		} else {
-			assert.Equal(t, tc.wantErr, err, "\nWant Err: %s\n Got Err: %s", tc.wantErr, err)
+		}
+
+		switch wantErr := tc.wantErr.(type) {
+		case string:
+			assert.EqualError(t, err, wantErr)
+		case error:
+			assert.ErrorIs(t, err, wantErr)
+		default:
+			assert.EqualValues(t, tc.wantErr, err, "\nWant Err: %s\n Got Err: %s", tc.wantErr, err)
 		}
 
 		// Verify that the expected methods were called on the mock

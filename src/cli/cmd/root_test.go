@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
@@ -19,7 +20,7 @@ func TestCmd(t *testing.T) {
 			cmd.AddCommand(&cobra.Command{
 				Use: "testmock",
 				RunE: func(cmd *cobra.Command, args []string) error {
-					cmd.Print(config.LogLevel())
+					fmt.Fprint(cmd.OutOrStdout(), config.LogLevel())
 					return nil
 				},
 			})

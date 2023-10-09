@@ -4,6 +4,7 @@
 package modules
 
 import (
+	"fmt"
 	"path"
 	"strings"
 
@@ -56,11 +57,11 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	if flagModuleListFile == "" {
-		cmd.Printf("Loading modules from provided directory '%s'...\n", flagTFDir)
+		fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided directory '%s'...\n", flagTFDir)
 		return loadFrom(g, flagTFDir)
 	}
 
-	cmd.Printf("Loading modules from provided list file '%s'...\n", flagModuleListFile)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided list file '%s'...\n", flagModuleListFile)
 	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
@@ -91,7 +92,7 @@ func loadFrom(g db.DB, dir string) error {
 	resourceTypeByName := make(map[string]*db.TFResourceType)
 
 	// load modules
-	cmd.Printf("Loading modules from '%s'...\n", dir)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from '%s'...\n", dir)
 
 	filters := []tfconfig.ResolvedModuleSchemaFilter{tfconfig.FilterModulesOmitHidden}
 	if !flagIncludeLocal {
@@ -143,7 +144,7 @@ func loadFrom(g db.DB, dir string) error {
 		log.Info("Done processing module", "path", config.Path)
 	}
 
-	cmd.Printf("Processed %d modules\n", len(configs))
+	fmt.Fprintf(cmd.OutOrStdout(), "Processed %d modules\n", len(configs))
 
 	return nil
 }

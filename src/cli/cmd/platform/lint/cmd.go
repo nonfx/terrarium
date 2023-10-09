@@ -4,6 +4,7 @@
 package lint
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/rotisserie/eris"
@@ -38,7 +39,7 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cmd.Printf("Platform parse and lint completed\n")
+	fmt.Fprintf(cmd.OutOrStdout(), "Platform parse and lint completed\n")
 	return nil
 }
 

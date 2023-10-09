@@ -1,0 +1,19 @@
+# You can view our full documentation here: https://docs.readme.com/docs/rdme
+name: ReadMe GitHub Action 🦉
+
+on:
+  push:
+    tags:
+    - 'v0.*'
+
+jobs:
+  rdme-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo 📚
+        uses: actions/checkout@v3
+
+      - name: Run `docs` command 🚀
+        uses: readmeio/rdme@v8
+        with:
+          rdme: docs ./readme/public_doc --key=${{ secrets.README_API_KEY }} --version=1.0
