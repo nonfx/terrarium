@@ -18,7 +18,7 @@ locals {
 ################################################################################
 
 module "vpc" {
-  source = "github.com/cldcvr/cldcvr-xa-terraform-aws-vpc?ref=v0.1.0"
+  source = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-vpc.git?ref=v0.1.0"
 
   name = "${local.name}-vpc"
   cidr = local.vpc_cidr
@@ -38,7 +38,7 @@ module "vpc" {
 #EC2 Module from public Terraform Registry is the compute for this platform
 
 module "tr_component_service_web" {
-  source = "terraform-aws-modules/ec2-instance/aws"
+  source = "registry.terraform.io/terraform-aws-modules/ec2-instance/aws"
 
   for_each = {
     for k, v in local.tr_component_service_web : k => merge(v, var.ec2_config["default"])
@@ -57,7 +57,7 @@ module "tr_component_service_web" {
 }
 
 module "ec2_sg" {
-  source   = "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
+  source   = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-security-group.git?ref=v0.1.0"
   for_each = {
     for k, v in local.tr_component_service_web : k => merge(v, var.ec2_config["default"])
   }
@@ -121,7 +121,7 @@ resource "random_password" "rds_password" {
 }
 
 module "tr_component_postgres" {
-  source = "github.com/cldcvr/cldcvr-xa-terraform-aws-db-instance?ref=v0.1.0"
+  source = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-db-instance.git?ref=v0.1.0"
 
   for_each = local.database_configuration
 
@@ -160,7 +160,7 @@ module "tr_component_postgres" {
 }
 
 module "db_sg" {
-  source = "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
+  source = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-security-group.git?ref=v0.1.0"
 
   for_each = local.database_configuration
 
@@ -204,7 +204,7 @@ locals {
 }
 
 module "tr_component_redis" {
-  source = "github.com/cldcvr/cldcvr-xa-terraform-aws-elasticache-cluster?ref=v0.1.0"
+  source = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-elasticache-cluster.git?ref=v0.1.0"
 
   for_each = local.redis_configuration
 
@@ -223,7 +223,7 @@ module "tr_component_redis" {
 
 
 module "redis_sg" {
-  source   = "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
+  source   = "git::https://github.com/cldcvr/cldcvr-xa-terraform-aws-security-group.git?ref=v0.1.0"
   for_each = local.redis_configuration
   vpc_id   = module.vpc.vpc_id
   security_group = {

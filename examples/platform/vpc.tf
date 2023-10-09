@@ -24,7 +24,7 @@ locals {
 }
 
 module "core_vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source = "registry.terraform.io/terraform-aws-modules/vpc/aws"
 
   name = random_string.random.id
   cidr = "10.0.0.0/16"
