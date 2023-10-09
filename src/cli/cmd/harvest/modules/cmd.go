@@ -70,6 +70,7 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	tfRunner := runner.NewTerraformRunner()
 	for _, item := range moduleList.Farm {
 		if item.Export {
+			log.Info("harvesting module", "name", item.Name, "source", item.Source)
 			dir, _, err := item.CreateTerraformFile(flagWorkDir)
 			if err != nil {
 				return err
