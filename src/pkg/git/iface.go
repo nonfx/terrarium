@@ -1,3 +1,6 @@
+// Copyright (c) CloudCover
+// SPDX-License-Identifier: Apache-2.0
+
 package git
 
 import "github.com/google/go-github/github"
