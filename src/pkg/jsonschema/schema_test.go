@@ -160,16 +160,22 @@ func TestNode_ApplyDefaultsToArr(t *testing.T) {
 func TestNodeScan(t *testing.T) {
 	n := &Node{}
 
-	// Successful unmarshalling
-	validJSON := `{"type":"testType"}`
-	err := n.Scan(validJSON)
+	// Successful unmarshalling with a string
+	validJSONStr := `{"type":"testType"}`
+	err := n.Scan(validJSONStr)
 	assert.Nil(t, err)
 	assert.Equal(t, "testType", n.Type)
+
+	// Successful unmarshalling with []byte
+	validJSONBytes := []byte(`{"type":"anotherType"}`)
+	err = n.Scan(validJSONBytes)
+	assert.Nil(t, err)
+	assert.Equal(t, "anotherType", n.Type)
 
 	// Failure due to incorrect type assertion
 	err = n.Scan(123)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "type assertion to string failed")
+	assert.Contains(t, err.Error(), "type assertion to string or []byte failed")
 
 	// Failure due to invalid JSON
 	invalidJSON := `{"type":}`
