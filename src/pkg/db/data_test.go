@@ -40,9 +40,15 @@ var (
 	uuidResMapping1 = uuid.MustParse("12345678-1234-5678-1234-567812345678")
 	uuidResMapping2 = uuid.MustParse("87654321-8765-4321-8765-432187654321")
 	uuidDep1        = uuid.MustParse("6ba7b81a-9dad-11d1-80b4-00c04fd430d2")
+	uuidDep2        = uuid.MustParse("32e17e03-05c9-4c62-b244-84ece8682493")
 	uuidDepAttr1    = uuid.MustParse("84c189b3-a85d-456a-abc0-eb9985ad3abf")
 	uuidDepAttr2    = uuid.MustParse("76fb7d75-51cf-41fc-a390-b51753395b0c")
 	uuidDepAttr3    = uuid.MustParse("eeddc51b-0afd-4d55-95bb-bf07a7b52016")
+	uuidPlat1       = uuid.MustParse("c8bcaa19-f8de-4234-a0f5-4e930b61b037")
+	uuidPlat2       = uuid.MustParse("b9696e52-1f44-4531-9612-f2dcd14f0972")
+	uuidPlat1Comp1  = uuid.MustParse("f87cddf1-14f8-45f4-b737-9fe7702a937c")
+	uuidPlat1Comp2  = uuid.MustParse("b07f92e8-e2d9-41f1-8fe8-b1bd444ecc5c")
+	uuidPlat2Comp1  = uuid.MustParse("55dc2fab-9e32-4662-872d-d8fe8639bcda")
 )
 
 var modules = db.TFModules{
@@ -280,6 +286,46 @@ var dependencies = []db.Dependency{
 			},
 		},
 	},
+	{
+		Model:       db.Model{ID: uuidDep2},
+		Title:       "dependency-2",
+		InterfaceID: "dependency-2-interface",
+		Description: "this is second test dependency",
+		TaxonomyID:  uuidTax2,
+		Attributes:  db.DependencyAttributes{},
+	},
+}
+
+var platforms = db.Platforms{
+	{
+		Model:     db.Model{ID: uuidPlat1},
+		Name:      "test-platform-1",
+		CommitSHA: "2ed744403e50",
+		Components: []db.PlatformComponent{
+			{
+				Model:        db.Model{ID: uuidPlat1Comp1},
+				PlatformID:   uuidPlat1,
+				DependencyID: uuidDep1,
+			},
+			{
+				Model:        db.Model{ID: uuidPlat1Comp2},
+				PlatformID:   uuidPlat1,
+				DependencyID: uuidDep2,
+			},
+		},
+	},
+	{
+		Model:     db.Model{ID: uuidPlat2},
+		Name:      "test-platform-2",
+		CommitSHA: "c4cf4e16e4f6",
+		Components: []db.PlatformComponent{
+			{
+				Model:        db.Model{ID: uuidPlat2Comp1},
+				PlatformID:   uuidPlat2,
+				DependencyID: uuidDep1,
+			},
+		},
+	},
 }
 
 func saveTestData(t *testing.T, g *gorm.DB) {
@@ -295,5 +341,8 @@ func saveTestData(t *testing.T, g *gorm.DB) {
 	require.NoError(t, err)
 
 	err = g.Save(dependencies).Error
+	require.NoError(t, err)
+
+	err = g.Save(platforms).Error
 	require.NoError(t, err)
 }

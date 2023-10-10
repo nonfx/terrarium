@@ -15,8 +15,7 @@ import (
 
 var (
 	cmd              *cobra.Command
-	flagPage         *terrariumpb.Page
-	flagTaxonomy     string
+	flags            *terrariumpb.ListTaxonomyRequest
 	flagOutputFormat string
 )
 
@@ -29,11 +28,13 @@ func NewCmd() *cobra.Command {
 		RunE:    queryTaxonomy,
 	}
 
-	flagPage = &terrariumpb.Page{}
+	flags = &terrariumpb.ListTaxonomyRequest{
+		Page: &terrariumpb.Page{},
+	}
 
-	cmd.Flags().Int32Var(&flagPage.Size, "pageSize", 100, "page size flag")
-	cmd.Flags().Int32Var(&flagPage.Index, "pageIndex", 0, "page index flag")
-	cmd.Flags().StringVarP(&flagTaxonomy, "taxonomy", "t", "", "taxonomy levels joined by `/`")
+	cmd.Flags().Int32Var(&flags.Page.Size, "pageSize", 100, "page size flag")
+	cmd.Flags().Int32Var(&flags.Page.Index, "pageIndex", 0, "page index flag")
+	cmd.Flags().StringVarP(&flags.Taxonomy, "taxonomy", "t", "", "taxonomy levels joined by `/`")
 	cmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
 
 	return cmd
@@ -45,12 +46,7 @@ func queryTaxonomy(cmd *cobra.Command, args []string) error {
 		return eris.Wrap(err, "error connecting to the database")
 	}
 
-	req := &terrariumpb.ListTaxonomyRequest{
-		Page:     flagPage,
-		Taxonomy: taxonomy.Taxon(flagTaxonomy).Split(),
-	}
-
-	result, err := g.QueryTaxonomies(db.TaxonomyRequestToFilters(req)...)
+	result, err := g.QueryTaxonomies(db.TaxonomyRequestToFilters(flags)...)
 	if err != nil {
 		return eris.Wrap(err, "error running database query")
 	}
@@ -58,7 +54,7 @@ func queryTaxonomy(cmd *cobra.Command, args []string) error {
 	f := utils.OutputFormatter[*terrariumpb.ListTaxonomyResponse, *terrariumpb.Taxonomy]{
 		Writer: cmd.OutOrStdout(),
 		Data: &terrariumpb.ListTaxonomyResponse{
-			Page:     flagPage,
+			Page:     flags.Page,
 			Taxonomy: result.ToProto(),
 		},
 		RowHeaders: []string{"ID", "Taxonomy"},

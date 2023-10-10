@@ -6,6 +6,7 @@ package db
 import (
 	"strings"
 
+	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/google/uuid"
@@ -140,7 +141,8 @@ func TaxonomyRequestToFilters(req *terrariumpb.ListTaxonomyRequest) []FilterOpti
 	}
 
 	if len(req.Taxonomy) > 0 {
-		filters = append(filters, TaxonomyByLevelsFilter(TaxonomyFromLevels(req.Taxonomy...)))
+		tax := taxonomy.Taxon(req.Taxonomy)
+		filters = append(filters, TaxonomyByLevelsFilter(TaxonomyFromLevels(tax.Split()...)))
 	}
 
 	return filters

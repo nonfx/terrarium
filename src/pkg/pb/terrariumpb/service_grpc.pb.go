@@ -29,6 +29,7 @@ const (
 	TerrariumService_ListModules_FullMethodName          = "/terrarium.v0.TerrariumService/ListModules"
 	TerrariumService_ListModuleAttributes_FullMethodName = "/terrarium.v0.TerrariumService/ListModuleAttributes"
 	TerrariumService_ListTaxonomy_FullMethodName         = "/terrarium.v0.TerrariumService/ListTaxonomy"
+	TerrariumService_ListPlatforms_FullMethodName        = "/terrarium.v0.TerrariumService/ListPlatforms"
 )
 
 // TerrariumServiceClient is the client API for TerrariumService service.
@@ -44,6 +45,8 @@ type TerrariumServiceClient interface {
 	ListModuleAttributes(ctx context.Context, in *ListModuleAttributesRequest, opts ...grpc.CallOption) (*ListModuleAttributesResponse, error)
 	// ListTaxonomy returns list of taxonomies based on the given filters
 	ListTaxonomy(ctx context.Context, in *ListTaxonomyRequest, opts ...grpc.CallOption) (*ListTaxonomyResponse, error)
+	// ListPlatforms returns list of platforms based on the given filters
+	ListPlatforms(ctx context.Context, in *ListPlatformsRequest, opts ...grpc.CallOption) (*ListPlatformsResponse, error)
 }
 
 type terrariumServiceClient struct {
@@ -90,6 +93,15 @@ func (c *terrariumServiceClient) ListTaxonomy(ctx context.Context, in *ListTaxon
 	return out, nil
 }
 
+func (c *terrariumServiceClient) ListPlatforms(ctx context.Context, in *ListPlatformsRequest, opts ...grpc.CallOption) (*ListPlatformsResponse, error) {
+	out := new(ListPlatformsResponse)
+	err := c.cc.Invoke(ctx, TerrariumService_ListPlatforms_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TerrariumServiceServer is the server API for TerrariumService service.
 // All implementations must embed UnimplementedTerrariumServiceServer
 // for forward compatibility
@@ -103,6 +115,8 @@ type TerrariumServiceServer interface {
 	ListModuleAttributes(context.Context, *ListModuleAttributesRequest) (*ListModuleAttributesResponse, error)
 	// ListTaxonomy returns list of taxonomies based on the given filters
 	ListTaxonomy(context.Context, *ListTaxonomyRequest) (*ListTaxonomyResponse, error)
+	// ListPlatforms returns list of platforms based on the given filters
+	ListPlatforms(context.Context, *ListPlatformsRequest) (*ListPlatformsResponse, error)
 	mustEmbedUnimplementedTerrariumServiceServer()
 }
 
@@ -121,6 +135,9 @@ func (UnimplementedTerrariumServiceServer) ListModuleAttributes(context.Context,
 }
 func (UnimplementedTerrariumServiceServer) ListTaxonomy(context.Context, *ListTaxonomyRequest) (*ListTaxonomyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTaxonomy not implemented")
+}
+func (UnimplementedTerrariumServiceServer) ListPlatforms(context.Context, *ListPlatformsRequest) (*ListPlatformsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPlatforms not implemented")
 }
 func (UnimplementedTerrariumServiceServer) mustEmbedUnimplementedTerrariumServiceServer() {}
 
@@ -207,6 +224,24 @@ func _TerrariumService_ListTaxonomy_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TerrariumService_ListPlatforms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlatformsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TerrariumServiceServer).ListPlatforms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TerrariumService_ListPlatforms_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TerrariumServiceServer).ListPlatforms(ctx, req.(*ListPlatformsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TerrariumService_ServiceDesc is the grpc.ServiceDesc for TerrariumService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +264,10 @@ var TerrariumService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTaxonomy",
 			Handler:    _TerrariumService_ListTaxonomy_Handler,
+		},
+		{
+			MethodName: "ListPlatforms",
+			Handler:    _TerrariumService_ListPlatforms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

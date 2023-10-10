@@ -6,6 +6,7 @@ package query
 import (
 	"github.com/cldcvr/terrarium/src/cli/cmd/query/dependencies"
 	"github.com/cldcvr/terrarium/src/cli/cmd/query/modules"
+	"github.com/cldcvr/terrarium/src/cli/cmd/query/platform"
 	"github.com/cldcvr/terrarium/src/cli/cmd/query/taxonomy"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,7 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(modules.NewCmd())
 	cmd.AddCommand(dependencies.NewCmd())
 	cmd.AddCommand(taxonomy.NewCmd())
+	cmd.AddCommand(platform.NewCmd())
 
 	return cmd
 }

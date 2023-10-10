@@ -35,6 +35,58 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type GitRefType int32
+
+const (
+	GitRefType_gitRef_undefined GitRefType = 0
+	GitRefType_gitRef_branch    GitRefType = 1
+	GitRefType_gitRef_tag       GitRefType = 2
+	GitRefType_gitRef_commit    GitRefType = 3
+)
+
+// Enum value maps for GitRefType.
+var (
+	GitRefType_name = map[int32]string{
+		0: "gitRef_undefined",
+		1: "gitRef_branch",
+		2: "gitRef_tag",
+		3: "gitRef_commit",
+	}
+	GitRefType_value = map[string]int32{
+		"gitRef_undefined": 0,
+		"gitRef_branch":    1,
+		"gitRef_tag":       2,
+		"gitRef_commit":    3,
+	}
+)
+
+func (x GitRefType) Enum() *GitRefType {
+	p := new(GitRefType)
+	*p = x
+	return p
+}
+
+func (x GitRefType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GitRefType) Descriptor() protoreflect.EnumDescriptor {
+	return file_terrariumpb_service_proto_enumTypes[0].Descriptor()
+}
+
+func (GitRefType) Type() protoreflect.EnumType {
+	return &file_terrariumpb_service_proto_enumTypes[0]
+}
+
+func (x GitRefType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GitRefType.Descriptor instead.
+func (GitRefType) EnumDescriptor() ([]byte, []int) {
+	return file_terrariumpb_service_proto_rawDescGZIP(), []int{0}
+}
+
 type Module struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1280,8 +1332,8 @@ type ListTaxonomyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Page     *Page    `protobuf:"bytes,1,opt,name=page,proto3" json:"page,omitempty"`
-	Taxonomy []string `protobuf:"bytes,2,rep,name=taxonomy,proto3" json:"taxonomy,omitempty"`
+	Page     *Page  `protobuf:"bytes,1,opt,name=page,proto3" json:"page,omitempty"`
+	Taxonomy string `protobuf:"bytes,2,opt,name=taxonomy,proto3" json:"taxonomy,omitempty"` // taxonomy levels joined by `/`
 }
 
 func (x *ListTaxonomyRequest) Reset() {
@@ -1323,11 +1375,11 @@ func (x *ListTaxonomyRequest) GetPage() *Page {
 	return nil
 }
 
-func (x *ListTaxonomyRequest) GetTaxonomy() []string {
+func (x *ListTaxonomyRequest) GetTaxonomy() string {
 	if x != nil {
 		return x.Taxonomy
 	}
-	return nil
+	return ""
 }
 
 type ListTaxonomyResponse struct {
@@ -1438,6 +1490,243 @@ func (x *Taxonomy) GetLevels() []string {
 		return x.Levels
 	}
 	return nil
+}
+
+type ListPlatformsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Page          *Page    `protobuf:"bytes,1,opt,name=page,proto3" json:"page,omitempty"`
+	Search        string   `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
+	Taxonomy      string   `protobuf:"bytes,3,opt,name=taxonomy,proto3" json:"taxonomy,omitempty"` // taxonomy levels joined by `/`
+	InterfaceUuid []string `protobuf:"bytes,4,rep,name=interface_uuid,json=interfaceUuid,proto3" json:"interface_uuid,omitempty"`
+}
+
+func (x *ListPlatformsRequest) Reset() {
+	*x = ListPlatformsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_terrariumpb_service_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListPlatformsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPlatformsRequest) ProtoMessage() {}
+
+func (x *ListPlatformsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_terrariumpb_service_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPlatformsRequest.ProtoReflect.Descriptor instead.
+func (*ListPlatformsRequest) Descriptor() ([]byte, []int) {
+	return file_terrariumpb_service_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListPlatformsRequest) GetPage() *Page {
+	if x != nil {
+		return x.Page
+	}
+	return nil
+}
+
+func (x *ListPlatformsRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
+	}
+	return ""
+}
+
+func (x *ListPlatformsRequest) GetTaxonomy() string {
+	if x != nil {
+		return x.Taxonomy
+	}
+	return ""
+}
+
+func (x *ListPlatformsRequest) GetInterfaceUuid() []string {
+	if x != nil {
+		return x.InterfaceUuid
+	}
+	return nil
+}
+
+type ListPlatformsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Platforms []*Platform `protobuf:"bytes,1,rep,name=platforms,proto3" json:"platforms,omitempty"`
+	Page      *Page       `protobuf:"bytes,2,opt,name=page,proto3" json:"page,omitempty"`
+}
+
+func (x *ListPlatformsResponse) Reset() {
+	*x = ListPlatformsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_terrariumpb_service_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListPlatformsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPlatformsResponse) ProtoMessage() {}
+
+func (x *ListPlatformsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_terrariumpb_service_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPlatformsResponse.ProtoReflect.Descriptor instead.
+func (*ListPlatformsResponse) Descriptor() ([]byte, []int) {
+	return file_terrariumpb_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListPlatformsResponse) GetPlatforms() []*Platform {
+	if x != nil {
+		return x.Platforms
+	}
+	return nil
+}
+
+func (x *ListPlatformsResponse) GetPage() *Page {
+	if x != nil {
+		return x.Page
+	}
+	return nil
+}
+
+type Platform struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id          string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title       string     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description string     `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	RepoUrl     string     `protobuf:"bytes,4,opt,name=repo_url,json=repoUrl,proto3" json:"repo_url,omitempty"`
+	RepoDir     string     `protobuf:"bytes,5,opt,name=repo_dir,json=repoDir,proto3" json:"repo_dir,omitempty"`
+	RepoCommit  string     `protobuf:"bytes,6,opt,name=repo_commit,json=repoCommit,proto3" json:"repo_commit,omitempty"`
+	RefLabel    string     `protobuf:"bytes,7,opt,name=ref_label,json=refLabel,proto3" json:"ref_label,omitempty"`
+	LabelType   GitRefType `protobuf:"varint,8,opt,name=label_type,json=labelType,proto3,enum=terrarium.v0.GitRefType" json:"label_type,omitempty"`
+	Components  int32      `protobuf:"varint,9,opt,name=components,proto3" json:"components,omitempty"`
+}
+
+func (x *Platform) Reset() {
+	*x = Platform{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_terrariumpb_service_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Platform) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Platform) ProtoMessage() {}
+
+func (x *Platform) ProtoReflect() protoreflect.Message {
+	mi := &file_terrariumpb_service_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Platform.ProtoReflect.Descriptor instead.
+func (*Platform) Descriptor() ([]byte, []int) {
+	return file_terrariumpb_service_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *Platform) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Platform) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Platform) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Platform) GetRepoUrl() string {
+	if x != nil {
+		return x.RepoUrl
+	}
+	return ""
+}
+
+func (x *Platform) GetRepoDir() string {
+	if x != nil {
+		return x.RepoDir
+	}
+	return ""
+}
+
+func (x *Platform) GetRepoCommit() string {
+	if x != nil {
+		return x.RepoCommit
+	}
+	return ""
+}
+
+func (x *Platform) GetRefLabel() string {
+	if x != nil {
+		return x.RefLabel
+	}
+	return ""
+}
+
+func (x *Platform) GetLabelType() GitRefType {
+	if x != nil {
+		return x.LabelType
+	}
+	return GitRefType_gitRef_undefined
+}
+
+func (x *Platform) GetComponents() int32 {
+	if x != nil {
+		return x.Components
+	}
+	return 0
 }
 
 var File_terrariumpb_service_proto protoreflect.FileDescriptor
@@ -1679,7 +1968,7 @@ var file_terrariumpb_service_proto_rawDesc = []byte{
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x26, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x74, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75,
 	0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12,
-	0x1a, 0x0a, 0x08, 0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x18, 0x02, 0x20, 0x03, 0x28,
+	0x1a, 0x0a, 0x08, 0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x08, 0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x22, 0x72, 0x0a, 0x14, 0x4c,
 	0x69, 0x73, 0x74, 0x54, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x08, 0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x18,
@@ -1691,7 +1980,49 @@ var file_terrariumpb_service_proto_rawDesc = []byte{
 	0x32, 0x0a, 0x08, 0x54, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69,
 	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x6c,
 	0x65, 0x76, 0x65, 0x6c, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x6c, 0x65, 0x76,
-	0x65, 0x6c, 0x73, 0x32, 0xdd, 0x03, 0x0a, 0x10, 0x54, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75,
+	0x65, 0x6c, 0x73, 0x22, 0xaa, 0x01, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x74,
+	0x66, 0x6f, 0x72, 0x6d, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x26, 0x0a, 0x04,
+	0x70, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x74, 0x65, 0x72,
+	0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x52, 0x04,
+	0x70, 0x61, 0x67, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x12, 0x1a, 0x0a, 0x08,
+	0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x74, 0x61, 0x78, 0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x12, 0x36, 0x0a, 0x0e, 0x69, 0x6e, 0x74, 0x65,
+	0x72, 0x66, 0x61, 0x63, 0x65, 0x5f, 0x75, 0x75, 0x69, 0x64, 0x18, 0x04, 0x20, 0x03, 0x28, 0x09,
+	0x42, 0x0f, 0xfa, 0x42, 0x0c, 0x92, 0x01, 0x09, 0x18, 0x01, 0x22, 0x05, 0x72, 0x03, 0xb0, 0x01,
+	0x01, 0x52, 0x0d, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x66, 0x61, 0x63, 0x65, 0x55, 0x75, 0x69, 0x64,
+	0x22, 0x75, 0x0a, 0x15, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x34, 0x0a, 0x09, 0x70, 0x6c, 0x61,
+	0x74, 0x66, 0x6f, 0x72, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x74,
+	0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x50, 0x6c, 0x61, 0x74,
+	0x66, 0x6f, 0x72, 0x6d, 0x52, 0x09, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x73, 0x12,
+	0x26, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e,
+	0x74, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x50, 0x61, 0x67,
+	0x65, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x22, 0x9f, 0x02, 0x0a, 0x08, 0x50, 0x6c, 0x61, 0x74,
+	0x66, 0x6f, 0x72, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x19, 0x0a, 0x08,
+	0x72, 0x65, 0x70, 0x6f, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x72, 0x65, 0x70, 0x6f, 0x55, 0x72, 0x6c, 0x12, 0x19, 0x0a, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x5f,
+	0x64, 0x69, 0x72, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x72, 0x65, 0x70, 0x6f, 0x44,
+	0x69, 0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x72, 0x65, 0x70, 0x6f, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x69,
+	0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x72, 0x65, 0x70, 0x6f, 0x43, 0x6f, 0x6d,
+	0x6d, 0x69, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x72, 0x65, 0x66, 0x5f, 0x6c, 0x61, 0x62, 0x65, 0x6c,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72, 0x65, 0x66, 0x4c, 0x61, 0x62, 0x65, 0x6c,
+	0x12, 0x37, 0x0a, 0x0a, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x08,
+	0x20, 0x01, 0x28, 0x0e, 0x32, 0x18, 0x2e, 0x74, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x30, 0x2e, 0x67, 0x69, 0x74, 0x52, 0x65, 0x66, 0x54, 0x79, 0x70, 0x65, 0x52, 0x09,
+	0x6c, 0x61, 0x62, 0x65, 0x6c, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x63, 0x6f, 0x6d,
+	0x70, 0x6f, 0x6e, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x09, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x63,
+	0x6f, 0x6d, 0x70, 0x6f, 0x6e, 0x65, 0x6e, 0x74, 0x73, 0x2a, 0x58, 0x0a, 0x0a, 0x67, 0x69, 0x74,
+	0x52, 0x65, 0x66, 0x54, 0x79, 0x70, 0x65, 0x12, 0x14, 0x0a, 0x10, 0x67, 0x69, 0x74, 0x52, 0x65,
+	0x66, 0x5f, 0x75, 0x6e, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x64, 0x10, 0x00, 0x12, 0x11, 0x0a,
+	0x0d, 0x67, 0x69, 0x74, 0x52, 0x65, 0x66, 0x5f, 0x62, 0x72, 0x61, 0x6e, 0x63, 0x68, 0x10, 0x01,
+	0x12, 0x0e, 0x0a, 0x0a, 0x67, 0x69, 0x74, 0x52, 0x65, 0x66, 0x5f, 0x74, 0x61, 0x67, 0x10, 0x02,
+	0x12, 0x11, 0x0a, 0x0d, 0x67, 0x69, 0x74, 0x52, 0x65, 0x66, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x69,
+	0x74, 0x10, 0x03, 0x32, 0xce, 0x04, 0x0a, 0x10, 0x54, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75,
 	0x6d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x56, 0x0a, 0x0b, 0x48, 0x65, 0x61, 0x6c,
 	0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a,
@@ -1721,13 +2052,20 @@ var file_terrariumpb_service_proto_rawDesc = []byte{
 	0x61, 0x72, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x61, 0x78,
 	0x6f, 0x6e, 0x6f, 0x6d, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x14, 0x82,
 	0xd3, 0xe4, 0x93, 0x02, 0x0e, 0x12, 0x0c, 0x2f, 0x76, 0x30, 0x2f, 0x74, 0x61, 0x78, 0x6f, 0x6e,
-	0x6f, 0x6d, 0x79, 0x42, 0x56, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x63, 0x6c, 0x64, 0x63, 0x76, 0x72, 0x2f, 0x74, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69,
-	0x75, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x62, 0x2f, 0x74, 0x65,
-	0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x70, 0x62, 0x92, 0x41, 0x1f, 0x12, 0x1a, 0x0a, 0x15,
-	0x54, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x20, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x20, 0x41, 0x50, 0x49, 0x32, 0x01, 0x30, 0x2a, 0x01, 0x02, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x6f, 0x6d, 0x79, 0x12, 0x6f, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x74, 0x66,
+	0x6f, 0x72, 0x6d, 0x73, 0x12, 0x22, 0x2e, 0x74, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x30, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23, 0x2e, 0x74, 0x65, 0x72, 0x72, 0x61,
+	0x72, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x30, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6c, 0x61, 0x74,
+	0x66, 0x6f, 0x72, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x15, 0x82,
+	0xd3, 0xe4, 0x93, 0x02, 0x0f, 0x12, 0x0d, 0x2f, 0x76, 0x30, 0x2f, 0x70, 0x6c, 0x61, 0x74, 0x66,
+	0x6f, 0x72, 0x6d, 0x73, 0x42, 0x56, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x63, 0x6c, 0x64, 0x63, 0x76, 0x72, 0x2f, 0x74, 0x65, 0x72, 0x72, 0x61, 0x72,
+	0x69, 0x75, 0x6d, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x62, 0x2f, 0x74,
+	0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x70, 0x62, 0x92, 0x41, 0x1f, 0x12, 0x1a, 0x0a,
+	0x15, 0x54, 0x65, 0x72, 0x72, 0x61, 0x72, 0x69, 0x75, 0x6d, 0x20, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x20, 0x41, 0x50, 0x49, 0x32, 0x01, 0x30, 0x2a, 0x01, 0x02, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1742,75 +2080,86 @@ func file_terrariumpb_service_proto_rawDescGZIP() []byte {
 	return file_terrariumpb_service_proto_rawDescData
 }
 
-var file_terrariumpb_service_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_terrariumpb_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_terrariumpb_service_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_terrariumpb_service_proto_goTypes = []interface{}{
-	(*Module)(nil),                               // 0: terrarium.v0.Module
-	(*CompletionRequest)(nil),                    // 1: terrarium.v0.CompletionRequest
-	(*CompletionResponse)(nil),                   // 2: terrarium.v0.CompletionResponse
-	(*Page)(nil),                                 // 3: terrarium.v0.Page
-	(*ListModulesRequest)(nil),                   // 4: terrarium.v0.ListModulesRequest
-	(*ListModulesResponse)(nil),                  // 5: terrarium.v0.ListModulesResponse
-	(*ListModuleAttributesRequest)(nil),          // 6: terrarium.v0.listModuleAttributesRequest
-	(*ListModuleAttributesResponse)(nil),         // 7: terrarium.v0.listModuleAttributesResponse
-	(*ModuleAttribute)(nil),                      // 8: terrarium.v0.ModuleAttribute
-	(*Dependency)(nil),                           // 9: terrarium.v0.Dependency
-	(*JSONSchema)(nil),                           // 10: terrarium.v0.JSONSchema
-	(*ListDependenciesResponse)(nil),             // 11: terrarium.v0.ListDependenciesResponse
-	(*Schema)(nil),                               // 12: terrarium.v0.Schema
-	(*DependencyInputsAndOutputs)(nil),           // 13: terrarium.v0.DependencyInputsAndOutputs
-	(*DependencyInputsAndOutputsJSONSchema)(nil), // 14: terrarium.v0.DependencyInputsAndOutputsJSONSchema
-	(*DependencyInputsAndOutputsDependency)(nil), // 15: terrarium.v0.DependencyInputsAndOutputsDependency
-	(*ListTaxonomyRequest)(nil),                  // 16: terrarium.v0.ListTaxonomyRequest
-	(*ListTaxonomyResponse)(nil),                 // 17: terrarium.v0.ListTaxonomyResponse
-	(*Taxonomy)(nil),                             // 18: terrarium.v0.Taxonomy
-	nil,                                          // 19: terrarium.v0.JSONSchema.PropertiesEntry
-	nil,                                          // 20: terrarium.v0.Schema.PropertiesEntry
-	nil,                                          // 21: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
-	(*structpb.Value)(nil),                       // 22: google.protobuf.Value
-	(*emptypb.Empty)(nil),                        // 23: google.protobuf.Empty
+	(GitRefType)(0),                              // 0: terrarium.v0.gitRefType
+	(*Module)(nil),                               // 1: terrarium.v0.Module
+	(*CompletionRequest)(nil),                    // 2: terrarium.v0.CompletionRequest
+	(*CompletionResponse)(nil),                   // 3: terrarium.v0.CompletionResponse
+	(*Page)(nil),                                 // 4: terrarium.v0.Page
+	(*ListModulesRequest)(nil),                   // 5: terrarium.v0.ListModulesRequest
+	(*ListModulesResponse)(nil),                  // 6: terrarium.v0.ListModulesResponse
+	(*ListModuleAttributesRequest)(nil),          // 7: terrarium.v0.listModuleAttributesRequest
+	(*ListModuleAttributesResponse)(nil),         // 8: terrarium.v0.listModuleAttributesResponse
+	(*ModuleAttribute)(nil),                      // 9: terrarium.v0.ModuleAttribute
+	(*Dependency)(nil),                           // 10: terrarium.v0.Dependency
+	(*JSONSchema)(nil),                           // 11: terrarium.v0.JSONSchema
+	(*ListDependenciesResponse)(nil),             // 12: terrarium.v0.ListDependenciesResponse
+	(*Schema)(nil),                               // 13: terrarium.v0.Schema
+	(*DependencyInputsAndOutputs)(nil),           // 14: terrarium.v0.DependencyInputsAndOutputs
+	(*DependencyInputsAndOutputsJSONSchema)(nil), // 15: terrarium.v0.DependencyInputsAndOutputsJSONSchema
+	(*DependencyInputsAndOutputsDependency)(nil), // 16: terrarium.v0.DependencyInputsAndOutputsDependency
+	(*ListTaxonomyRequest)(nil),                  // 17: terrarium.v0.ListTaxonomyRequest
+	(*ListTaxonomyResponse)(nil),                 // 18: terrarium.v0.ListTaxonomyResponse
+	(*Taxonomy)(nil),                             // 19: terrarium.v0.Taxonomy
+	(*ListPlatformsRequest)(nil),                 // 20: terrarium.v0.ListPlatformsRequest
+	(*ListPlatformsResponse)(nil),                // 21: terrarium.v0.ListPlatformsResponse
+	(*Platform)(nil),                             // 22: terrarium.v0.Platform
+	nil,                                          // 23: terrarium.v0.JSONSchema.PropertiesEntry
+	nil,                                          // 24: terrarium.v0.Schema.PropertiesEntry
+	nil,                                          // 25: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
+	(*structpb.Value)(nil),                       // 26: google.protobuf.Value
+	(*emptypb.Empty)(nil),                        // 27: google.protobuf.Empty
 }
 var file_terrariumpb_service_proto_depIdxs = []int32{
-	8,  // 0: terrarium.v0.Module.inputAttributes:type_name -> terrarium.v0.ModuleAttribute
-	3,  // 1: terrarium.v0.ListModulesRequest.page:type_name -> terrarium.v0.Page
-	0,  // 2: terrarium.v0.ListModulesResponse.modules:type_name -> terrarium.v0.Module
-	3,  // 3: terrarium.v0.ListModulesResponse.page:type_name -> terrarium.v0.Page
-	3,  // 4: terrarium.v0.listModuleAttributesRequest.page:type_name -> terrarium.v0.Page
-	8,  // 5: terrarium.v0.listModuleAttributesResponse.attributes:type_name -> terrarium.v0.ModuleAttribute
-	3,  // 6: terrarium.v0.listModuleAttributesResponse.page:type_name -> terrarium.v0.Page
-	0,  // 7: terrarium.v0.ModuleAttribute.parentModule:type_name -> terrarium.v0.Module
-	8,  // 8: terrarium.v0.ModuleAttribute.outputModuleAttributes:type_name -> terrarium.v0.ModuleAttribute
-	10, // 9: terrarium.v0.Dependency.inputs:type_name -> terrarium.v0.JSONSchema
-	10, // 10: terrarium.v0.Dependency.outputs:type_name -> terrarium.v0.JSONSchema
-	22, // 11: terrarium.v0.JSONSchema.default:type_name -> google.protobuf.Value
-	22, // 12: terrarium.v0.JSONSchema.examples:type_name -> google.protobuf.Value
-	22, // 13: terrarium.v0.JSONSchema.enum:type_name -> google.protobuf.Value
-	10, // 14: terrarium.v0.JSONSchema.items:type_name -> terrarium.v0.JSONSchema
-	19, // 15: terrarium.v0.JSONSchema.properties:type_name -> terrarium.v0.JSONSchema.PropertiesEntry
-	9,  // 16: terrarium.v0.ListDependenciesResponse.dependencies:type_name -> terrarium.v0.Dependency
-	3,  // 17: terrarium.v0.ListDependenciesResponse.page:type_name -> terrarium.v0.Page
-	20, // 18: terrarium.v0.Schema.properties:type_name -> terrarium.v0.Schema.PropertiesEntry
-	21, // 19: terrarium.v0.DependencyInputsAndOutputsJSONSchema.properties:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
-	14, // 20: terrarium.v0.DependencyInputsAndOutputsDependency.inputs:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema
-	14, // 21: terrarium.v0.DependencyInputsAndOutputsDependency.outputs:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema
-	3,  // 22: terrarium.v0.ListTaxonomyRequest.page:type_name -> terrarium.v0.Page
-	18, // 23: terrarium.v0.ListTaxonomyResponse.taxonomy:type_name -> terrarium.v0.Taxonomy
-	3,  // 24: terrarium.v0.ListTaxonomyResponse.page:type_name -> terrarium.v0.Page
-	10, // 25: terrarium.v0.JSONSchema.PropertiesEntry.value:type_name -> terrarium.v0.JSONSchema
-	10, // 26: terrarium.v0.Schema.PropertiesEntry.value:type_name -> terrarium.v0.JSONSchema
-	13, // 27: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry.value:type_name -> terrarium.v0.DependencyInputsAndOutputs
-	23, // 28: terrarium.v0.TerrariumService.HealthCheck:input_type -> google.protobuf.Empty
-	4,  // 29: terrarium.v0.TerrariumService.ListModules:input_type -> terrarium.v0.ListModulesRequest
-	6,  // 30: terrarium.v0.TerrariumService.ListModuleAttributes:input_type -> terrarium.v0.listModuleAttributesRequest
-	16, // 31: terrarium.v0.TerrariumService.ListTaxonomy:input_type -> terrarium.v0.ListTaxonomyRequest
-	23, // 32: terrarium.v0.TerrariumService.HealthCheck:output_type -> google.protobuf.Empty
-	5,  // 33: terrarium.v0.TerrariumService.ListModules:output_type -> terrarium.v0.ListModulesResponse
-	7,  // 34: terrarium.v0.TerrariumService.ListModuleAttributes:output_type -> terrarium.v0.listModuleAttributesResponse
-	17, // 35: terrarium.v0.TerrariumService.ListTaxonomy:output_type -> terrarium.v0.ListTaxonomyResponse
-	32, // [32:36] is the sub-list for method output_type
-	28, // [28:32] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	28, // [28:28] is the sub-list for extension extendee
-	0,  // [0:28] is the sub-list for field type_name
+	9,  // 0: terrarium.v0.Module.inputAttributes:type_name -> terrarium.v0.ModuleAttribute
+	4,  // 1: terrarium.v0.ListModulesRequest.page:type_name -> terrarium.v0.Page
+	1,  // 2: terrarium.v0.ListModulesResponse.modules:type_name -> terrarium.v0.Module
+	4,  // 3: terrarium.v0.ListModulesResponse.page:type_name -> terrarium.v0.Page
+	4,  // 4: terrarium.v0.listModuleAttributesRequest.page:type_name -> terrarium.v0.Page
+	9,  // 5: terrarium.v0.listModuleAttributesResponse.attributes:type_name -> terrarium.v0.ModuleAttribute
+	4,  // 6: terrarium.v0.listModuleAttributesResponse.page:type_name -> terrarium.v0.Page
+	1,  // 7: terrarium.v0.ModuleAttribute.parentModule:type_name -> terrarium.v0.Module
+	9,  // 8: terrarium.v0.ModuleAttribute.outputModuleAttributes:type_name -> terrarium.v0.ModuleAttribute
+	11, // 9: terrarium.v0.Dependency.inputs:type_name -> terrarium.v0.JSONSchema
+	11, // 10: terrarium.v0.Dependency.outputs:type_name -> terrarium.v0.JSONSchema
+	26, // 11: terrarium.v0.JSONSchema.default:type_name -> google.protobuf.Value
+	26, // 12: terrarium.v0.JSONSchema.examples:type_name -> google.protobuf.Value
+	26, // 13: terrarium.v0.JSONSchema.enum:type_name -> google.protobuf.Value
+	11, // 14: terrarium.v0.JSONSchema.items:type_name -> terrarium.v0.JSONSchema
+	23, // 15: terrarium.v0.JSONSchema.properties:type_name -> terrarium.v0.JSONSchema.PropertiesEntry
+	10, // 16: terrarium.v0.ListDependenciesResponse.dependencies:type_name -> terrarium.v0.Dependency
+	4,  // 17: terrarium.v0.ListDependenciesResponse.page:type_name -> terrarium.v0.Page
+	24, // 18: terrarium.v0.Schema.properties:type_name -> terrarium.v0.Schema.PropertiesEntry
+	25, // 19: terrarium.v0.DependencyInputsAndOutputsJSONSchema.properties:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry
+	15, // 20: terrarium.v0.DependencyInputsAndOutputsDependency.inputs:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema
+	15, // 21: terrarium.v0.DependencyInputsAndOutputsDependency.outputs:type_name -> terrarium.v0.DependencyInputsAndOutputsJSONSchema
+	4,  // 22: terrarium.v0.ListTaxonomyRequest.page:type_name -> terrarium.v0.Page
+	19, // 23: terrarium.v0.ListTaxonomyResponse.taxonomy:type_name -> terrarium.v0.Taxonomy
+	4,  // 24: terrarium.v0.ListTaxonomyResponse.page:type_name -> terrarium.v0.Page
+	4,  // 25: terrarium.v0.ListPlatformsRequest.page:type_name -> terrarium.v0.Page
+	22, // 26: terrarium.v0.ListPlatformsResponse.platforms:type_name -> terrarium.v0.Platform
+	4,  // 27: terrarium.v0.ListPlatformsResponse.page:type_name -> terrarium.v0.Page
+	0,  // 28: terrarium.v0.Platform.label_type:type_name -> terrarium.v0.gitRefType
+	11, // 29: terrarium.v0.JSONSchema.PropertiesEntry.value:type_name -> terrarium.v0.JSONSchema
+	11, // 30: terrarium.v0.Schema.PropertiesEntry.value:type_name -> terrarium.v0.JSONSchema
+	14, // 31: terrarium.v0.DependencyInputsAndOutputsJSONSchema.PropertiesEntry.value:type_name -> terrarium.v0.DependencyInputsAndOutputs
+	27, // 32: terrarium.v0.TerrariumService.HealthCheck:input_type -> google.protobuf.Empty
+	5,  // 33: terrarium.v0.TerrariumService.ListModules:input_type -> terrarium.v0.ListModulesRequest
+	7,  // 34: terrarium.v0.TerrariumService.ListModuleAttributes:input_type -> terrarium.v0.listModuleAttributesRequest
+	17, // 35: terrarium.v0.TerrariumService.ListTaxonomy:input_type -> terrarium.v0.ListTaxonomyRequest
+	20, // 36: terrarium.v0.TerrariumService.ListPlatforms:input_type -> terrarium.v0.ListPlatformsRequest
+	27, // 37: terrarium.v0.TerrariumService.HealthCheck:output_type -> google.protobuf.Empty
+	6,  // 38: terrarium.v0.TerrariumService.ListModules:output_type -> terrarium.v0.ListModulesResponse
+	8,  // 39: terrarium.v0.TerrariumService.ListModuleAttributes:output_type -> terrarium.v0.listModuleAttributesResponse
+	18, // 40: terrarium.v0.TerrariumService.ListTaxonomy:output_type -> terrarium.v0.ListTaxonomyResponse
+	21, // 41: terrarium.v0.TerrariumService.ListPlatforms:output_type -> terrarium.v0.ListPlatformsResponse
+	37, // [37:42] is the sub-list for method output_type
+	32, // [32:37] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_terrariumpb_service_proto_init() }
@@ -2047,6 +2396,42 @@ func file_terrariumpb_service_proto_init() {
 				return nil
 			}
 		}
+		file_terrariumpb_service_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListPlatformsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_terrariumpb_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListPlatformsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_terrariumpb_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Platform); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_terrariumpb_service_proto_msgTypes[13].OneofWrappers = []interface{}{
 		(*DependencyInputsAndOutputs_DefaultNumber)(nil),
@@ -2057,13 +2442,14 @@ func file_terrariumpb_service_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_terrariumpb_service_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   22,
+			NumEnums:      1,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_terrariumpb_service_proto_goTypes,
 		DependencyIndexes: file_terrariumpb_service_proto_depIdxs,
+		EnumInfos:         file_terrariumpb_service_proto_enumTypes,
 		MessageInfos:      file_terrariumpb_service_proto_msgTypes,
 	}.Build()
 	File_terrariumpb_service_proto = out.File

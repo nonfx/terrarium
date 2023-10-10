@@ -25,7 +25,7 @@ func TestService_ListTaxonomy(t *testing.T) {
 				}, nil)
 			},
 			req: &terrariumpb.ListTaxonomyRequest{
-				Taxonomy: []string{"mocked-l1"},
+				Taxonomy: "mocked-l1",
 				Page:     &terrariumpb.Page{Size: 10, Index: 2, Total: 1},
 			},
 			wantResp: &terrariumpb.ListTaxonomyResponse{

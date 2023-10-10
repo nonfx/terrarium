@@ -94,6 +94,32 @@ func (_m *TerrariumServiceServer) ListModules(_a0 context.Context, _a1 *terrariu
 	return r0, r1
 }
 
+// ListPlatforms provides a mock function with given fields: _a0, _a1
+func (_m *TerrariumServiceServer) ListPlatforms(_a0 context.Context, _a1 *terrariumpb.ListPlatformsRequest) (*terrariumpb.ListPlatformsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *terrariumpb.ListPlatformsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.ListPlatformsRequest) (*terrariumpb.ListPlatformsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *terrariumpb.ListPlatformsRequest) *terrariumpb.ListPlatformsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*terrariumpb.ListPlatformsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *terrariumpb.ListPlatformsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListTaxonomy provides a mock function with given fields: _a0, _a1
 func (_m *TerrariumServiceServer) ListTaxonomy(_a0 context.Context, _a1 *terrariumpb.ListTaxonomyRequest) (*terrariumpb.ListTaxonomyResponse, error) {
 	ret := _m.Called(_a0, _a1)

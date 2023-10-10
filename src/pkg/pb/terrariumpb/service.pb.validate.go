@@ -1540,6 +1540,8 @@ func (m *ListTaxonomyRequest) Validate() error {
 		}
 	}
 
+	// no validation rules for Taxonomy
+
 	return nil
 }
 
@@ -1756,3 +1758,290 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = TaxonomyValidationError{}
+
+// Validate checks the field values on ListPlatformsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListPlatformsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListPlatformsRequestValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Search
+
+	// no validation rules for Taxonomy
+
+	_ListPlatformsRequest_InterfaceUuid_Unique := make(map[string]struct{}, len(m.GetInterfaceUuid()))
+
+	for idx, item := range m.GetInterfaceUuid() {
+		_, _ = idx, item
+
+		if _, exists := _ListPlatformsRequest_InterfaceUuid_Unique[item]; exists {
+			return ListPlatformsRequestValidationError{
+				field:  fmt.Sprintf("InterfaceUuid[%v]", idx),
+				reason: "repeated value must contain unique items",
+			}
+		} else {
+			_ListPlatformsRequest_InterfaceUuid_Unique[item] = struct{}{}
+		}
+
+		if err := m._validateUuid(item); err != nil {
+			return ListPlatformsRequestValidationError{
+				field:  fmt.Sprintf("InterfaceUuid[%v]", idx),
+				reason: "value must be a valid UUID",
+				cause:  err,
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ListPlatformsRequest) _validateUuid(uuid string) error {
+	if matched := _service_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// ListPlatformsRequestValidationError is the validation error returned by
+// ListPlatformsRequest.Validate if the designated constraints aren't met.
+type ListPlatformsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListPlatformsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListPlatformsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListPlatformsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListPlatformsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListPlatformsRequestValidationError) ErrorName() string {
+	return "ListPlatformsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListPlatformsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListPlatformsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListPlatformsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListPlatformsRequestValidationError{}
+
+// Validate checks the field values on ListPlatformsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListPlatformsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetPlatforms() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListPlatformsResponseValidationError{
+					field:  fmt.Sprintf("Platforms[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if v, ok := interface{}(m.GetPage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListPlatformsResponseValidationError{
+				field:  "Page",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// ListPlatformsResponseValidationError is the validation error returned by
+// ListPlatformsResponse.Validate if the designated constraints aren't met.
+type ListPlatformsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListPlatformsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListPlatformsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListPlatformsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListPlatformsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListPlatformsResponseValidationError) ErrorName() string {
+	return "ListPlatformsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListPlatformsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListPlatformsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListPlatformsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListPlatformsResponseValidationError{}
+
+// Validate checks the field values on Platform with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Platform) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Title
+
+	// no validation rules for Description
+
+	// no validation rules for RepoUrl
+
+	// no validation rules for RepoDir
+
+	// no validation rules for RepoCommit
+
+	// no validation rules for RefLabel
+
+	// no validation rules for LabelType
+
+	// no validation rules for Components
+
+	return nil
+}
+
+// PlatformValidationError is the validation error returned by
+// Platform.Validate if the designated constraints aren't met.
+type PlatformValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PlatformValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PlatformValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PlatformValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PlatformValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PlatformValidationError) ErrorName() string { return "PlatformValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PlatformValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPlatform.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PlatformValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PlatformValidationError{}
