@@ -115,12 +115,18 @@ func formatErrors(errs []gojsonschema.ResultError) string {
 // Implement the sql.Scanner interface to take care of unmarshaling
 // the serialized form (stored in the database) into the Go Node structure
 func (n *Node) Scan(value interface{}) error {
-	t, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
+	var data []byte
+
+	switch v := value.(type) {
+	case string:
+		data = []byte(v)
+	case []byte:
+		data = v
+	default:
+		return errors.New("type assertion to string or []byte failed")
 	}
 
-	return json.Unmarshal(t, n)
+	return json.Unmarshal(data, n)
 }
 
 // Implement the driver.Valuer interface to serialize the Node struct
