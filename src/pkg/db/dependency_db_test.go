@@ -26,9 +26,9 @@ func Test_gDB_QueryDependencies(t *testing.T) {
 	}{
 		{
 			name: "query by InterfaceID",
-			filters: []db.FilterOption{
-				db.DependencySearchFilter("ependency-1-int"),
-			},
+			filters: db.DependencyRequestToFilters(&terrariumpb.ListDependenciesRequest{
+				Search: "ependency-1-int",
+			}),
 			wantModule: []*terrariumpb.Dependency{
 				{
 					Id:          uuidDep1.String(),
@@ -65,15 +65,39 @@ func Test_gDB_QueryDependencies(t *testing.T) {
 			},
 		},
 		{
-			name: "empty query return everything",
-			filters: []db.FilterOption{
-				db.DependencySearchFilter(""),
+			name: "query by taxonomy",
+			filters: db.DependencyRequestToFilters(&terrariumpb.ListDependenciesRequest{
+				Taxonomy: "mockdata-l1/mockdata-l2/mockdata-l3.2",
+			}),
+			wantModule: []*terrariumpb.Dependency{
+				{
+					Id:          uuidDep2.String(),
+					InterfaceId: "dependency-2-interface",
+					Title:       "dependency-2",
+					Description: "this is second test dependency",
+					Taxonomy:    []string{"mockdata-l1", "mockdata-l2", "mockdata-l3.2", "mockdata-l4.2", "mockdata-l5.2", "mockdata-l6.2", "mockdata-l7.2"},
+					Inputs: &terrariumpb.JSONSchema{
+						Type:       gojsonschema.TYPE_OBJECT,
+						Properties: map[string]*terrariumpb.JSONSchema{},
+					},
+					Outputs: &terrariumpb.JSONSchema{
+						Type:       gojsonschema.TYPE_OBJECT,
+						Properties: map[string]*terrariumpb.JSONSchema{},
+					},
+				},
 			},
+		},
+		{
+			name: "empty query return everything",
+			filters: db.DependencyRequestToFilters(&terrariumpb.ListDependenciesRequest{
+				Page: &terrariumpb.Page{Size: 2},
+			}),
 			validator: func(t *testing.T, d db.Dependencies) {
-				assert.GreaterOrEqual(t, len(d), 1, "length of returned results")
+				assert.Equal(t, len(d), 2, "length of returned results")
 			},
 		},
 	}
+
 	for dbName, connector := range getConnectorMap() {
 		g := connector(t)
 		dbObj, err := db.AutoMigrate(g)
