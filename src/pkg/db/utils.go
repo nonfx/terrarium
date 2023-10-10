@@ -27,7 +27,7 @@ type DB interface {
 	CreateDependencyInterface(e *Dependency) (uuid.UUID, error)
 	CreateDependencyAttribute(e *DependencyAttribute) (uuid.UUID, error)
 	CreatePlatform(p *Platform) (uuid.UUID, error)
-	CreatePlatformComponents(p *PlatformComponents) (uuid.UUID, error)
+	CreatePlatformComponents(p *PlatformComponent) (uuid.UUID, error)
 
 	// GetOrCreateTFProvider finds and updates `e` and if the record doesn't exists, it creates a new record `e` and updates ID.
 	GetOrCreateTFProvider(e *TFProvider) (id uuid.UUID, isNew bool, err error)

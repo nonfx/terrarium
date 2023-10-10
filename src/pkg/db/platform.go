@@ -19,7 +19,7 @@ type Platform struct {
 	RefLabel      string              // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
 	LabelType     terrpb.GitLabelEnum // 1=branch, 2=tag, 3=commit
 
-	Components []PlatformComponents `gorm:"foreignKey:PlatformID"`
+	Components []PlatformComponent `gorm:"foreignKey:PlatformID"`
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object

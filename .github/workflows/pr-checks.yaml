@@ -18,7 +18,7 @@ jobs:
 
       - name: Run default Setup
         run: |
-          make farm-release-pull
+          make farm-release-pull || echo "no release asset found, skipping."
           make docker-init docker-build docker-run
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}

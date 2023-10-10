@@ -8,13 +8,18 @@ import (
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
+	"github.com/cldcvr/terrarium/src/pkg/git"
 	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
+	"github.com/google/go-github/github"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -230,5 +235,179 @@ func TestTerrarium_Init(t *testing.T) {
 	for _, component := range terrarium.Terrarium {
 		assert.Equal(t, "object", component.Inputs.Type)
 		assert.Equal(t, "object", component.Outputs.Type)
+	}
+}
+
+func Test_harvestPlatforms(t *testing.T) {
+	q := []db.DependencyResult{
+		{
+			DependencyID: uuid.New(),
+			InterfaceID:  "test_id",
+			Name:         "test_name",
+			Schema:       nil,
+			Computed:     false,
+		},
+	}
+	tests := []struct {
+		name    string
+		dirPath string
+		mockDB  func(*mocks.DB)
+		mockGit func(*git.Git)
+		wantErr bool
+	}{
+		{
+			name:    "success with valid YAML file",
+			dirPath: "./testdata/",
+			mockDB: func(dbMocks *mocks.DB) {
+				dbMocks.On("CreatePlatform", mock.Anything).Return(uuid.New(), nil).Once()
+				dbMocks.On("Fetchdeps", mock.Anything).Return(q, nil).Once()
+			},
+		},
+	}
+	for _, tt := range tests {
+		config.LoadDefaults()
+		t.Run(tt.name, func(t *testing.T) {
+			dbMocks := &mocks.DB{}
+			if tt.mockDB != nil {
+				tt.mockDB(dbMocks)
+			}
+
+			err := harvestPlatforms(dbMocks, tt.dirPath)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			dbMocks.AssertExpectations(t)
+		})
+	}
+}
+
+func Test_readPlatformYAML(t *testing.T) {
+	tests := []struct {
+		name    string
+		dirPath string
+		wantErr bool
+	}{
+		{
+			name:    "success with dir",
+			dirPath: "./",
+		},
+		{
+			name:    "success with file",
+			dirPath: "./testdata/platform.yaml",
+		},
+	}
+	for _, tt := range tests {
+		config.LoadDefaults()
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := readPlatformYAML(tt.dirPath)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func Test_findTerrariumYaml(t *testing.T) {
+	tests := []struct {
+		name      string
+		gl        []*github.RepositoryContent
+		owner     string
+		repo      string
+		reference string
+		dirPath   string
+		mockDB    func(*mocks.DB)
+		wantErr   bool
+	}{
+		{
+			name:      "success",
+			owner:     "owner",
+			repo:      "repo",
+			reference: "ref",
+			dirPath:   "./",
+			gl: []*github.RepositoryContent{
+				{
+					Name: github.String("platform.yaml"),
+					Type: github.String("dir"),
+					Path: github.String("./testdata"),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		config.LoadDefaults()
+		t.Run(tt.name, func(t *testing.T) {
+			dbMocks := &mocks.DB{}
+			if tt.mockDB != nil {
+				tt.mockDB(dbMocks)
+			}
+
+			_, err := findTerrariumYaml(tt.gl, tt.owner, tt.repo, tt.reference, tt.dirPath)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			dbMocks.AssertExpectations(t)
+		})
+	}
+}
+
+func Test_compareYAMLWithSQLData(t *testing.T) {
+	tests := []struct {
+		name        string
+		queryResult []db.DependencyResult
+		c           Component
+		u           uuid.UUID
+		mockDB      func(*mocks.DB)
+		wantErr     bool
+	}{
+		{
+			name: "success",
+			queryResult: []db.DependencyResult{
+				{
+					DependencyID: uuid.New(),
+					InterfaceID:  "testID",
+					Name:         "test_name",
+					Schema:       nil,
+					Computed:     false,
+				},
+			},
+			c: Component{
+				ID:          "testID",
+				Title:       "testTitle",
+				Description: "testDesc",
+				Inputs:      nil,
+				Outputs:     nil,
+			},
+			u: uuid.New(),
+			mockDB: func(dbMocks *mocks.DB) {
+				dbMocks.On("CreatePlatformComponents", mock.Anything).Return(uuid.New(), nil).Once()
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		config.LoadDefaults()
+		t.Run(tt.name, func(t *testing.T) {
+			dbMocks := &mocks.DB{}
+			if tt.mockDB != nil {
+				tt.mockDB(dbMocks)
+			}
+
+			err := compareYAMLWithSQLData(dbMocks, tt.c, tt.queryResult, tt.u)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			dbMocks.AssertExpectations(t)
+		})
 	}
 }

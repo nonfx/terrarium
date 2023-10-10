@@ -1,0 +1,11 @@
+# Copyright (c) CloudCover
+# SPDX-License-Identifier: Apache-2.0
+
+platforms:
+  - title: AWS EKS
+    description: Amazon Elastic Kubernetes Service
+    repo_url: https://github.com/cldcvr/terrarium
+    repo_directory: examples/platform/
+    revisions:
+      - label: main
+        type: branch

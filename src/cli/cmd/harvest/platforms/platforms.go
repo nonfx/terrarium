@@ -155,7 +155,7 @@ func getOwnerRepoRef(platform Platform) (owner, repo, ref string, err error) {
 }
 
 func gitClient() git.Git {
-	t := config.GitPassword()
+	t := config.GitToken()
 	return git.GithubClient(t)
 }
 
@@ -292,7 +292,7 @@ func findTerrariumYaml(gl []*github.RepositoryContent, owner, repo, reference, d
 func compareYAMLWithSQLData(g db.DB, c Component, queryResult []db.DependencyResult, u uuid.UUID) error {
 	for _, r := range queryResult {
 		if c.ID == r.InterfaceID {
-			_, err := g.CreatePlatformComponents(&db.PlatformComponents{
+			_, err := g.CreatePlatformComponents(&db.PlatformComponent{
 				PlatformID:   u,
 				DependencyID: r.DependencyID,
 			})

@@ -93,15 +93,15 @@ func (_m *DB) CreatePlatform(p *db.Platform) (uuid.UUID, error) {
 }
 
 // CreatePlatformComponents provides a mock function with given fields: p
-func (_m *DB) CreatePlatformComponents(p *db.PlatformComponents) (uuid.UUID, error) {
+func (_m *DB) CreatePlatformComponents(p *db.PlatformComponent) (uuid.UUID, error) {
 	ret := _m.Called(p)
 
 	var r0 uuid.UUID
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*db.PlatformComponents) (uuid.UUID, error)); ok {
+	if rf, ok := ret.Get(0).(func(*db.PlatformComponent) (uuid.UUID, error)); ok {
 		return rf(p)
 	}
-	if rf, ok := ret.Get(0).(func(*db.PlatformComponents) uuid.UUID); ok {
+	if rf, ok := ret.Get(0).(func(*db.PlatformComponent) uuid.UUID); ok {
 		r0 = rf(p)
 	} else {
 		if ret.Get(0) != nil {
@@ -109,7 +109,7 @@ func (_m *DB) CreatePlatformComponents(p *db.PlatformComponents) (uuid.UUID, err
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*db.PlatformComponents) error); ok {
+	if rf, ok := ret.Get(1).(func(*db.PlatformComponent) error); ok {
 		r1 = rf(p)
 	} else {
 		r1 = ret.Error(1)

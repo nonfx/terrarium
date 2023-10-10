@@ -41,5 +41,4 @@ farm:
   version: latest # release tag to use
 
 github:
-  username: ""  # github username
-  password: ""  # github password
+  token: ""  # github token

@@ -50,12 +50,12 @@ func Test_gDB_CreatePlatform(t *testing.T) {
 func Test_gDB_CreatePlatformComponents(t *testing.T) {
 	tests := []struct {
 		name         string
-		platformComp *db.PlatformComponents
+		platformComp *db.PlatformComponent
 		wantErr      bool
 	}{
 		{
 			name: "first new insert",
-			platformComp: &db.PlatformComponents{
+			platformComp: &db.PlatformComponent{
 				PlatformID:   uuid.New(),
 				DependencyID: uuid.New(),
 			},
