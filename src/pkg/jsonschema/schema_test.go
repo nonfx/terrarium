@@ -162,18 +162,18 @@ func TestNodeScan(t *testing.T) {
 
 	// Successful unmarshalling
 	validJSON := `{"type":"testType"}`
-	err := n.Scan([]byte(validJSON))
+	err := n.Scan(validJSON)
 	assert.Nil(t, err)
 	assert.Equal(t, "testType", n.Type)
 
 	// Failure due to incorrect type assertion
-	err = n.Scan("invalidType")
+	err = n.Scan(123)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "type assertion to []byte failed")
+	assert.Contains(t, err.Error(), "type assertion to string failed")
 
 	// Failure due to invalid JSON
 	invalidJSON := `{"type":}`
-	err = n.Scan([]byte(invalidJSON))
+	err = n.Scan(invalidJSON)
 	assert.NotNil(t, err)
 }
 
