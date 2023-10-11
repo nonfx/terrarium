@@ -162,7 +162,7 @@ message DependencyInputsAndOutputsDependency {
 
 message ListTaxonomyRequest {
   Page page = 1;
-  repeated string taxonomy = 2;
+  string taxonomy = 2; // taxonomy levels joined by `/`
 }
 
 message ListTaxonomyResponse {
@@ -173,6 +173,37 @@ message ListTaxonomyResponse {
 message Taxonomy {
   string id = 1;
   repeated string levels = 2;
+}
+
+message ListPlatformsRequest {
+  Page page = 1;
+  string search = 2;
+  string taxonomy = 3; // taxonomy levels joined by `/`
+  repeated string interface_uuid = 4 [(validate.rules).repeated = {unique: true, items: { string: {uuid: true} }}];
+}
+
+message ListPlatformsResponse {
+  repeated Platform platforms = 1;
+  Page page = 2;
+}
+
+message Platform {
+  string id = 1;
+  string title  = 2;
+  string description = 3;
+  string repo_url = 4;
+  string repo_dir = 5;
+  string repo_commit = 6;
+  string ref_label = 7;
+  gitRefType label_type = 8;
+  int32 components = 9;
+}
+
+enum gitRefType {
+  gitRef_undefined = 0;
+  gitRef_branch = 1;
+  gitRef_tag = 2;
+  gitRef_commit = 3;
 }
 
 service TerrariumService {
@@ -202,6 +233,13 @@ service TerrariumService {
   rpc ListTaxonomy(ListTaxonomyRequest) returns (ListTaxonomyResponse) {
     option (google.api.http) = {
       get: "/v0/taxonomy"
+    };
+  }
+
+  // ListPlatforms returns list of platforms based on the given filters
+  rpc ListPlatforms(ListPlatformsRequest) returns (ListPlatformsResponse) {
+    option (google.api.http) = {
+      get: "/v0/platforms"
     };
   }
 }
