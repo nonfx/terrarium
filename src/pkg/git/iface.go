@@ -3,10 +3,14 @@
 
 package git
 
-import "github.com/google/go-github/github"
+import (
+	"context"
+
+	"github.com/google/go-github/github"
+)
 
 //go:generate mockery --name Git
 type Git interface {
-	FetchCommitSHA(owner, repo, ref string) (string, error)
-	GetContents(owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error)
+	FetchCommitSHA(ctx context.Context, owner, repo, ref string) (string, error)
+	GetContents(ctx context.Context, owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error)
 }

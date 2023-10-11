@@ -15,8 +15,7 @@ type GitClient struct {
 	client *github.Client
 }
 
-func GithubClient(token string) Git {
-	ctx := context.Background()
+func GithubClient(ctx context.Context, token string) Git {
 	var tc *http.Client
 
 	if token != "" {
@@ -31,16 +30,16 @@ func GithubClient(token string) Git {
 	return &GitClient{client: client}
 }
 
-func (gh *GitClient) FetchCommitSHA(owner, repo, ref string) (string, error) {
-	commit, _, err := gh.client.Repositories.GetCommitSHA1(context.Background(), owner, repo, ref, "")
+func (gh *GitClient) FetchCommitSHA(ctx context.Context, owner, repo, ref string) (string, error) {
+	commit, _, err := gh.client.Repositories.GetCommitSHA1(ctx, owner, repo, ref, "")
 	if err != nil {
 		return "", err
 	}
 	return commit, nil
 }
 
-func (gh *GitClient) GetContents(owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
-	content, list, _, err := gh.client.Repositories.GetContents(context.Background(), owner, repo, path, &github.RepositoryContentGetOptions{Ref: ref})
+func (gh *GitClient) GetContents(ctx context.Context, owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	content, list, _, err := gh.client.Repositories.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{Ref: ref})
 	if err != nil {
 		return nil, nil, err
 	}

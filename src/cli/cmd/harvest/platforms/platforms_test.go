@@ -313,6 +313,7 @@ func Test_readPlatformYAML(t *testing.T) {
 }
 
 func Test_findTerrariumYaml(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name      string
 		gl        []*github.RepositoryContent
@@ -346,7 +347,7 @@ func Test_findTerrariumYaml(t *testing.T) {
 				tt.mockDB(dbMocks)
 			}
 
-			_, err := findTerrariumYaml(tt.gl, tt.owner, tt.repo, tt.reference, tt.dirPath)
+			_, err := findTerrariumYaml(ctx, tt.gl, tt.owner, tt.repo, tt.reference, tt.dirPath)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

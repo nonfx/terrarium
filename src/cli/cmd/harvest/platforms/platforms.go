@@ -4,6 +4,7 @@
 package platforms
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -56,7 +57,9 @@ func processPlatform(g db.DB, platform Platform) error {
 }
 
 func processRevision(g db.DB, platform Platform, owner, repo string, revision Revision) error {
-	commitSHA, err := fetchCommitSHA(owner, repo, revision.Label)
+	ctx := context.Background()
+
+	commitSHA, err := fetchCommitSHA(ctx, owner, repo, revision.Label)
 	if err != nil {
 		return err
 	}
@@ -67,12 +70,12 @@ func processRevision(g db.DB, platform Platform, owner, repo string, revision Re
 		return err
 	}
 
-	terrariumYAMLPath, err := findTerrariumYAMLInGitHubDir(owner, repo, revision.Label, platform.RepoDir)
+	terrariumYAMLPath, err := findTerrariumYAMLInGitHubDir(ctx, owner, repo, revision.Label, platform.RepoDir)
 	if err != nil {
 		return err
 	}
 
-	gc, _, err := gitGetContents(owner, repo, revision.Label, terrariumYAMLPath)
+	gc, _, err := gitGetContents(ctx, owner, repo, revision.Label, terrariumYAMLPath)
 	if err != nil {
 		return err
 	}
@@ -154,21 +157,21 @@ func getOwnerRepoRef(platform Platform) (owner, repo, ref string, err error) {
 	return owner, repo, ref, nil
 }
 
-func gitClient() git.Git {
+func gitClient(ctx context.Context) git.Git {
 	t := config.GitToken()
-	return git.GithubClient(t)
+	return git.GithubClient(ctx, t)
 }
 
-func fetchCommitSHA(owner, repo, ref string) (string, error) {
-	sha, err := gitClient().FetchCommitSHA(owner, repo, ref)
+func fetchCommitSHA(ctx context.Context, owner, repo, ref string) (string, error) {
+	sha, err := gitClient(ctx).FetchCommitSHA(ctx, owner, repo, ref)
 	if err != nil {
 		return "", err
 	}
 	return sha, nil
 }
 
-func gitGetContents(owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
-	gc, gl, err := gitClient().GetContents(owner, repo, ref, path)
+func gitGetContents(ctx context.Context, owner, repo, ref, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	gc, gl, err := gitClient(ctx).GetContents(ctx, owner, repo, ref, path)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -250,14 +253,14 @@ func GitLabelEnumFromYAML(language string) int32 {
 	}
 }
 
-func findTerrariumYAMLInGitHubDir(owner, repo, reference, dirPath string) (string, error) {
-	gc, gl, err := gitGetContents(owner, repo, reference, dirPath)
+func findTerrariumYAMLInGitHubDir(ctx context.Context, owner, repo, reference, dirPath string) (string, error) {
+	gc, gl, err := gitGetContents(ctx, owner, repo, reference, dirPath)
 	if err != nil {
 		return "", err
 	}
 
 	if gc == nil {
-		p, err := findTerrariumYaml(gl, owner, repo, reference, dirPath)
+		p, err := findTerrariumYaml(ctx, gl, owner, repo, reference, dirPath)
 		if err != nil {
 			return "", err
 		}
@@ -267,7 +270,7 @@ func findTerrariumYAMLInGitHubDir(owner, repo, reference, dirPath string) (strin
 	return "", fmt.Errorf("terrarium.yaml or terrarium.yml is not found in %s in directory: %s", reference, dirPath)
 }
 
-func findTerrariumYaml(gl []*github.RepositoryContent, owner, repo, reference, dirPath string) (string, error) {
+func findTerrariumYaml(ctx context.Context, gl []*github.RepositoryContent, owner, repo, reference, dirPath string) (string, error) {
 	for _, content := range gl {
 		if content.Type == nil {
 			continue
@@ -279,7 +282,7 @@ func findTerrariumYaml(gl []*github.RepositoryContent, owner, repo, reference, d
 
 		if *content.Type == "dir" {
 			subdirPath := *content.Path
-			subfilePath, err := findTerrariumYAMLInGitHubDir(owner, repo, reference, subdirPath)
+			subfilePath, err := findTerrariumYAMLInGitHubDir(ctx, owner, repo, reference, subdirPath)
 			if err != nil {
 				return "", nil
 			}

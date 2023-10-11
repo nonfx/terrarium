@@ -174,7 +174,7 @@ farm-dependency-harvest: $(FARM_DEPENDENCY_DIR)
 # Needs access to the farm repo
 ######################################################
 
-FARM_REPO := github.com/cldcvr/terrarium-farm
+FARM_REPO := https://api.github.com/repos/cldcvr/terrarium-farm
 
 ifeq ($(FARM_VERSION),)
 FARM_VERSION := latest
@@ -186,7 +186,12 @@ data/$(FARM_DB_DUMP_FILE):
 .PHONY: farm-release-pull
 farm-release-pull:
 	@echo "Downloading db dump from the latest terrarium-farm release..."
-	@gh release download $(FARM_VERSION) --clobber -p 'terrarium_farm.psql' -O data/$(FARM_DB_DUMP_FILE) -R $(FARM_REPO)
+	@DB_DUMP_URL=$$(curl -s $(FARM_REPO)/releases/latest | grep browser_download_url | grep .psql | cut -d '"' -f 4); \
+	if [ -z "$$DB_DUMP_URL" ]; then \
+		echo "db dump file not found in the latest release"; \
+		exit 1; \
+	fi; \
+	curl -L -o data/$(FARM_DB_DUMP_FILE) "$$DB_DUMP_URL"
 
 .PHONY: help
 help:
