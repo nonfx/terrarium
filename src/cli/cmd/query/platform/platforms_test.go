@@ -58,7 +58,7 @@ func TestNewCmd(t *testing.T) {
 				config.SetDBMocks(mockedDB)
 			},
 			Args:           []string{"-t", "mocked-l1/l2"},
-			ValidateOutput: clitesting.ValidateOutputMatch("  #  ID                                    TITLE     REPO  COMMIT   \n  1  00000000-0000-0000-0000-000000000000  mock-pf1        0943637  \n\nPage: 1 of 0 | Page Size: 100\n"),
+			ValidateOutput: clitesting.ValidateOutputMatch("  #  ID                                    TITLE     REPO  COMMIT   COMPONENTS  \n  1  00000000-0000-0000-0000-000000000000  mock-pf1        0943637  0           \n\nPage: 1 of 0 | Page Size: 100\n"),
 		},
 		{
 			Name: "success json",

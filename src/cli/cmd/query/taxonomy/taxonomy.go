@@ -4,6 +4,7 @@
 package taxonomy
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
@@ -24,8 +25,14 @@ func NewCmd() *cobra.Command {
 		Use:     "taxonomy",
 		Aliases: []string{"t"},
 		Short:   "Query available taxonomy",
-		Long:    "command to query available taxonomy.",
-		RunE:    queryTaxonomy,
+		Long: heredoc.Doc(`The 'taxonomy' command allows you to query and list available taxonomy values in the system.
+		It provides various options to filter and paginate the results. You can specify the page size and index,
+		as well as the taxonomy levels you are interested in. The output can be formatted as either a table or JSON.
+
+		Example Usage:
+			taxonomy --pageSize=50 --pageIndex=1 -t "storage/database" -o json
+		`),
+		RunE: queryTaxonomy,
 	}
 
 	flags = &terrariumpb.ListTaxonomyRequest{
