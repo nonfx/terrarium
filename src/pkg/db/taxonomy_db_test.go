@@ -79,7 +79,7 @@ func Test_gDB_QueryTaxonomies(t *testing.T) {
 		{
 			name: "get by common top two levels",
 			filterOps: &terrariumpb.ListTaxonomyRequest{
-				Taxonomy: []string{"mockdata-l1", "mockdata-l2"},
+				Taxonomy: "mockdata-l1/mockdata-l2",
 				Page:     &terrariumpb.Page{Size: 5},
 			},
 			wantResult: []*terrariumpb.Taxonomy{
@@ -96,8 +96,7 @@ func Test_gDB_QueryTaxonomies(t *testing.T) {
 		{
 			name: "get all",
 			filterOps: &terrariumpb.ListTaxonomyRequest{
-				Taxonomy: []string{},
-				Page:     &terrariumpb.Page{Size: 5},
+				Page: &terrariumpb.Page{Size: 5},
 			},
 			validator: func(t *testing.T, tax db.Taxonomies) {
 				assert.GreaterOrEqual(t, len(tax), 2, "length of taxonomies array")
