@@ -437,6 +437,38 @@ func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.Dependencies, 
 	return r0, r1
 }
 
+// QueryPlatforms provides a mock function with given fields: filterOps
+func (_m *DB) QueryPlatforms(filterOps ...db.FilterOption) (db.Platforms, error) {
+	_va := make([]interface{}, len(filterOps))
+	for _i := range filterOps {
+		_va[_i] = filterOps[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 db.Platforms
+	var r1 error
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.Platforms, error)); ok {
+		return rf(filterOps...)
+	}
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.Platforms); ok {
+		r0 = rf(filterOps...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.Platforms)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
+		r1 = rf(filterOps...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // QueryTFModuleAttributes provides a mock function with given fields: filterOps
 func (_m *DB) QueryTFModuleAttributes(filterOps ...db.FilterOption) (db.TFModuleAttributes, error) {
 	_va := make([]interface{}, len(filterOps))

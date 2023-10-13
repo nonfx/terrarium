@@ -43,6 +43,7 @@ type DB interface {
 
 	QueryDependencies(filterOps ...FilterOption) (result Dependencies, err error)
 	QueryTaxonomies(filterOps ...FilterOption) (result Taxonomies, err error)
+	QueryPlatforms(filterOps ...FilterOption) (result Platforms, err error)
 
 	ExecuteSQLStatement(string) error
 

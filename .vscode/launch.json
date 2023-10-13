@@ -170,5 +170,20 @@
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
     },
+    {
+      "name": "Platform List",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "query",
+        "platforms",
+        "-o",
+        "json"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
   ]
 }

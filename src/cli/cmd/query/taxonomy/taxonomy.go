@@ -4,6 +4,7 @@
 package taxonomy
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
@@ -15,8 +16,7 @@ import (
 
 var (
 	cmd              *cobra.Command
-	flagPage         *terrariumpb.Page
-	flagTaxonomy     string
+	flags            *terrariumpb.ListTaxonomyRequest
 	flagOutputFormat string
 )
 
@@ -25,15 +25,23 @@ func NewCmd() *cobra.Command {
 		Use:     "taxonomy",
 		Aliases: []string{"t"},
 		Short:   "Query available taxonomy",
-		Long:    "command to query available taxonomy.",
-		RunE:    queryTaxonomy,
+		Long: heredoc.Doc(`The 'taxonomy' command allows you to query and list available taxonomy values in the system.
+		It provides various options to filter and paginate the results. You can specify the page size and index,
+		as well as the taxonomy levels you are interested in. The output can be formatted as either a table or JSON.
+
+		Example Usage:
+			taxonomy --pageSize=50 --pageIndex=1 -t "storage/database" -o json
+		`),
+		RunE: queryTaxonomy,
 	}
 
-	flagPage = &terrariumpb.Page{}
+	flags = &terrariumpb.ListTaxonomyRequest{
+		Page: &terrariumpb.Page{},
+	}
 
-	cmd.Flags().Int32Var(&flagPage.Size, "pageSize", 100, "page size flag")
-	cmd.Flags().Int32Var(&flagPage.Index, "pageIndex", 0, "page index flag")
-	cmd.Flags().StringVarP(&flagTaxonomy, "taxonomy", "t", "", "taxonomy levels joined by `/`")
+	cmd.Flags().Int32Var(&flags.Page.Size, "pageSize", 100, "page size flag")
+	cmd.Flags().Int32Var(&flags.Page.Index, "pageIndex", 0, "page index flag")
+	cmd.Flags().StringVarP(&flags.Taxonomy, "taxonomy", "t", "", "taxonomy levels joined by `/`")
 	cmd.Flags().StringVarP(&flagOutputFormat, "output", "o", "table", "Output format (json or table)")
 
 	return cmd
@@ -45,12 +53,7 @@ func queryTaxonomy(cmd *cobra.Command, args []string) error {
 		return eris.Wrap(err, "error connecting to the database")
 	}
 
-	req := &terrariumpb.ListTaxonomyRequest{
-		Page:     flagPage,
-		Taxonomy: taxonomy.Taxon(flagTaxonomy).Split(),
-	}
-
-	result, err := g.QueryTaxonomies(db.TaxonomyRequestToFilters(req)...)
+	result, err := g.QueryTaxonomies(db.TaxonomyRequestToFilters(flags)...)
 	if err != nil {
 		return eris.Wrap(err, "error running database query")
 	}
@@ -58,7 +61,7 @@ func queryTaxonomy(cmd *cobra.Command, args []string) error {
 	f := utils.OutputFormatter[*terrariumpb.ListTaxonomyResponse, *terrariumpb.Taxonomy]{
 		Writer: cmd.OutOrStdout(),
 		Data: &terrariumpb.ListTaxonomyResponse{
-			Page:     flagPage,
+			Page:     flags.Page,
 			Taxonomy: result.ToProto(),
 		},
 		RowHeaders: []string{"ID", "Taxonomy"},

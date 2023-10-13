@@ -341,7 +341,7 @@ func ValidateOutputMatch(expectedString string) ValidateOutputFunc {
 // ValidateOutputJson helper to assert if the json output
 func ValidateOutputJson(expectedJsonString string) ValidateOutputFunc {
 	return func(ctx context.Context, t *testing.T, cmdOpts CmdOpts, output []byte) bool {
-		return assert.JSONEq(t, expectedJsonString, string(output))
+		return assert.JSONEq(t, expectedJsonString, string(output), "got JSON: %s", output)
 	}
 }
 
