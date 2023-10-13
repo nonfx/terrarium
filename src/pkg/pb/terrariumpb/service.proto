@@ -195,7 +195,8 @@ message Platform {
   string repo_dir = 5;
   string repo_commit = 6;
   string ref_label = 7;
-  int32 components = 8;
+  gitLabelEnum ref_type = 8;
+  int32 components = 9;
 }
 
 service TerrariumService {

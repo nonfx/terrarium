@@ -3343,6 +3343,8 @@ func (m *Platform) validate(all bool) error {
 
 	// no validation rules for RefLabel
 
+	// no validation rules for RefType
+
 	// no validation rules for Components
 
 	if len(errors) > 0 {

@@ -82,6 +82,7 @@ func TestNewCmd(t *testing.T) {
 						"repoDir": "",
 						"repoCommit": "",
 						"refLabel": "",
+						"refType":"label_no",
 						"components": 0
 					}
 				],

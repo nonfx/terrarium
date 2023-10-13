@@ -92,6 +92,7 @@ func (p Platform) ToProto() *terrpb.Platform {
 		RepoDir:    p.RepoDirectory,
 		RepoCommit: p.CommitSHA,
 		RefLabel:   p.RefLabel,
+		RefType:    p.LabelType,
 		Components: int32(len(p.Components)),
 	}
 }
