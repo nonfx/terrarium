@@ -5,15 +5,14 @@ package dependencies
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/transporthelper"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -86,27 +85,16 @@ func fetchDependencies(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(b))
 	} else {
-		displayInTable(cmd.OutOrStdout(), pbRes.Dependencies)
+		table := utils.OutFormatForList(cmd.OutOrStdout())
+		table.SetHeader([]string{"Interface ID", "Title", "Description", "Inputs", "Outputs"})
+		for _, res := range dbDependencies {
+			outputLine := []string{res.InterfaceID, res.Title, res.Description, schemaToString(res.ToProto().Inputs), schemaToString(res.ToProto().Outputs)}
+			table.Append(outputLine)
+		}
+		table.Render()
 
 	}
 	return nil
-}
-
-func displayInTable(w io.Writer, dependencies []*terrariumpb.Dependency) {
-	table := tablewriter.NewWriter(w)
-	table.SetHeader([]string{"Interface ID", "Title", "Description", "Inputs", "Outputs"})
-
-	for _, dependency := range dependencies {
-		table.Append([]string{
-			dependency.InterfaceId,
-			dependency.Title,
-			dependency.Description,
-			schemaToString(dependency.Inputs),
-			schemaToString(dependency.Outputs),
-		})
-	}
-
-	table.Render()
 }
 
 // Utility function to convert JSONSchema into a readable string.
