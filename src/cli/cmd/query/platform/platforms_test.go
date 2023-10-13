@@ -51,7 +51,7 @@ func TestNewCmd(t *testing.T) {
 				mockedDB := &dbmocks.DB{}
 				mockedDB.On("QueryPlatforms", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(db.Platforms{
 					{
-						Name:      "mock-pf1",
+						Title:     "mock-pf1",
 						CommitSHA: "0943637a8bf75489ef3e222db54c83a662c5f66a",
 					},
 				}, nil)
@@ -66,13 +66,32 @@ func TestNewCmd(t *testing.T) {
 				mockedDB := &dbmocks.DB{}
 				mockedDB.On("QueryPlatforms", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(db.Platforms{
 					{
-						Name: "mock-pf1",
+						Title: "mock-pf1",
 					},
 				}, nil)
 				config.SetDBMocks(mockedDB)
 			},
-			Args:           []string{"-o", "json"},
-			ValidateOutput: clitesting.ValidateOutputJson(`{"platforms":[{"id":"00000000-0000-0000-0000-000000000000", "title":"mock-pf1", "description":"", "repoUrl":"", "repoDir":"", "repoCommit":"", "refLabel":"", "labelType":"gitRef_undefined", "components":0}], "page":{"size":100, "index":0, "total":0}}`),
+			Args: []string{"-o", "json"},
+			ValidateOutput: clitesting.ValidateOutputJson(`{
+				"platforms": [
+					{
+						"id": "00000000-0000-0000-0000-000000000000",
+						"title": "mock-pf1",
+						"description": "",
+						"repoUrl": "",
+						"repoDir": "",
+						"repoCommit": "",
+						"refLabel": "",
+						"refType":"label_no",
+						"components": 0
+					}
+				],
+				"page": {
+					"size": 100,
+					"index": 0,
+					"total": 0
+				}
+			}`),
 		},
 	})
 }

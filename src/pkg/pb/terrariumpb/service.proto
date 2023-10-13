@@ -195,15 +195,8 @@ message Platform {
   string repo_dir = 5;
   string repo_commit = 6;
   string ref_label = 7;
-  gitRefType label_type = 8;
+  gitLabelEnum ref_type = 8;
   int32 components = 9;
-}
-
-enum gitRefType {
-  gitRef_undefined = 0;
-  gitRef_branch = 1;
-  gitRef_tag = 2;
-  gitRef_commit = 3;
 }
 
 service TerrariumService {
@@ -242,4 +235,11 @@ service TerrariumService {
       get: "/v0/platforms"
     };
   }
+}
+
+enum gitLabelEnum {
+  label_no = 0;
+  label_branch = 1;
+  label_tag = 2;
+  label_commit = 3;
 }

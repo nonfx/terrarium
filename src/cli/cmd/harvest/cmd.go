@@ -7,6 +7,7 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/dependencies"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/mappings"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/modules"
+	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/platforms"
 	"github.com/cldcvr/terrarium/src/cli/cmd/harvest/resources"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +26,7 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(modules.NewCmd())
 	cmd.AddCommand(mappings.NewCmd())
 	cmd.AddCommand(dependencies.NewCmd())
+	cmd.AddCommand(platforms.NewCmd())
 
 	return cmd
 }

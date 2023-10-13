@@ -299,14 +299,9 @@ var dependencies = []db.Dependency{
 var platforms = db.Platforms{
 	{
 		Model:     db.Model{ID: uuidPlat1},
-		Name:      "test-platform-1",
+		Title:     "test-platform-1",
 		CommitSHA: "2ed744403e50",
 		Components: []db.PlatformComponent{
-			{
-				Model:        db.Model{ID: uuidPlat1Comp1},
-				PlatformID:   uuidPlat1,
-				DependencyID: uuidDep1,
-			},
 			{
 				Model:        db.Model{ID: uuidPlat1Comp2},
 				PlatformID:   uuidPlat1,
@@ -316,7 +311,7 @@ var platforms = db.Platforms{
 	},
 	{
 		Model:     db.Model{ID: uuidPlat2},
-		Name:      "test-platform-2",
+		Title:     "test-platform-2",
 		CommitSHA: "c4cf4e16e4f6",
 		Components: []db.PlatformComponent{
 			{

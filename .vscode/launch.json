@@ -129,6 +129,8 @@
       "args": [
         "query",
         "dependencies",
+        "-o",
+        "json"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",
@@ -149,6 +151,36 @@
         "examples/apps/voting-worker",
         "-o",
         "/tmp/.terrarium"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "Harvest Platform",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "harvest",
+        "platforms",
+        "-d",
+        "examples/farm/platform/platform.yaml"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "Platform List",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/src/cli/terrarium/main.go",
+      "args": [
+        "query",
+        "platforms",
+        "-o",
+        "json"
       ],
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}",

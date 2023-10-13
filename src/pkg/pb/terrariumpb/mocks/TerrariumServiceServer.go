@@ -151,13 +151,12 @@ func (_m *TerrariumServiceServer) mustEmbedUnimplementedTerrariumServiceServer()
 	_m.Called()
 }
 
-type mockConstructorTestingTNewTerrariumServiceServer interface {
+// NewTerrariumServiceServer creates a new instance of TerrariumServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewTerrariumServiceServer(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// NewTerrariumServiceServer creates a new instance of TerrariumServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func NewTerrariumServiceServer(t mockConstructorTestingTNewTerrariumServiceServer) *TerrariumServiceServer {
+}) *TerrariumServiceServer {
 	mock := &TerrariumServiceServer{}
 	mock.Mock.Test(t)
 

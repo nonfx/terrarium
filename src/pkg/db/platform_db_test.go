@@ -24,7 +24,7 @@ func Test_gDB_CreatePlatform(t *testing.T) {
 	}{
 		{
 			name:     "first new insert",
-			platform: &db.Platform{Name: "test-1", RepoURL: "test-url", RepoDirectory: "test-dir", CommitSHA: "test-sha", RefLabel: "test-ref", LabelType: 1},
+			platform: &db.Platform{Title: "test-1", RepoURL: "test-url", RepoDirectory: "test-dir", CommitSHA: "test-sha", RefLabel: "test-ref", LabelType: 1},
 		},
 	}
 
@@ -75,7 +75,7 @@ func Test_gDB_QueryPlatforms(t *testing.T) {
 					Id:         uuidPlat1.String(),
 					Title:      "test-platform-1",
 					RepoCommit: "2ed744403e50",
-					Components: 2,
+					Components: 1,
 				},
 			},
 		},
@@ -89,7 +89,7 @@ func Test_gDB_QueryPlatforms(t *testing.T) {
 					Id:         uuidPlat1.String(),
 					Title:      "test-platform-1",
 					RepoCommit: "2ed744403e50",
-					Components: 2,
+					Components: 1,
 				},
 			},
 		},
@@ -103,7 +103,7 @@ func Test_gDB_QueryPlatforms(t *testing.T) {
 					Id:         uuidPlat1.String(),
 					Title:      "test-platform-1",
 					RepoCommit: "2ed744403e50",
-					Components: 2,
+					Components: 1,
 				},
 			},
 		},

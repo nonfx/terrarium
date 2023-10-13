@@ -314,6 +314,22 @@ func (_m *DB) ExecuteSQLStatement(_a0 string) error {
 	return r0
 }
 
+// Fetchdeps provides a mock function with given fields:
+func (_m *DB) Fetchdeps() []db.DependencyResult {
+	ret := _m.Called()
+
+	var r0 []db.DependencyResult
+	if rf, ok := ret.Get(0).(func() []db.DependencyResult); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]db.DependencyResult)
+		}
+	}
+
+	return r0
+}
+
 // GetOrCreateTFProvider provides a mock function with given fields: e
 func (_m *DB) GetOrCreateTFProvider(e *db.TFProvider) (uuid.UUID, bool, error) {
 	ret := _m.Called(e)
@@ -549,13 +565,12 @@ func (_m *DB) QueryTaxonomies(filterOps ...db.FilterOption) (db.Taxonomies, erro
 	return r0, r1
 }
 
-type mockConstructorTestingTNewDB interface {
+// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewDB(t interface {
 	mock.TestingT
 	Cleanup(func())
-}
-
-// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-func NewDB(t mockConstructorTestingTNewDB) *DB {
+}) *DB {
 	mock := &DB{}
 	mock.Mock.Test(t)
 

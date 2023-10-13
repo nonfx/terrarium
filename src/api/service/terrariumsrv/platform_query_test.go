@@ -21,7 +21,7 @@ func TestService_ListPlatforms(t *testing.T) {
 			name: "success",
 			preCall: func(t *testing.T, tc TestCase[terrariumpb.ListPlatformsRequest, terrariumpb.ListPlatformsResponse]) {
 				tc.mockDB.On("QueryPlatforms", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(db.Platforms{
-					{Name: "mocked-pf1"},
+					{Title: "mocked-pf1"},
 				}, nil)
 			},
 			req: &terrariumpb.ListPlatformsRequest{

@@ -5,31 +5,23 @@ package db
 
 import (
 	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
-	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
 	"gorm.io/gorm"
 )
 
-type GitRef int
-
-const (
-	GitRef_not_set = iota
-	GitRef_branch
-	GitRef_tag
-	GitRef_commit
-)
-
 type Platform struct {
 	Model
 
-	Name          string
+	Title         string
+	Description   string
 	RepoURL       string
 	RepoDirectory string
-	CommitSHA     string `gorm:"unique"`
-	RefLabel      string // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
-	LabelType     GitRef // 1=branch, 2=tag, 3=commit
+	CommitSHA     string              `gorm:"unique"`
+	RefLabel      string              // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
+	LabelType     terrpb.GitLabelEnum // 1=branch, 2=tag, 3=commit
 
 	Components []PlatformComponent `gorm:"foreignKey:PlatformID"`
 }
@@ -38,7 +30,7 @@ type Platforms []Platform
 
 // CreatePlatform insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
-	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"name"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"commit_sha"})
 	return id, err
 }
 
@@ -50,7 +42,7 @@ func (db *gDB) QueryPlatforms(filterOps ...FilterOption) (result Platforms, err 
 		q = filer(q)
 	}
 
-	q = q.Order("name").Preload("Components")
+	q = q.Order("title").Preload("Components")
 
 	err = q.Find(&result).Error
 	if err != nil {
@@ -68,7 +60,7 @@ func PlatformFilterBySearch(query string) FilterOption {
 
 	return func(g *gorm.DB) *gorm.DB {
 		q := "%" + query + "%"
-		return g.Where("name LIKE ? OR repo_url LIKE ?", q, q)
+		return g.Where("title LIKE ? OR repo_url LIKE ?", q, q)
 	}
 }
 
@@ -92,25 +84,21 @@ func PlatformFilterByDependencyID(depIDs ...string) FilterOption {
 	}
 }
 
-func (r GitRef) ToProto() terrariumpb.GitRefType {
-	return terrariumpb.GitRefType(r)
-}
-
-func (p Platform) ToProto() *terrariumpb.Platform {
-	return &terrariumpb.Platform{
+func (p Platform) ToProto() *terrpb.Platform {
+	return &terrpb.Platform{
 		Id:         p.ID.String(),
-		Title:      p.Name,
+		Title:      p.Title,
 		RepoUrl:    p.RepoURL,
 		RepoDir:    p.RepoDirectory,
 		RepoCommit: p.CommitSHA,
 		RefLabel:   p.RefLabel,
-		LabelType:  p.LabelType.ToProto(),
+		RefType:    p.LabelType,
 		Components: int32(len(p.Components)),
 	}
 }
 
-func (pArr Platforms) ToProto() []*terrariumpb.Platform {
-	respArr := make([]*terrariumpb.Platform, len(pArr))
+func (pArr Platforms) ToProto() []*terrpb.Platform {
+	respArr := make([]*terrpb.Platform, len(pArr))
 
 	for i, p := range pArr {
 		respArr[i] = p.ToProto()
@@ -118,7 +106,7 @@ func (pArr Platforms) ToProto() []*terrariumpb.Platform {
 
 	return respArr
 }
-func PlatformRequestToFilters(req *terrariumpb.ListPlatformsRequest) []FilterOption {
+func PlatformRequestToFilters(req *terrpb.ListPlatformsRequest) []FilterOption {
 	filters := []FilterOption{}
 
 	if req.Page != nil {
