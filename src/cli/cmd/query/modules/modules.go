@@ -6,6 +6,7 @@ package modules
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
@@ -30,8 +31,24 @@ func NewCmd() *cobra.Command {
 	cmd = &cobra.Command{
 		Use:   "modules",
 		Short: "List modules matching the source pattern",
-		Long:  "command to list mathcing modules as per the filter chosen. provides variety of filters to list desired modules",
-		RunE:  listModules,
+		Long: heredoc.Doc(`
+			The 'modules' command is designed to list Terraform modules that are indexed in the system.
+			The command provides a variety of filters to narrow down the list of modules to those that meet your specific criteria.
+
+			- Search Text Flag (-s, --searchText):
+			  An optional flag that allows you to search for modules based on a text pattern. This could be part of the module name, source, or any other identifiable text.
+
+			- Populate Mappings Flag (-p, --populateMappings):
+			  A boolean flag that, when set, populates the mappings related to each module in the output. This is useful for understanding how modules are related to each other.
+			  NOTE: This only works with json output (-o json).
+
+			- Namespaces Flag (-n, --namespaces):
+			  Allows you to filter local modules based on their namespaces. The farm repo namespace will always be included in the query.
+
+			Example Usage:
+			  modules --searchText="aws" --populateMappings=true --pageSize=50 --pageIndex=1 -n "path/to/tf/wd" -o json
+		`),
+		RunE: listModules,
 	}
 
 	cmd.Flags().StringVarP(&flagSearchText, "searchText", "s", "", "optional search text")

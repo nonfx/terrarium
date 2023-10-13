@@ -7,7 +7,6 @@
 package db_test
 
 import (
-	"log"
 	"testing"
 
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
@@ -16,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func TestAutoMigrate(t *testing.T) {
@@ -51,7 +49,6 @@ func newConPG(t *testing.T) *gorm.DB {
 		confighelper.MustGetString("db.name"),
 		confighelper.MustGetInt("db.port"),
 		confighelper.MustGetBool("db.ssl_mode"),
-		dbhelper.WithLogger(log.Default(), logger.Config{LogLevel: logger.Error}),
 	)
 	require.NoError(t, err)
 
@@ -69,7 +66,6 @@ func newConSQLite(t *testing.T) *gorm.DB {
 
 	db, err := dbhelper.ConnectSQLite(
 		confighelper.MustGetString("db.dsn"),
-		dbhelper.WithLogger(log.Default(), logger.Config{LogLevel: logger.Error}),
 	)
 	require.NoError(t, err)
 
