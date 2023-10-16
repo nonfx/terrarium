@@ -5,6 +5,7 @@ package dbhelper
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/rotisserie/eris"
@@ -13,52 +14,106 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:generate mockery --name Dialector --srcpkg gorm.io/gorm
+type DBDriver uint
 
-// Connect establishes a connection to the database using the given dialector and connection parameters.
-func Connect(dialector gorm.Dialector, options ...ConnOption) (*gorm.DB, error) {
-	var db *gorm.DB
+const (
+	DBDriverUndefined = iota
+	DBDriverSQLite
+	DBDriverPostgres
+)
 
-	cc := getDefaultConfig()
-
-	for _, op := range options {
-		op(&cc)
-	}
-
-	err := utils.Retry(cc.maxRetries, cc.retryIntervalSec, cc.jitterLimitSec, func() error {
-		var err error
-		db, err = gorm.Open(dialector, &gorm.Config{
-			Logger: cc.logger,
-		})
-		return err
-	})
-
-	return db, eris.Wrap(err, "error connecting to database")
+type ConfigPostgres struct {
+	Host     string
+	User     string
+	Password string
+	DBName   string
+	Port     int
+	SslMode  bool
 }
 
-// createPostgresDSN creates the DSN (Data Source Name) string for the postgres database connection.
-func createPostgresDSN(host, user, password, dbName string, port int, sslMode bool) string {
+type ConfigSQLite struct {
+	ResolvePathCreateDir bool
+	DSN                  string
+	err                  error
+}
+
+type DialectorGetter interface {
+	GetGormDialector() (gorm.Dialector, error)
+}
+
+type DialectorSwitcher struct {
+	ConfigPostgres
+	ConfigSQLite
+}
+
+// GetDSN creates the DSN (Data Source Name) string for the postgres database connection.
+func (c ConfigPostgres) GetDSN() string {
 	sslModeStr := "disable"
-	if sslMode {
+	if c.SslMode {
 		sslModeStr = "enable"
 	}
 
 	passwordStr := ""
-	if password != "" {
+	if c.Password != "" {
 		// omitting the password block when not set, allows the library to look at
 		// other standard sources like `~/.pgpass`
-		passwordStr = "password=" + password
+		passwordStr = "password=" + c.Password
 	}
 
-	return fmt.Sprintf("host=%s user=%s %s dbname=%s port=%d sslmode=%s", host, user, passwordStr, dbName, port, sslModeStr)
+	return fmt.Sprintf("host=%s user=%s %s dbname=%s port=%d sslmode=%s", c.Host, c.User, passwordStr, c.DBName, c.Port, sslModeStr)
 }
 
-// ConnectPG establishes a connection to a postgres database using the provided connection parameters.
-func ConnectPG(host, user, password, dbName string, port int, sslMode bool, options ...ConnOption) (*gorm.DB, error) {
-	dsn := createPostgresDSN(host, user, password, dbName, port, sslMode)
-	return Connect(postgres.Open(dsn), options...)
+func (c ConfigPostgres) GetGormDialector() (gorm.Dialector, error) {
+	return postgres.Open(c.GetDSN()), nil
 }
 
-func ConnectSQLite(dsn string, options ...ConnOption) (*gorm.DB, error) {
-	return Connect(sqlite.Open(dsn), options...)
+func (c ConfigSQLite) GetGormDialector() (gorm.Dialector, error) {
+	resolvedDSN := c.DSN
+	if c.ResolvePathCreateDir {
+		dir := filepath.Dir(c.DSN)
+		dir, err := utils.SetupDir(dir)
+		if err != nil {
+			return nil, err
+		}
+		resolvedDSN = filepath.Join(dir, filepath.Ext(c.DSN))
+	}
+
+	return sqlite.Open(resolvedDSN), nil
+}
+
+func DBDriverFromStr(dbType string) DBDriver {
+	d, _ := (map[string]DBDriver{
+		"postgres": DBDriverPostgres,
+		"sqlite":   DBDriverSQLite,
+	})[dbType]
+	return d
+}
+
+func (dbType DBDriver) String() string {
+	d, _ := (map[DBDriver]string{
+		DBDriverPostgres: "postgres",
+		DBDriverSQLite:   "sqlite",
+	})[dbType]
+	return d
+}
+
+func (conf DialectorSwitcher) Connect(dbType DBDriver, ops ...ConnOption) (*gorm.DB, error) {
+	d, err := conf.Switch(dbType)
+	if err != nil {
+		return nil, err
+	}
+
+	return Connect(d, ops...)
+}
+
+func (conf DialectorSwitcher) Switch(dbType DBDriver) (gorm.Dialector, error) {
+	d, ok := (map[DBDriver]DialectorGetter{
+		DBDriverPostgres: conf.ConfigPostgres,
+		DBDriverSQLite:   conf.ConfigSQLite,
+	})[dbType]
+	if !ok {
+		return nil, eris.Errorf("invalid db driver: %d", dbType)
+	}
+
+	return d.GetGormDialector()
 }

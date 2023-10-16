@@ -4,16 +4,11 @@
 package config
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/cldcvr/terrarium/src/pkg/confighelper"
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper"
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
-	"github.com/mitchellh/go-homedir"
 	"github.com/rotisserie/eris"
-	"gorm.io/gorm"
 )
 
 var mockdb *mocks.DB
@@ -75,40 +70,41 @@ func DBRetryJitter() int {
 
 // DBConnect establishes a connection to the database using the connection parameters from the environment.
 func DBConnect() (db.DB, error) {
-	var g *gorm.DB
-	var err error
-	switch DBType() {
-	case "mock":
+	if DBType() == "mock" {
 		if mockdb == nil {
 			return nil, eris.New("mocked err: connection failed")
 		}
 		return mockdb, nil
-	case "sqlite":
-		dir, err := homedir.Expand(filepath.Dir(DBDSN()))
-		if err != nil {
-			return nil, eris.Wrap(err, "could not locate the DB file location")
-		}
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return nil, eris.Wrap(err, "could not create/access DB file location")
-		}
-		g, err = dbhelper.ConnectSQLite(filepath.Join(dir, filepath.Base(DBDSN())))
-		if err != nil {
-			return nil, eris.Wrap(err, "could not establish a connection to the database")
-		}
-	default:
-		g, err = dbhelper.ConnectPG(
-			DBHost(),
-			DBUser(),
-			DBPassword(),
-			DBName(),
-			DBPort(),
-			DBSSLMode(),
-			dbhelper.WithRetries(DBRetryAttempts(), DBRetryInterval(), DBRetryJitter()),
-		)
-		if err != nil {
-			return nil, eris.Wrap(err, "could not establish a connection to the database")
-		}
 	}
+
+	config := dbhelper.DialectorSwitcher{
+		ConfigPostgres: dbhelper.ConfigPostgres{
+			Host:     DBHost(),
+			User:     DBUser(),
+			Password: DBPassword(),
+			DBName:   DBName(),
+			Port:     DBPort(),
+			SslMode:  DBSSLMode(),
+		},
+		ConfigSQLite: dbhelper.ConfigSQLite{
+			DSN:                  DBDSN(),
+			ResolvePathCreateDir: true,
+		},
+	}
+
+	dbType := dbhelper.DBDriverFromStr(DBType())
+
+	g, err := config.Connect(
+		dbType,
+		dbhelper.WithRetries(
+			DBRetryAttempts(),
+			DBRetryInterval(),
+			DBRetryJitter(),
+		),
+	)
+	if err != nil {
+		return nil, eris.Wrap(err, "could not establish a connection to the database")
+	}
+
 	return db.AutoMigrate(g)
 }
