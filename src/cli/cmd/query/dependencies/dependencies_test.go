@@ -85,12 +85,7 @@ func Test_fetchDependencies(t *testing.T) {
 				cmd.SetArgs(args)
 			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				expectedOutput := `+--------------+------------+-------------+--------+---------+
-| INTERFACE ID |   TITLE    | DESCRIPTION | INPUTS | OUTPUTS |
-+--------------+------------+-------------+--------+---------+
-| test_id      | test_title | testing     | N/A    | N/A     |
-+--------------+------------+-------------+--------+---------+
-`
+				expectedOutput := "  INTERFACE ID  TITLE       DESCRIPTION  INPUTS  OUTPUTS  \n  test_id       test_title  testing      N/A     N/A      \n"
 
 				return assert.Equal(t, expectedOutput, string(output))
 			},
