@@ -147,9 +147,9 @@ flowchart TD
 
 ## Get Involved
 
-Join our slack community - `#terrarium-community`.
+Join our Discord community - [**Terrarium Community**](https://discord.gg/gG3gDm9GmF).
 
-Terrarium, is still in its early stages; we welcome your contribution.
+Terrarium is still in its early stages, and we welcome your contributions.
 
 To file a bug, suggest an improvement, or request a new feature please open an issue, refer to our [contributing guide](./CONTRIBUTING.md)
 
