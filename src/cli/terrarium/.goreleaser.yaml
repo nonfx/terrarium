@@ -33,9 +33,8 @@ release:
   github:
     owner: cldcvr
     name: terrarium
-  draft: true
-  replace_existing_draft: true
-  make_latest: false
+  draft: false
+  make_latest: true
   mode: replace
 
 brews:
