@@ -4,18 +4,13 @@
 package dbhelper
 
 import (
-	"fmt"
-	"log"
-	"strings"
 	"testing"
 
-	"github.com/cldcvr/terrarium/src/pkg/db/dbhelper/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm/logger"
+	"github.com/stretchr/testify/require"
 )
 
-func TestCreateDSN(t *testing.T) {
+func TestConfigPostgresGetDSN(t *testing.T) {
 	testCases := []struct {
 		name     string
 		host     string
@@ -60,31 +55,105 @@ func TestCreateDSN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			dsn := createPostgresDSN(tc.host, tc.user, tc.password, tc.dbName, tc.port, tc.sslMode)
+			dsn := (ConfigPostgres{Host: tc.host, User: tc.user, Password: tc.password, DBName: tc.dbName, Port: tc.port, SslMode: tc.sslMode}).GetDSN()
 			assert.Equal(t, tc.expected, dsn)
 		})
 	}
 }
 
-func TestConnect(t *testing.T) {
-	// Mock dialector
-	mockErr := fmt.Errorf("mocked error")
-	mockDialector := &mocks.Dialector{}
-	mockDialector.On("Initialize", mock.Anything).Return(mockErr).Times(3)
-	mockDialector.On("Initialize", mock.Anything).Return(nil).Once()
-
-	logData := strings.Builder{}
-	opts := []ConnOption{
-		WithRetries(1, 0, 0),
-		WithLogger(log.New(&logData, "", 0), logger.Config{LogLevel: logger.Info}),
+func TestDialectorSwitcherSwitch(t *testing.T) {
+	ds := DialectorSwitcher{
+		ConfigPostgres: ConfigPostgres{},
+		ConfigSQLite:   ConfigSQLite{},
+	}
+	tests := []struct {
+		name              string
+		ds                DialectorSwitcher
+		dbType            DBDriver
+		wantDialectorName string
+		wantError         bool
+	}{
+		{
+			name:              "success get postgres",
+			ds:                ds,
+			dbType:            DBDriverPostgres,
+			wantDialectorName: "postgres",
+		},
+		{
+			name:              "success get sqlite",
+			ds:                ds,
+			dbType:            DBDriverSQLite,
+			wantDialectorName: "sqlite",
+		},
+		{
+			name:      "fail undefined type",
+			ds:        ds,
+			dbType:    DBDriverUndefined,
+			wantError: true,
+		},
 	}
 
-	_, err := Connect(mockDialector, opts...) // fail twice
-	assert.ErrorIs(t, err, mockErr)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotDialector, gotErr := tt.ds.Switch(tt.dbType)
+			if tt.wantError {
+				assert.Error(t, gotErr)
+				return
+			}
 
-	db, err := Connect(mockDialector, opts...) // succeed on retry after failing once
-	assert.NoError(t, err)
-	assert.NotNil(t, db)
+			require.NoError(t, gotErr)
+			assert.Equal(t, tt.wantDialectorName, gotDialector.Name())
+		})
+	}
+}
 
-	assert.Equal(t, 3, strings.Count(logData.String(), "[error] failed to initialize database, got error mocked error"))
+func TestDBDriver(t *testing.T) {
+	tests := []struct {
+		name    string
+		fromStr string
+		fromT   DBDriver
+		wantT   DBDriver
+		wantStr string
+	}{
+		{
+			name:    "pg str to type",
+			fromStr: "postgres",
+			wantT:   DBDriverPostgres,
+		},
+		{
+			name:    "sqlite str to type",
+			fromStr: "sqlite",
+			wantT:   DBDriverSQLite,
+		},
+		{
+			name:    "invalid str to type",
+			fromStr: "undefined",
+			wantT:   DBDriverUndefined,
+		},
+		{
+			name:    "pg type to str",
+			fromT:   DBDriverPostgres,
+			wantStr: "postgres",
+		},
+		{
+			name:    "sqlite type to str",
+			fromT:   DBDriverSQLite,
+			wantStr: "sqlite",
+		},
+		{
+			name:    "invalid type to str",
+			fromT:   DBDriverUndefined,
+			wantStr: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotT := DBDriverFromStr(tt.fromStr)
+			assert.Equal(t, tt.wantT, gotT)
+
+			gotStr := tt.fromT.String()
+			assert.Equal(t, tt.wantStr, gotStr)
+		})
+	}
 }

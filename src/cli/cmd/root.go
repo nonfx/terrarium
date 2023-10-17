@@ -6,7 +6,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/cli/cmd/farm"
@@ -16,7 +15,7 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/cmd/query"
 	"github.com/cldcvr/terrarium/src/cli/cmd/version"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -64,22 +63,25 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(flagCfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
+		const defaultConfigDirPath = "~/.terrarium/"
+
+		// Resolve the path and create directory if not present.
+		dirPath, err := utils.SetupDir(defaultConfigDirPath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
 		// Search config in `$HOME/.terrarium` directory with name "config" (without extension)
-		viper.AddConfigPath(filepath.Join(home, ".terrarium"))
+		viper.AddConfigPath(dirPath)
 		viper.SetConfigName("config")
 	}
 
+	config.LoadDefaults()
+
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+		config.LoggerConfigDefault()
 		log.Info("Using config file", "file", viper.ConfigFileUsed())
 	}
-
-	config.LoadDefaults()
 }

@@ -6,18 +6,23 @@ package dbhelper
 import (
 	"log"
 
+	"github.com/cldcvr/terrarium/src/pkg/utils"
+	"github.com/rotisserie/eris"
+	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type connConfig struct {
+//go:generate mockery --name Dialector --srcpkg gorm.io/gorm
+
+type connOptions struct {
 	maxRetries       int
 	retryIntervalSec int
 	jitterLimitSec   int
 	logger           logger.Interface
 }
 
-func getDefaultConfig() connConfig {
-	return connConfig{
+func getDefaultConfig() connOptions {
+	return connOptions{
 		maxRetries:       2,
 		retryIntervalSec: 2,
 		jitterLimitSec:   2,
@@ -27,7 +32,7 @@ func getDefaultConfig() connConfig {
 	}
 }
 
-type ConnOption func(*connConfig)
+type ConnOption func(*connOptions)
 
 // WithRetries configures db connection retries.
 // maxRetries represents number of times the connection request should be retried on failure.
@@ -38,7 +43,7 @@ type ConnOption func(*connConfig)
 // interval between 0 and this number is selected and added to the retry interval on each retry
 // attempt to avoid high retry traffic on exact same time from all servers.
 func WithRetries(maxRetries, retryIntervalSec, jitterLimitSec int) ConnOption {
-	return func(cc *connConfig) {
+	return func(cc *connOptions) {
 		cc.maxRetries = maxRetries
 		cc.retryIntervalSec = retryIntervalSec
 		cc.jitterLimitSec = jitterLimitSec
@@ -51,7 +56,28 @@ func WithRetries(maxRetries, retryIntervalSec, jitterLimitSec int) ConnOption {
 // config is the gorm logger config that allows setting the log level, etc.
 // by default, we set log level to Warning.
 func WithLogger(writer logger.Writer, config logger.Config) ConnOption {
-	return func(cc *connConfig) {
+	return func(cc *connOptions) {
 		cc.logger = logger.New(writer, config)
 	}
+}
+
+// Connect establishes a connection to the database using the given dialector and connection parameters.
+func Connect(dialector gorm.Dialector, options ...ConnOption) (*gorm.DB, error) {
+	var db *gorm.DB
+
+	cc := getDefaultConfig()
+
+	for _, op := range options {
+		op(&cc)
+	}
+
+	err := utils.Retry(cc.maxRetries, cc.retryIntervalSec, cc.jitterLimitSec, func() error {
+		var err error
+		db, err = gorm.Open(dialector, &gorm.Config{
+			Logger: cc.logger,
+		})
+		return err
+	})
+
+	return db, eris.Wrap(err, "error connecting to database")
 }

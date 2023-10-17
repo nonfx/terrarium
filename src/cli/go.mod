@@ -9,7 +9,6 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.17.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/rotisserie/eris v0.5.4
 	github.com/spf13/cobra v1.7.0
@@ -45,6 +44,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -92,5 +92,5 @@ require (
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gorm.io/gorm v1.25.2
+	gorm.io/gorm v1.25.2 // indirect
 )

@@ -19,7 +19,7 @@ import (
 
 func TestAutoMigrate(t *testing.T) {
 	t.Run("postgres", func(t *testing.T) {
-		g := newConPG(t)
+		g := newCon(dbhelper.DBDriverPostgres)(t)
 		dbObj, err := db.AutoMigrate(g)
 		assert.NoError(t, err)
 		assert.NotNil(t, dbObj)
@@ -28,53 +28,49 @@ func TestAutoMigrate(t *testing.T) {
 
 // Helpers used in multiple tests
 
-func newConPG(t *testing.T) *gorm.DB {
-	t.Helper()
-
-	confighelper.LoadDefaults(map[string]interface{}{
-		"db": map[string]interface{}{
-			"host":     "localhost",
-			"user":     "postgres",
-			"password": "",
-			"name":     "cc_terrarium",
-			"port":     5432,
-			"ssl_mode": false,
-		},
-	}, "tr")
-
-	db, err := dbhelper.ConnectPG(
-		confighelper.MustGetString("db.host"),
-		confighelper.MustGetString("db.user"),
-		confighelper.MustGetString("db.password"),
-		confighelper.MustGetString("db.name"),
-		confighelper.MustGetInt("db.port"),
-		confighelper.MustGetBool("db.ssl_mode"),
-	)
-	require.NoError(t, err)
-
-	return db
-}
-
 type testConnector func(t *testing.T) *gorm.DB
 
-func newConSQLite(t *testing.T) *gorm.DB {
-	t.Helper()
+func newCon(dbType dbhelper.DBDriver) testConnector {
+	return func(t *testing.T) *gorm.DB {
 
-	confighelper.LoadDefaults(map[string]interface{}{
-		"db": map[string]interface{}{"dsn": ":memory:"},
-	}, "tr")
+		t.Helper()
 
-	db, err := dbhelper.ConnectSQLite(
-		confighelper.MustGetString("db.dsn"),
-	)
-	require.NoError(t, err)
+		confighelper.LoadDefaults(map[string]interface{}{
+			"db": map[string]interface{}{
+				"host":     "localhost",
+				"user":     "postgres",
+				"password": "",
+				"name":     "cc_terrarium",
+				"port":     5432,
+				"ssl_mode": false,
+				"dsn":      ":memory:",
+			},
+		}, "tr")
 
-	return db
+		config := dbhelper.DialectorSwitcher{
+			ConfigPostgres: dbhelper.ConfigPostgres{
+				Host:     confighelper.MustGetString("db.host"),
+				User:     confighelper.MustGetString("db.user"),
+				Password: confighelper.MustGetString("db.password"),
+				DBName:   confighelper.MustGetString("db.name"),
+				Port:     confighelper.MustGetInt("db.port"),
+				SslMode:  confighelper.MustGetBool("db.ssl_mode"),
+			},
+			ConfigSQLite: dbhelper.ConfigSQLite{
+				DSN: confighelper.MustGetString("db.dsn"),
+			},
+		}
+
+		db, err := config.Connect(dbType)
+		require.NoError(t, err)
+
+		return db
+	}
 }
 
 func getConnectorMap() map[string]testConnector {
 	return map[string]testConnector{
-		"postgres": newConPG,
-		"sqlite":   newConSQLite,
+		"postgres": newCon(dbhelper.DBDriverPostgres),
+		"sqlite":   newCon(dbhelper.DBDriverSQLite),
 	}
 }
