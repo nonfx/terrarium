@@ -1,3 +1,5 @@
+name: Terrarium CLI Release
+
 on:
   push:
     tags:
@@ -19,16 +21,14 @@ jobs:
       - name: Install xgo
         run: |
           go install src.techknowlogick.com/xgo@latest
+      - name: Install goreleaser
+        uses: supplypike/setup-bin@v3
+        with:
+          uri: https://github.com/cldcvr/goreleaser/releases/download/v0.1/goreleaser_Linux_x86_64.tar.gz
+          name: 'goreleaser'
+          version: 'v0.1'
       - name: Create release artifacts
         run: |
           ./scripts/create-release-artifacts.sh ${{ github.ref_name }}
-      - name: Create release and upload artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          token: ${{ secrets.GH_RELEASE_TOKEN }}
-          generate_release_notes: true
-          files: |
-            ./.bin/terrarium-${{ github.ref_name }}-*.tar.gz
-            ./.bin/terrarium-${{ github.ref_name }}-*.zip
-            ./.bin/SHA256SUM
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
