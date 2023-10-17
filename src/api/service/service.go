@@ -18,6 +18,8 @@ type Service interface {
 	ListModuleAttributes(ctx context.Context, req *terrariumpb.ListModuleAttributesRequest) (*terrariumpb.ListModuleAttributesResponse, error)
 	ListTaxonomy(ctx context.Context, req *terrariumpb.ListTaxonomyRequest) (resp *terrariumpb.ListTaxonomyResponse, err error)
 	ListPlatforms(ctx context.Context, req *terrariumpb.ListPlatformsRequest) (resp *terrariumpb.ListPlatformsResponse, err error)
+	ListComponents(ctx context.Context, req *terrariumpb.ListComponentsRequest) (resp *terrariumpb.ListComponentsResponse, err error)
+	ListDependencies(ctx context.Context, req *terrariumpb.ListDependenciesRequest) (resp *terrariumpb.ListDependenciesResponse, err error)
 }
 
 func New() (Service, error) {

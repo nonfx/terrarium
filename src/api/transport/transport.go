@@ -46,3 +46,11 @@ func (t terrariumAPIImplementor) ListTaxonomy(ctx context.Context, req *terrariu
 func (t terrariumAPIImplementor) ListPlatforms(ctx context.Context, req *terrariumpb.ListPlatformsRequest) (*terrariumpb.ListPlatformsResponse, error) {
 	return transporthelper.DefaultAPI(ctx, req, t.service.ListPlatforms, t.defaultMiddlewareOpts...)
 }
+
+func (t terrariumAPIImplementor) ListComponents(ctx context.Context, req *terrariumpb.ListComponentsRequest) (*terrariumpb.ListComponentsResponse, error) {
+	return transporthelper.DefaultAPI(ctx, req, t.service.ListComponents, t.defaultMiddlewareOpts...)
+}
+
+func (t terrariumAPIImplementor) ListDependencies(ctx context.Context, req *terrariumpb.ListDependenciesRequest) (*terrariumpb.ListDependenciesResponse, error) {
+	return transporthelper.DefaultAPI(ctx, req, t.service.ListDependencies, t.defaultMiddlewareOpts...)
+}

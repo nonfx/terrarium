@@ -130,6 +130,12 @@ message JSONSchema {
   repeated string required = 22;
 }
 
+message ListDependenciesRequest {
+  Page page = 1;
+  string search = 2;
+  string taxonomy = 3; // taxonomy levels joined by `/`
+}
+
 message ListDependenciesResponse {
   repeated Dependency dependencies = 1;
   Page page = 2;
@@ -199,6 +205,36 @@ message Platform {
   int32 components = 9;
 }
 
+enum gitLabelEnum {
+  label_no = 0;
+  label_branch = 1;
+  label_tag = 2;
+  label_commit = 3;
+}
+
+message ListComponentsRequest {
+  string platform_id = 1 [(validate.rules).string.uuid = true];
+  Page page = 2;
+  string search = 3;
+  string taxonomy = 4; // taxonomy levels joined by `/`
+}
+
+message ListComponentsResponse {
+  repeated Component components = 1;
+  Page page = 2;
+}
+
+message Component {
+  string id = 1;
+  string interface_uuid = 2;
+  string interface_id = 3;
+  repeated string taxonomy = 4;
+  string title = 5;
+  string description = 6;
+  JSONSchema inputs = 7;
+  JSONSchema outputs = 8;
+}
+
 service TerrariumService {
   // HealthCheck check endpoint
   rpc HealthCheck(google.protobuf.Empty) returns (google.protobuf.Empty) {
@@ -235,11 +271,18 @@ service TerrariumService {
       get: "/v0/platforms"
     };
   }
-}
 
-enum gitLabelEnum {
-  label_no = 0;
-  label_branch = 1;
-  label_tag = 2;
-  label_commit = 3;
+  // ListComponents returns list of platform components based on the given filters
+  rpc ListComponents(ListComponentsRequest) returns (ListComponentsResponse) {
+    option (google.api.http) = {
+      get: "/v0/platforms/{platform_id=*}/components"
+    };
+  }
+
+  // ListDependencies returns list of dependencies based on the given filters
+  rpc ListDependencies(ListDependenciesRequest) returns (ListDependenciesResponse) {
+    option (google.api.http) = {
+      get: "/v0/dependencies"
+    };
+  }
 }

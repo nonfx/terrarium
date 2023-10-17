@@ -324,8 +324,6 @@ var platforms = db.Platforms{
 }
 
 func saveTestData(t *testing.T, g *gorm.DB) {
-	t.Helper()
-
 	_, err := db.AutoMigrate(g)
 	require.NoError(t, err)
 

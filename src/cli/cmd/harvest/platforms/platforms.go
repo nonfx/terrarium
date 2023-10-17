@@ -19,7 +19,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 )

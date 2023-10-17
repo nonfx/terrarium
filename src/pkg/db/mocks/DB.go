@@ -437,6 +437,38 @@ func (_m *DB) QueryDependencies(filterOps ...db.FilterOption) (db.Dependencies, 
 	return r0, r1
 }
 
+// QueryPlatformComponents provides a mock function with given fields: filterOps
+func (_m *DB) QueryPlatformComponents(filterOps ...db.FilterOption) (db.PlatformComponents, error) {
+	_va := make([]interface{}, len(filterOps))
+	for _i := range filterOps {
+		_va[_i] = filterOps[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 db.PlatformComponents
+	var r1 error
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) (db.PlatformComponents, error)); ok {
+		return rf(filterOps...)
+	}
+	if rf, ok := ret.Get(0).(func(...db.FilterOption) db.PlatformComponents); ok {
+		r0 = rf(filterOps...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(db.PlatformComponents)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(...db.FilterOption) error); ok {
+		r1 = rf(filterOps...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // QueryPlatforms provides a mock function with given fields: filterOps
 func (_m *DB) QueryPlatforms(filterOps ...db.FilterOption) (db.Platforms, error) {
 	_va := make([]interface{}, len(filterOps))
@@ -565,12 +597,13 @@ func (_m *DB) QueryTaxonomies(filterOps ...db.FilterOption) (db.Taxonomies, erro
 	return r0, r1
 }
 
-// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewDB(t interface {
+type mockConstructorTestingTNewDB interface {
 	mock.TestingT
 	Cleanup(func())
-}) *DB {
+}
+
+// NewDB creates a new instance of DB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewDB(t mockConstructorTestingTNewDB) *DB {
 	mock := &DB{}
 	mock.Mock.Test(t)
 

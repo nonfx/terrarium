@@ -4,6 +4,8 @@
 package db
 
 import (
+	"github.com/cldcvr/terrarium/src/pkg/jsonschema"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/taxonomy"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -41,8 +43,8 @@ func (d Dependency) ToProto() *terrariumpb.Dependency {
 	}
 
 	if d.Attributes != nil {
-		protoDep.Inputs = d.Attributes.GetByCompute(false).ToJSONSchema().ToProto()
-		protoDep.Outputs = d.Attributes.GetByCompute(true).ToJSONSchema().ToProto()
+		protoDep.Inputs = d.GetInputs().ToProto()
+		protoDep.Outputs = d.GetOutputs().ToProto()
 	}
 
 	if d.Taxonomy != nil {
@@ -50,6 +52,14 @@ func (d Dependency) ToProto() *terrariumpb.Dependency {
 	}
 
 	return protoDep
+}
+
+func (d Dependency) GetInputs() *jsonschema.Node {
+	return d.Attributes.GetByCompute(false).ToJSONSchema()
+}
+
+func (d Dependency) GetOutputs() *jsonschema.Node {
+	return d.Attributes.GetByCompute(true).ToJSONSchema()
 }
 
 // insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
@@ -85,6 +95,33 @@ func DependencySearchFilter(query string) FilterOption {
 		q := "%" + query + "%"
 		return g.Where("interface_id LIKE ? OR title LIKE ?", q, q)
 	}
+}
+
+func DependencyFilterByTaxonomy(tax *Taxonomy) FilterOption {
+	return func(g *gorm.DB) *gorm.DB {
+		taxQ := g.Session(&gorm.Session{NewDB: true}).Model(&Taxonomy{}).Where(tax).Select("id")
+		return g.Where("taxonomy_id IN (?)", taxQ)
+	}
+}
+
+func DependencyRequestToFilters(req *terrariumpb.ListDependenciesRequest) []FilterOption {
+	filters := []FilterOption{}
+
+	if req.Page != nil {
+		filters = append(filters, PaginateGlobalFilter(req.Page.Size, req.Page.Index, &req.Page.Total))
+	}
+
+	if req.Taxonomy != "" {
+		tax := TaxonomyFromLevels(taxonomy.Taxon(req.Taxonomy).Split()...)
+		filters = append(filters, DependencyFilterByTaxonomy(tax))
+	}
+
+	filters = append(
+		filters,
+		DependencySearchFilter(req.Search),
+	)
+
+	return filters
 }
 
 var results []DependencyResult
