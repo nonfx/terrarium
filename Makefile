@@ -147,8 +147,12 @@ ifeq ($(FARM_DEPENDENCY_DIR),)
 FARM_DEPENDENCY_DIR := $(FARM_DIR)/dependencies/
 endif
 
+ifeq ($(FARM_PLATFORM_DIR),)
+FARM_PLATFORM_DIR := $(FARM_DIR)/platform/
+endif
+
 .PHONY: farm-harvest
-farm-harvest: farm-resource-harvest farm-module-harvest farm-mapping-harvest  farm-dependency-harvest## Run all harvest commands on the farm directory
+farm-harvest: farm-dependency-harvest farm-platform-harvest farm-resource-harvest farm-module-harvest farm-mapping-harvest## Run all harvest commands on the farm directory
 
 .PHONY: farm-resource-harvest  ## Harvest terraform provider resources from module list file
 farm-resource-harvest: $(FARM_DIR)/modules.yaml
@@ -168,6 +172,10 @@ farm-mapping-harvest: $(FARM_DIR)/modules.yaml
 .PHONY: farm-dependency-harvest  ## Harvest dependency interface from the farm directory
 farm-dependency-harvest: $(FARM_DEPENDENCY_DIR)
 	terrarium harvest dependencies --dir $(FARM_DEPENDENCY_DIR)
+
+.PHONY: farm-platform-harvest  ## Harvest platform from the farm directory
+farm-platform-harvest: $(FARM_PLATFORM_DIR)
+	terrarium harvest platforms --dir $(FARM_PLATFORM_DIR)
 
 ######################################################
 # Farm releases pull
