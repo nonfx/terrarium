@@ -18,9 +18,7 @@ platforms:
     repo_directory: examples/platform/
     revisions:
       - label: v0.2
-        type: commit
-      - label: christy/TER-277
-        type: branch
+        type: tag
 
   - title: GCP GKE
     description: Google Kubernetes Engine
