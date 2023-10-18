@@ -24,7 +24,7 @@ db:
   port: 5432             # db port
   ssl_mode: false        # enable SSL mode
   type: postgres         # type of db - postgres | sqlite
-  dsn: embedded.db       # SQLite Data Source Name
+  dsn: ~/t8.sqlite       # SQLite Data Source Name
   retry_attempts: 20     # max number of re-tries on connection request failure
   retry_interval_sec: 2  # time to wait for (in seconds) before each retry
   retry_jitter_sec: 2    # additional random time (in seconds) between 0 and this, to be added to the wait time

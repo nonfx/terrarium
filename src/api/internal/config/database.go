@@ -40,6 +40,16 @@ func DBSSLMode() bool {
 	return confighelper.MustGetBool("db.ssl_mode")
 }
 
+// DBType returns the database type chosen. Default is postgres
+func DBType() string {
+	return confighelper.MustGetString("db.type")
+}
+
+// DB_DSN returns the SQLite Data Source Name. Default is "embedded.db"
+func DBDSN() string {
+	return confighelper.MustGetString("db.dsn")
+}
+
 // DBRetryAttempts returns the max number of re-ties on DB connection request failure
 func DBRetryAttempts() int {
 	return confighelper.MustGetInt("db.retry_attempts")
@@ -57,14 +67,30 @@ func DBRetryJitter() int {
 
 // DBConnect establishes a connection to the database using the connection parameters from the environment.
 func DBConnect() (db.DB, error) {
-	g, err := dbhelper.ConnectPG(
-		DBHost(),
-		DBUser(),
-		DBPassword(),
-		DBName(),
-		DBPort(),
-		DBSSLMode(),
-		dbhelper.WithRetries(DBRetryAttempts(), DBRetryInterval(), DBRetryJitter()),
+	config := dbhelper.DialectorSwitcher{
+		ConfigPostgres: dbhelper.ConfigPostgres{
+			Host:     DBHost(),
+			User:     DBUser(),
+			Password: DBPassword(),
+			DBName:   DBName(),
+			Port:     DBPort(),
+			SslMode:  DBSSLMode(),
+		},
+		ConfigSQLite: dbhelper.ConfigSQLite{
+			DSN:                  DBDSN(),
+			ResolvePathCreateDir: true,
+		},
+	}
+
+	dbType := dbhelper.DBDriverFromStr(DBType())
+
+	g, err := config.Connect(
+		dbType,
+		dbhelper.WithRetries(
+			DBRetryAttempts(),
+			DBRetryInterval(),
+			DBRetryJitter(),
+		),
 	)
 	if err != nil {
 		return nil, eris.Wrap(err, "could not establish a connection to the database")

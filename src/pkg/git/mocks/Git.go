@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	github "github.com/google/go-github/github"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,23 +15,23 @@ type Git struct {
 	mock.Mock
 }
 
-// FetchCommitSHA provides a mock function with given fields: owner, repo, ref
-func (_m *Git) FetchCommitSHA(owner string, repo string, ref string) (string, error) {
-	ret := _m.Called(owner, repo, ref)
+// FetchCommitSHA provides a mock function with given fields: ctx, owner, repo, ref
+func (_m *Git) FetchCommitSHA(ctx context.Context, owner string, repo string, ref string) (string, error) {
+	ret := _m.Called(ctx, owner, repo, ref)
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string) (string, error)); ok {
-		return rf(owner, repo, ref)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (string, error)); ok {
+		return rf(ctx, owner, repo, ref)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string) string); ok {
-		r0 = rf(owner, repo, ref)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) string); ok {
+		r0 = rf(ctx, owner, repo, ref)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(owner, repo, ref)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, owner, repo, ref)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -36,34 +39,34 @@ func (_m *Git) FetchCommitSHA(owner string, repo string, ref string) (string, er
 	return r0, r1
 }
 
-// GetContents provides a mock function with given fields: owner, repo, ref, path
-func (_m *Git) GetContents(owner string, repo string, ref string, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
-	ret := _m.Called(owner, repo, ref, path)
+// GetContents provides a mock function with given fields: ctx, owner, repo, ref, path
+func (_m *Git) GetContents(ctx context.Context, owner string, repo string, ref string, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	ret := _m.Called(ctx, owner, repo, ref, path)
 
 	var r0 *github.RepositoryContent
 	var r1 []*github.RepositoryContent
 	var r2 error
-	if rf, ok := ret.Get(0).(func(string, string, string, string) (*github.RepositoryContent, []*github.RepositoryContent, error)); ok {
-		return rf(owner, repo, ref, path)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) (*github.RepositoryContent, []*github.RepositoryContent, error)); ok {
+		return rf(ctx, owner, repo, ref, path)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, string) *github.RepositoryContent); ok {
-		r0 = rf(owner, repo, ref, path)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) *github.RepositoryContent); ok {
+		r0 = rf(ctx, owner, repo, ref, path)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*github.RepositoryContent)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, string) []*github.RepositoryContent); ok {
-		r1 = rf(owner, repo, ref, path)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, string) []*github.RepositoryContent); ok {
+		r1 = rf(ctx, owner, repo, ref, path)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).([]*github.RepositoryContent)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(string, string, string, string) error); ok {
-		r2 = rf(owner, repo, ref, path)
+	if rf, ok := ret.Get(2).(func(context.Context, string, string, string, string) error); ok {
+		r2 = rf(ctx, owner, repo, ref, path)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -71,12 +74,13 @@ func (_m *Git) GetContents(owner string, repo string, ref string, path string) (
 	return r0, r1, r2
 }
 
-// NewGit creates a new instance of Git. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewGit(t interface {
+type mockConstructorTestingTNewGit interface {
 	mock.TestingT
 	Cleanup(func())
-}) *Git {
+}
+
+// NewGit creates a new instance of Git. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+func NewGit(t mockConstructorTestingTNewGit) *Git {
 	mock := &Git{}
 	mock.Mock.Test(t)
 
