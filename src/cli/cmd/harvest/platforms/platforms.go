@@ -19,9 +19,15 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/rotisserie/eris"
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
 	terrpb "github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+)
+
+const (
+	PlatformYAML = "platform.yaml"
+	PlatformYML  = "platform.yml"
 )
 
 func harvestPlatforms(g db.DB, directoryPath string) error {
@@ -208,22 +214,22 @@ func readPlatformYAML(directoryPath string) (string, error) {
 }
 
 func isPlatformYAML(filename string) bool {
-	return filename == "platform.yaml" || filename == "platform.yml"
+	return filename == PlatformYAML || filename == PlatformYML
 }
 
 func findPlatformYAML(directoryPath string) (string, error) {
 	var foundPath string
 
-	extensions := map[string]bool{".yaml": true, ".yml": true}
+	filenames := []string{PlatformYAML, PlatformYML}
 
 	err := filepath.WalkDir(directoryPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		ext := filepath.Ext(path)
-		if _, ok := extensions[ext]; ok {
+		if slices.Contains(filenames, d.Name()) {
 			foundPath = path
+			return filepath.SkipDir
 		}
 
 		return nil
@@ -234,7 +240,7 @@ func findPlatformYAML(directoryPath string) (string, error) {
 	}
 
 	if foundPath == "" {
-		return "", fmt.Errorf("platform.yaml or platform.yml not found in directory: %s", directoryPath)
+		return "", fmt.Errorf("neither 'platform.yaml' nor 'platform.yml' was found in directory: %s", directoryPath)
 	}
 
 	return foundPath, nil
