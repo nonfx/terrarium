@@ -20,15 +20,6 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker Push terrarium-api
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          target: api-runner
-          tags: |
-            cldcvr/terrarium-api:latest,
-            cldcvr/terrarium-api:${{ github.sha }}
-
       - name: Docker Push terrarium-farm-harvester
         uses: docker/build-push-action@v4
         with:
