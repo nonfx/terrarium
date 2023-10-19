@@ -124,13 +124,14 @@ func DependencyRequestToFilters(req *terrariumpb.ListDependenciesRequest) []Filt
 	return filters
 }
 
-var results []DependencyResult
-
 func (db *gDB) Fetchdeps() []DependencyResult {
-	db.g().Model(&Dependency{}).
-		Select("dependencies.id AS DependencyID, dependencies.interface_id AS InterfaceID").
-		Joins("INNER JOIN dependency_attributes ON dependencies.id = dependency_attributes.dependency_id").
-		Scan(&results)
+	var results []DependencyResult
+
+	db.g().Raw(`
+        SELECT dependencies.id AS "DependencyID", dependencies.interface_id AS "InterfaceID"
+        FROM dependencies
+        INNER JOIN dependency_attributes ON dependencies.id = dependency_attributes.dependency_id
+    `).Scan(&results)
 
 	return results
 }

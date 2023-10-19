@@ -303,6 +303,11 @@ var platforms = db.Platforms{
 		CommitSHA: "2ed744403e50",
 		Components: []db.PlatformComponent{
 			{
+				Model:        db.Model{ID: uuidPlat1Comp1},
+				PlatformID:   uuidPlat1,
+				DependencyID: uuidDep1,
+			},
+			{
 				Model:        db.Model{ID: uuidPlat1Comp2},
 				PlatformID:   uuidPlat1,
 				DependencyID: uuidDep2,

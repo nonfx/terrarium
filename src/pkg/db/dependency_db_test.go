@@ -11,6 +11,7 @@ import (
 
 	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xeipuuv/gojsonschema"
@@ -120,5 +121,64 @@ func Test_gDB_QueryDependencies(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+func Test_gDB_Fetchdeps(t *testing.T) {
+	tests := []struct {
+		name       string
+		validator  func(*testing.T, []db.DependencyResult)
+		wantModule []db.DependencyResult
+		wantErr    bool
+	}{
+		{
+			name: "success",
+			wantModule: []db.DependencyResult{
+				{
+					DependencyID: uuidDep1,
+				},
+			},
+		},
+	}
+
+	for dbName, connector := range getConnectorMap() {
+		g := connector(t)
+		dbObj, err := db.AutoMigrate(g)
+		require.NoError(t, err)
+		saveTestData(t, g)
+
+		t.Run(dbName, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					gotResult := dbObj.Fetchdeps()
+					if tt.wantErr {
+						assert.Error(t, err)
+					} else if tt.validator != nil {
+						assert.NoError(t, err)
+						tt.validator(t, gotResult)
+					} else {
+						assert.NoError(t, err)
+						assertMatchesSubset(t, tt.wantModule, gotResult)
+					}
+				})
+			}
+		})
+	}
+}
+
+func assertMatchesSubset(t *testing.T, want []db.DependencyResult, got []db.DependencyResult) {
+	t.Helper()
+
+	// Create a map to track which items are found in the actual result.
+	found := make(map[uuid.UUID]bool)
+	for _, item := range got {
+		found[item.DependencyID] = true
+	}
+
+	// Check that each expected item is found in the actual result.
+	for _, item := range want {
+		if !found[item.DependencyID] {
+			t.Errorf("Expected item with DependencyID %v not found in the actual result", item.DependencyID)
+		}
 	}
 }
