@@ -75,7 +75,7 @@ func (c ConfigSQLite) GetGormDialector() (gorm.Dialector, error) {
 		if err != nil {
 			return nil, err
 		}
-		resolvedDSN = filepath.Join(dir, filepath.Ext(c.DSN))
+		resolvedDSN = filepath.Join(dir, filepath.Base(c.DSN))
 	}
 
 	return sqlite.Open(resolvedDSN), nil
