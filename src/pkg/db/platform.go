@@ -15,11 +15,11 @@ import (
 type Platform struct {
 	Model
 
-	Title         string
+	Title         string `gorm:"unique"`
 	Description   string
 	RepoURL       string
 	RepoDirectory string
-	CommitSHA     string              `gorm:"unique"`
+	CommitSHA     string
 	RefLabel      string              // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
 	LabelType     terrpb.GitLabelEnum // 1=branch, 2=tag, 3=commit
 
@@ -30,7 +30,7 @@ type Platforms []Platform
 
 // CreatePlatform insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
-	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"commit_sha"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"title"})
 	return id, err
 }
 
