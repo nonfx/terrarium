@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
+	"github.com/cldcvr/terrarium/src/cli/internal/utils"
+	"github.com/cldcvr/terrarium/src/pkg/db"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 )
@@ -34,8 +36,7 @@ func NewCmd() *cobra.Command {
 }
 
 func cmdRunE(cmd *cobra.Command, args []string) error {
-
-	dumpFilePath, err := downloadArtifact(config.FarmDefault(), config.FarmVersion(), artifactName)
+	dumpFilePath, latestReleaseTag, err := downloadArtifact(config.FarmDefault(), artifactName)
 	if err != nil {
 		return err
 	}
@@ -57,35 +58,51 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return eris.Wrap(err, "error reading content: %v")
 	}
 
-	return seedDatabase(string(dumpContent))
+	err = seedDatabase(string(dumpContent))
+	if err != nil {
+		return eris.Wrap(err, "failed to seed database: %v")
+	}
+
+	// we store the latest artifact as current running artifact
+	utils.SetCurrentFarmVersion(&db.FarmRelease{
+		Repo: config.FarmDefault(),
+		Tag:  latestReleaseTag,
+	})
+	return nil
 }
 
-func downloadArtifact(repo, releaseTag, artifactName string) (string, error) {
+// downloadArtifact downloads the latest artifact
+func downloadArtifact(repo, artifactName string) (string, string, error) {
+	releaseTag, err := utils.GetLatestReleaseTag(repo)
+	if err != nil {
+		return "", "", eris.Wrap(err, "failed to fetch latest release tag: %v")
+	}
+
 	resp, err := http.Get(fmt.Sprintf("https://%s/releases/download/%s/%s", repo, releaseTag, artifactName))
 	if err != nil {
-		return "", eris.Wrap(err, "error sending HTTP request: %v")
+		return "", "", eris.Wrap(err, "error sending HTTP request: %v")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", eris.Errorf("HTTP request failed with status code %d", resp.StatusCode)
+		return "", "", eris.Errorf("HTTP request failed with status code %d", resp.StatusCode)
 	}
 
 	tempDir := filepath.Join(os.TempDir(), "farm-artifact")
 	err = os.MkdirAll(tempDir, os.ModePerm)
 	if err != nil {
-		return "", eris.Wrap(err, "error creating temporary directory: %v")
+		return "", "", eris.Wrap(err, "error creating temporary directory: %v")
 	}
 
 	outFile, err := os.Create(filepath.Join(tempDir, artifactName))
 	if err != nil {
-		return "", eris.Wrap(err, "error creating output file: %v")
+		return "", "", eris.Wrap(err, "error creating output file: %v")
 	}
 	defer outFile.Close()
 
 	_, err = io.Copy(outFile, resp.Body)
 	if err != nil {
-		return "", eris.Wrap(err, "error copying artifact to output file: %v")
+		return "", "", eris.Wrap(err, "error copying artifact to output file: %v")
 	}
-	return tempDir, nil
+	return tempDir, releaseTag, nil
 }

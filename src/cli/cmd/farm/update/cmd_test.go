@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -34,8 +35,8 @@ func TestCmd(t *testing.T) {
 		}
 		return nil
 	})
+	mockDB.On("CreateRelease", mock.Anything).Return(nil, nil)
 	config.SetDBMocks(mockDB)
-
 	clitest.RunTests(t, []clitesting.CLITestCase{
 		{
 			Name: "success",
@@ -44,9 +45,14 @@ func TestCmd(t *testing.T) {
 				gzWriter := gzip.NewWriter(&buf)
 				gzWriter.Write([]byte("some dummy SQL command;"))
 				gzWriter.Close()
+				b, _ := json.Marshal(map[string]interface{}{"tag_name": "mock_tag"})
+				gock.New("https://api.github.com").
+					Get("/repos/cldcvr/terrarium-farm/releases/latest").
+					Reply(http.StatusOK).
+					Body(bytes.NewReader(b))
 
 				gock.New("https://github.com").
-					Get("/cldcvr/terrarium-farm/releases/download/latest/cc_terrarium_data.sql.gz").
+					Get("/cldcvr/terrarium-farm/releases/download/mock_tag/cc_terrarium_data.sql.gz").
 					Reply(http.StatusOK).
 					Body(bytes.NewReader(buf.Bytes())).
 					SetHeader("Content-Encoding", "gzip")
@@ -55,8 +61,13 @@ func TestCmd(t *testing.T) {
 		{
 			Name: "download artifact non ok http response",
 			GockSetup: func(ctx context.Context, t *testing.T) {
+				b, _ := json.Marshal(map[string]interface{}{"tag_name": "mock_tag"})
+				gock.New("https://api.github.com").
+					Get("/repos/cldcvr/terrarium-farm/releases/latest").
+					Reply(http.StatusOK).
+					Body(bytes.NewReader(b))
 				gock.New("https://github.com").
-					Get("/cldcvr/terrarium-farm/releases/download/latest/cc_terrarium_data.sql.gz").
+					Get("/cldcvr/terrarium-farm/releases/download/mock_tag/cc_terrarium_data.sql.gz").
 					Reply(http.StatusInternalServerError).
 					SetHeader("Content-Encoding", "gzip")
 			},
@@ -66,8 +77,13 @@ func TestCmd(t *testing.T) {
 		{
 			Name: "invalid artifact failure",
 			GockSetup: func(ctx context.Context, t *testing.T) {
+				b, _ := json.Marshal(map[string]interface{}{"tag_name": "mock_tag"})
+				gock.New("https://api.github.com").
+					Get("/repos/cldcvr/terrarium-farm/releases/latest").
+					Reply(http.StatusOK).
+					Body(bytes.NewReader(b))
 				gock.New("https://github.com").
-					Get("/cldcvr/terrarium-farm/releases/download/latest/cc_terrarium_data.sql.gz").
+					Get("/cldcvr/terrarium-farm/releases/download/mock_tag/cc_terrarium_data.sql.gz").
 					Reply(http.StatusOK)
 			},
 			ExpError: "error creating gzip reader",
@@ -80,9 +96,13 @@ func TestCmd(t *testing.T) {
 				gzWriter := gzip.NewWriter(&buf)
 				gzWriter.Write([]byte("failure"))
 				gzWriter.Close()
-
+				b, _ := json.Marshal(map[string]interface{}{"tag_name": "mock_tag"})
+				gock.New("https://api.github.com").
+					Get("/repos/cldcvr/terrarium-farm/releases/latest").
+					Reply(http.StatusOK).
+					Body(bytes.NewReader(b))
 				gock.New("https://github.com").
-					Get("/cldcvr/terrarium-farm/releases/download/latest/cc_terrarium_data.sql.gz").
+					Get("/cldcvr/terrarium-farm/releases/download/mock_tag/cc_terrarium_data.sql.gz").
 					Reply(http.StatusOK).
 					Body(bytes.NewReader(buf.Bytes())).
 					SetHeader("Content-Encoding", "gzip")

@@ -118,6 +118,32 @@ func (_m *DB) CreatePlatformComponents(p *db.PlatformComponent) (uuid.UUID, erro
 	return r0, r1
 }
 
+// CreateRelease provides a mock function with given fields: e
+func (_m *DB) CreateRelease(e *db.FarmRelease) (uuid.UUID, error) {
+	ret := _m.Called(e)
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*db.FarmRelease) (uuid.UUID, error)); ok {
+		return rf(e)
+	}
+	if rf, ok := ret.Get(0).(func(*db.FarmRelease) uuid.UUID); ok {
+		r0 = rf(e)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*db.FarmRelease) error); ok {
+		r1 = rf(e)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateTFModule provides a mock function with given fields: e
 func (_m *DB) CreateTFModule(e *db.TFModule) (uuid.UUID, error) {
 	ret := _m.Called(e)
@@ -300,13 +326,27 @@ func (_m *DB) CreateTaxonomy(e *db.Taxonomy) (uuid.UUID, error) {
 	return r0, r1
 }
 
-// ExecuteSQLStatement provides a mock function with given fields: _a0
-func (_m *DB) ExecuteSQLStatement(_a0 string) error {
-	ret := _m.Called(_a0)
+// ExecuteSQLStatement provides a mock function with given fields: statement
+func (_m *DB) ExecuteSQLStatement(statement string) error {
+	ret := _m.Called(statement)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(_a0)
+		r0 = rf(statement)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// FindReleaseByRepo provides a mock function with given fields: e, repo
+func (_m *DB) FindReleaseByRepo(e *db.FarmRelease, repo string) error {
+	ret := _m.Called(e, repo)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*db.FarmRelease, string) error); ok {
+		r0 = rf(e, repo)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -23,6 +23,7 @@ func AutoMigrate(db *gorm.DB) (DB, error) {
 		DependencyAttributeMappings{},
 		Platform{},
 		PlatformComponent{},
+		FarmRelease{},
 	)
 	if err != nil {
 		return nil, eris.Wrap(err, "failed to perform database migration")
