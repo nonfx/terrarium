@@ -1,4 +1,4 @@
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 id: demo_app
@@ -10,10 +10,8 @@ compute:
   inputs:
     port: 80
 
-
 dependencies:
   - id: queue
     use: redis
     inputs:
       version: "11.20"
-

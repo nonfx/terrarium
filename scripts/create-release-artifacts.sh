@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 # This script assumes that a tag that is passed in (i.e. $1) has already been pushed

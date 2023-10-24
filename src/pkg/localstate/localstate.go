@@ -1,4 +1,4 @@
-// Copyright (c) CloudCover
+// Copyright (c) Ollion
 // SPDX-License-Identifier: Apache-2.0
 
 package localstate
@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	stateFileDir = ".terrarium"
+	stateFileDir  = ".terrarium"
 	stateFileName = ".terrarium_state"
 	stateFileExt  = "yaml"
 )

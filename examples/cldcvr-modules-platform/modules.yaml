@@ -1,6 +1,5 @@
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
-
 
 farm:
   # public modules
@@ -33,4 +32,3 @@ farm:
   - name: xa_aws_iam_role
     source: "github.com/cldcvr/cldcvr-xa-terraform-aws-iam-role?ref=v0.1.0"
     export: true
-
