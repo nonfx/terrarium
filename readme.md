@@ -21,14 +21,17 @@ The Terrarium project aims to empower platform engineering professionals by prov
    ```bash
    wget https://github.com/cldcvr/terrarium/releases/download/$VERSION/terrarium-$VERSION-linux-amd64.tar.gz
    ```
+
    Example:
-  ```bash
-    wget https://github.com/cldcvr/terrarium/releases/download/v0.4/terrarium-v0.4-macos-amd64.tar.gz
-    tar -xzf terrarium-v0.4-macos-amd64.tar.gz
-   ```
+
+```bash
+  wget https://github.com/cldcvr/terrarium/releases/download/v0.4/terrarium-v0.4-macos-amd64.tar.gz
+  tar -xzf terrarium-v0.4-macos-amd64.tar.gz
+```
 
 2. Move the `terrarium` binary to a directory in your system's PATH, like `/usr/local/bin/`.
    Add this to your shell:
+
    ```bash
    PATH="$PATH:/path/to/terrarium"
    ```
@@ -52,19 +55,19 @@ The Terrarium project aims to empower platform engineering professionals by prov
 
 ## Client Libraries
 
-| Tool                 | Description                                                           |
-|----------------------|-----------------------------------------------------------------------|
-| [VS Code Extension](https://github.com/cldcvr/terrarium-vscode-plugin) | Assists DevOps in writing Terraform code and managing dependencies.    |
-| [CLI](./setup.md)    | Command-line interface for working with Terrarium and app templates. |
-| [Web UI](https://github.com/cldcvr/terrarium-frontend) (coming soon) | User interface for visualizing Terrarium Platform Templates.         |
-| [API](./src/api/) (internal) | Internal query server for Terrarium Farm repo content.              |
+| Tool                                                                   | Description                                                          |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [VS Code Extension](https://github.com/cldcvr/terrarium-vscode-plugin) | Assists DevOps in writing Terraform code and managing dependencies.  |
+| [CLI](./setup.md)                                                      | Command-line interface for working with Terrarium and app templates. |
+| [Web UI](https://github.com/cldcvr/terrarium-frontend) (coming soon)   | User interface for visualizing Terrarium Platform Templates.         |
+| [API](./src/api/) (internal)                                           | Internal query server for Terrarium Farm repo content.               |
 
 ## Concepts
 
 - [App Manifest](./src/pkg/metadata/app/readme.md) - App Manifest provides a way for an applications to declare its infrastructure requirements using generic dependency interfaces. Such as, a working Terraform template can be generated at the time of deployment using the best practice defined in the Terrarium platform template.
 - [Terrarium Dependency Interface](./src/pkg/metadata/dependency/readme.md) - The Terrarium Dependency Interface is an agreement that outlines how applications and Infrastructure as Code (IaC) interact. Dependencies are implemented in platforms and used in apps. A single dependency can be built into various platforms but only once per platform. However, an app can use the same dependency multiple times.
 - [Terrarium Platform Framework](./examples/platform/readme.md) - The Terrarium Platform Framework helps make reusable templates with Terraform. A Terrarium Platform Template implements dependencies in an opinionated way, exposing only relevant controls to the app and generating a defined set of outputs for the app to use as environment variables.
-- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a repository containing seed data like tf-modules, dependencies, taxonomy & platforms. The farm repository has workflows to ensure the sanity of the content as well as scan the content to extract key information. The Cloudcover maintained Farm repo is at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm).
+- [Terrarium Farm](./examples/farm/readme.md) - The Terrarium Farm is a repository containing seed data like tf-modules, dependencies, taxonomy & platforms. The farm repository has workflows to ensure the sanity of the content as well as scan the content to extract key information. The Ollion maintained Farm repo is at [cldcvr/terrarium-farm](https://github.com/cldcvr/terrarium-farm).
 
 ## Flow
 
@@ -142,9 +145,6 @@ flowchart TD
 - [ ] Add taxonomy mappings to the farm-repo.
 - [ ] Enhance VS Code plugin to automatically implement dependency-interfaces in a platform (best guess).
 
-
-
-
 ## Get Involved
 
 Join our Discord community - [**Terrarium Community**](https://discord.gg/gG3gDm9GmF).
@@ -152,4 +152,3 @@ Join our Discord community - [**Terrarium Community**](https://discord.gg/gG3gDm
 Terrarium is still in its early stages, and we welcome your contributions.
 
 To file a bug, suggest an improvement, or request a new feature please open an issue, refer to our [contributing guide](./CONTRIBUTING.md)
-

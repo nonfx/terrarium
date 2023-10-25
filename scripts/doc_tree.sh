@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 echo "# Table of contents\n" > TOC.md

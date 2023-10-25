@@ -1,4 +1,4 @@
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 id: demo_app
@@ -9,7 +9,6 @@ compute:
   use: service_web
   inputs:
     port: 80
-
 
 dependencies:
   - id: testdb

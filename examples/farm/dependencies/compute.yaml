@@ -1,4 +1,4 @@
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 dependency-interfaces:
@@ -9,17 +9,17 @@ dependency-interfaces:
     inputs:
       type: object
       properties:
-          port:
-              title: Port
-              description: The port number on which the server should listen.
-              type: number
-              default: 80
+        port:
+          title: Port
+          description: The port number on which the server should listen.
+          type: number
+          default: 80
     outputs:
       properties:
-          host:
-              title: Host
-              description: The host address of the web server.
-              type: string
+        host:
+          title: Host
+          description: The host address of the web server.
+          type: string
 
   - id: server_static
     taxonomy: compute/server/static
@@ -28,17 +28,17 @@ dependency-interfaces:
     inputs:
       type: object
       properties:
-          port:
-              title: Port
-              description: The port number on which the server should listen.
-              type: number
-              default: 80
+        port:
+          title: Port
+          description: The port number on which the server should listen.
+          type: number
+          default: 80
     outputs:
       properties:
-          host:
-              title: Host
-              description: The host address of the static server.
-              type: string
+        host:
+          title: Host
+          description: The host address of the static server.
+          type: string
 
   - id: server_private
     taxonomy: compute/server/private
@@ -47,17 +47,17 @@ dependency-interfaces:
     inputs:
       type: object
       properties:
-          port:
-              title: Port
-              description: The port number on which the server should listen.
-              type: number
-              default: 80
+        port:
+          title: Port
+          description: The port number on which the server should listen.
+          type: number
+          default: 80
     outputs:
       properties:
-          host:
-              title: Host
-              description: The host address of the private server.
-              type: string
+        host:
+          title: Host
+          description: The host address of the private server.
+          type: string
 
   - id: job_queue
     taxonomy: compute/job/queue
@@ -67,10 +67,10 @@ dependency-interfaces:
     outputs:
       type: object
       properties:
-          task_queue:
-              title: Task Queue URL
-              description: The queue from which the job pulls tasks.
-              type: string
+        task_queue:
+          title: Task Queue URL
+          description: The queue from which the job pulls tasks.
+          type: string
 
   - id: job_scheduled
     taxonomy: compute/job/scheduled
@@ -79,8 +79,8 @@ dependency-interfaces:
     inputs:
       type: object
       properties:
-          schedule:
-              title: Schedule
-              description: The schedule on which the job should run, in cron format.
-              type: string
+        schedule:
+          title: Schedule
+          description: The schedule on which the job should run, in cron format.
+          type: string
     outputs: {}

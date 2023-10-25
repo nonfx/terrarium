@@ -3,7 +3,7 @@ schema_version = 1
 project {
   license        = "Apache-2.0"
   copyright_year = 2023
-  copyright_holder = "CloudCover"
+  copyright_holder = "Ollion"
 
   # (OPTIONAL) A list of globs that should not have copyright/license headers.
   # Supports doublestar glob patterns for more flexibility in defining which
@@ -14,7 +14,7 @@ project {
     "**/*.tfvars",
     "**/testdata/**",
     "**/*.pb.go",
-    "**/mocks", 
+    "**/mocks",
     "**/.terraform",
     ".git",
     "coverage",

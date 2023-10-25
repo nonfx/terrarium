@@ -1,4 +1,4 @@
-# Copyright (c) CloudCover
+# Copyright (c) Ollion
 # SPDX-License-Identifier: Apache-2.0
 
 id: banking_app
@@ -22,4 +22,3 @@ dependencies:
     use: postgres
     inputs:
       version: "11.20"
-
