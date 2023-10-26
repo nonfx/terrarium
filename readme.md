@@ -18,7 +18,7 @@ The Terrarium project aims to empower platform engineering professionals by prov
 
 ### Prerequisite
 
-<img alt="Terraform" src="https://www.datocms-assets.com/2885/1629941242-logo-terraform-main.svg" width="100px"><img alt="Terraform" src="https://user-images.githubusercontent.com/25181517/192149581-88194d20-1a37-4be8-8801-5dc0017ffbbe.png" width="50px">
+<img alt="Terraform" src="https://www.datocms-assets.com/2885/1629941242-logo-terraform-main.svg" width="150px"> .        <img alt="Terraform" src="https://user-images.githubusercontent.com/25181517/192149581-88194d20-1a37-4be8-8801-5dc0017ffbbe.png" width="50px">
 
 
 1. Download [Terrarium](https://github.com/cldcvr/terrarium/releases) and extract the TAR archive.
