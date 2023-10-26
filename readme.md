@@ -42,6 +42,10 @@ The Terrarium project aims to empower platform engineering professionals by prov
    ```bash
    make install
    ```
+> [!IMPORTANT]
+> make sure you have go version 1.20 or above if not try this link to download https://go.dev/dl/
+
+
 
 4. Verify the Installation
 
