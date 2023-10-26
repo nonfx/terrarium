@@ -20,7 +20,7 @@ docker-init:  ## Initialize the environment before running docker commands
 
 .PHONY: db-dump
 db-dump: start-db  ## Target for dumping PostgreSQL database to a file
-	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump --column-inserts -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE) -Fc $(POSTGRES_DB)
+	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE) -Fc $(POSTGRES_DB)
 	docker compose exec -T $(POSTGRES_CONTAINER) pg_dump -Z 9 --column-inserts --rows-per-insert=100 --data-only --exclude-table=taxonomies -U $(POSTGRES_USER) -f /docker-entrypoint-initdb.d/$(FARM_DB_DUMP_FILE_SQL_ZIP) -Fp $(POSTGRES_DB)
 
 .PHONY: db-update  ## Restore database from the database bump file. Ignore errors for existing rows.
