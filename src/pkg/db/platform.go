@@ -12,14 +12,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// Platform table lists all terrarium platform template references
+// Unique constraint - the unique constraint is setup such that the
+// git reference (gir repo, commit & directory) of a platform cannot
+// be duplicated in the table.
+// There may be duplicate title in the table though, which is meant
+// for grouping the references belonging to the same platform.
 type Platform struct {
 	Model
 
-	Title         string `gorm:"unique"`
+	Title         string
 	Description   string
-	RepoURL       string
-	RepoDirectory string
-	CommitSHA     string
+	RepoURL       string              `gorm:"uniqueIndex:platform_ref_unique"`
+	RepoDirectory string              `gorm:"uniqueIndex:platform_ref_unique"`
+	CommitSHA     string              `gorm:"uniqueIndex:platform_ref_unique"`
 	RefLabel      string              // can be tag/branch/commit that user wrote in the yaml. example v0.1 or main.
 	LabelType     terrpb.GitLabelEnum // 1=branch, 2=tag, 3=commit
 
@@ -30,7 +36,7 @@ type Platforms []Platform
 
 // CreatePlatform insert a row in DB or in case of conflict in unique fields, update the existing record and set the existing record ID in the given object
 func (db *gDB) CreatePlatform(p *Platform) (uuid.UUID, error) {
-	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"title"})
+	id, _, _, err := createOrGetOrUpdate(db.g(), p, []string{"repo_url", "repo_directory", "commit_sha"})
 	return id, err
 }
 
