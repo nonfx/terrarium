@@ -12,7 +12,7 @@
 
 # Terrarium
 
-The Terrarium project aims to empower platform engineering professionals by providing a comprehensive suite of tools for creating reusable Terraform templates. In the evolving landscape of DevOps, Terrarium aligns with the principles of [Internal Developer Platforms (IDP)](internaldeveloperplatform.org), ensuring streamlined infrastructure provisioning and management.
+The Terrarium project aims to empower platform engineering professionals by providing a comprehensive suite of tools for creating reusable Terraform templates. In the evolving landscape of DevOps, Terrarium aligns with the principles of [Internal Developer Platforms (IDP)](https://internaldeveloperplatform.org/), ensuring streamlined infrastructure provisioning and management.
 
 ## Installation Instructions
 
