@@ -16,7 +16,7 @@ import (
 // OutFormatForList This configures the table format for the List commands
 func OutFormatForList(out io.Writer) *tablewriter.Table {
 	table := tablewriter.NewWriter(out)
-	table.SetAutoWrapText(false)
+	table.SetAutoWrapText(true)
 	table.SetAutoFormatHeaders(true)
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
