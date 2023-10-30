@@ -12,7 +12,7 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/modulelist"
 	"github.com/cldcvr/terrarium/src/pkg/tf/runner"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
@@ -52,15 +52,15 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided list file '%s'...\n", flagModuleListFile)
-	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
+	moduleList, err := modulelist.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
 	}
 
 	tfRunner := runner.NewTerraformRunner()
-	for _, item := range moduleList.Farm {
-		log.Info("harvesting mappings from module", "name", item.Name, "source", item.Source)
-		dir, _, err := item.CreateTerraformFile(flagWorkDir)
+	for _, item := range moduleList.Groups() {
+		log.Info("harvesting mappings", "groupName", item.Name)
+		dir, err := item.CreateTerraformFile(flagWorkDir)
 		if err != nil {
 			return err
 		}

@@ -14,7 +14,7 @@ import (
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/modulelist"
 	"github.com/cldcvr/terrarium/src/pkg/tf/runner"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
@@ -62,27 +62,25 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from provided list file '%s'...\n", flagModuleListFile)
-	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
+	moduleList, err := modulelist.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
 	}
 
 	tfRunner := runner.NewTerraformRunner()
-	for _, item := range moduleList.Farm {
-		if item.Export {
-			log.Info("harvesting module", "name", item.Name, "source", item.Source)
-			dir, _, err := item.CreateTerraformFile(flagWorkDir)
-			if err != nil {
-				return err
-			}
+	for _, item := range moduleList.Groups().FilterExport(true) {
+		log.Info("harvesting module", "groupName", item.Name)
+		dir, err := item.CreateTerraformFile(flagWorkDir)
+		if err != nil {
+			return err
+		}
 
-			if err := runner.TerraformInit(tfRunner, dir); err != nil {
-				return err
-			}
+		if err := runner.TerraformInit(tfRunner, dir); err != nil {
+			return err
+		}
 
-			if err := loadFrom(g, dir); err != nil {
-				return err
-			}
+		if err := loadFrom(g, dir); err != nil {
+			return err
 		}
 	}
 
