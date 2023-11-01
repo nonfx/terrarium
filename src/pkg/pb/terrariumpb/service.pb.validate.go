@@ -926,6 +926,186 @@ var _ interface {
 	ErrorName() string
 } = DependencyValidationError{}
 
+// Validate checks the field values on App with the rules defined in the proto
+// definition for this message. If any rules are violated, an error is returned.
+func (m *App) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for EnvPrefix
+
+	if v, ok := interface{}(m.GetCompute()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AppValidationError{
+				field:  "Compute",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetDependencies() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AppValidationError{
+					field:  fmt.Sprintf("Dependencies[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// AppValidationError is the validation error returned by App.Validate if the
+// designated constraints aren't met.
+type AppValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AppValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AppValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AppValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AppValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AppValidationError) ErrorName() string { return "AppValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AppValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sApp.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AppValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AppValidationError{}
+
+// Validate checks the field values on AppDependency with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *AppDependency) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Use
+
+	// no validation rules for EnvPrefix
+
+	if v, ok := interface{}(m.GetInputs()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AppDependencyValidationError{
+				field:  "Inputs",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Outputs
+
+	// no validation rules for NoProvision
+
+	return nil
+}
+
+// AppDependencyValidationError is the validation error returned by
+// AppDependency.Validate if the designated constraints aren't met.
+type AppDependencyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AppDependencyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AppDependencyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AppDependencyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AppDependencyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AppDependencyValidationError) ErrorName() string { return "AppDependencyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AppDependencyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAppDependency.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AppDependencyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AppDependencyValidationError{}
+
 // Validate checks the field values on JSONSchema with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *JSONSchema) Validate() error {

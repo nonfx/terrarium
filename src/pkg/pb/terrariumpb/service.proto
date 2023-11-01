@@ -92,6 +92,23 @@ message Dependency {
   JSONSchema outputs = 7;
 }
 
+message App {
+  string id = 1;
+	string name = 2;
+  string env_prefix = 3;
+  AppDependency compute = 4;
+  repeated AppDependency dependencies = 5;
+}
+
+message AppDependency {
+  string id = 1;
+  string use = 2;
+  string env_prefix = 3;
+  google.protobuf.Struct inputs = 4;
+  map<string, string> outputs = 5;
+  bool no_provision = 6;
+}
+
 message JSONSchema {
   // Basic schema details
   string title = 1;
