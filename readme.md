@@ -18,7 +18,7 @@ The Terrarium project aims to empower platform engineering professionals by prov
 
 ### Prerequisite
 
-<img alt="Terraform" src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.hashicorp.com%2Fbrand&psig=AOvVaw2E5KgMQDZdgi-uJZhjfq4i&ust=1698922876155000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPiinZPTooIDFQAAAAAdAAAAABAD" width="150px">                     <img alt="Golang" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/yaml/yaml.png" width="40px">                    <img alt="Terraform" src="https://user-images.githubusercontent.com/25181517/192149581-88194d20-1a37-4be8-8801-5dc0017ffbbe.png" width="50px">
+<img alt="Terraform" src="https://www.datocms-assets.com/2885/1620155116-brandhcterraformverticalcolor.svg" width="45px">                     <img alt="Golang" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/yaml/yaml.png" width="40px">                    <img alt="Terraform" src="https://user-images.githubusercontent.com/25181517/192149581-88194d20-1a37-4be8-8801-5dc0017ffbbe.png" width="50px">
 
 ### Steps
 1. Download [Terrarium](https://github.com/cldcvr/terrarium/releases) and extract the TAR archive.
