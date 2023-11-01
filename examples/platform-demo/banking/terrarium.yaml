@@ -20,5 +20,7 @@ compute:
 dependencies:
   - id: ledgerdb
     use: postgres
+    outputs:
+      
     inputs:
       version: "11.20"
