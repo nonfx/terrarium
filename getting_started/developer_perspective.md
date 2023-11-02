@@ -36,8 +36,8 @@ terrarium generate -p /Users/himanshuuniyal/test-terrarium/terrarium/examples/pl
 ```
 > The above command will give you the following output
 
-![Alt text](getting_started/images/one.png?raw=true "generate")
-![Alt text](getting_started/images/two.png?raw=true "output")
+![myimage](getting_started/images/one.png)
+![myimage](getting_started/images/two.png)
 
 #### Command flags
 
