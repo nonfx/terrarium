@@ -154,7 +154,7 @@ This project provides tools, guidelines, and real-world examples for improving i
 
 ## Who is behind this project?
 
-Ollion, a team of passionate DevOps engineers with extensive experience in Terraform, maintains this project. We aim to share our knowledge and best practices with the community.
+Ollion, a team of passionate engineers with extensive experience in Devops, maintains this project. We aim to share our knowledge and best practices with the community.
 
 ---
 
