@@ -19,7 +19,7 @@ Further Reading:
 [6] https://humanitec.com/platform-engineering
 
 
-***Why do we need platform engineering?***
+**Why do we need platform engineering?**
 
 Platform engineering is a discipline that focuses on enhancing developer productivity by reducing the complexity and uncertainty of modern software delivery. It is an emerging field that addresses some of the biggest challenges in software development, such as reducing operational complexity and removing friction from the development process. Platform engineering is a process that organizations can use to leverage their cloud platform as efficiently as possible so that engineers can deliver value to production quickly and reliably. It is a step forward in DevOps, enabling developers to follow DevOps practices more easily by creating a "golden path" that developers can use for rapid application development. Platform engineering is a powerful tool for scaling up software delivery processes without sacrificing quality, security, or efficiency. By simplifying and automating resource provisioning and management, it enables developers to ship more value to production faster. Some benefits of platform engineering include improving quality, delivering capabilities faster, and reducing cognitive load on development teams.
 
@@ -43,7 +43,7 @@ In summary, IaC is important because it allows you to automate, audit, secure, a
 
 
 
-***Why Terraform?***
+**Why Terraform?**
 Here are some reasons why Terraform is preferred over other IaC tools:
 
 1. **Vendor-neutral**: Unlike other IaC tools, Terraform is vendor-neutral. You can use it to manage infrastructure in any supported platform or tool, such as Microsoft Azure, Google Cloud, AWS, Linode, and Oracle Cloud.
@@ -70,7 +70,7 @@ Further Reading:
 [5] https://selleo.com/blog/why-choose-terraform-over-chef-puppet-ansible-saltstack-and-cloudformation
 [6] https://ibatulanand.medium.com/extensive-comparison-of-iac-tools-49118e962ef8
 
-***Why Adopt Platform-Based Infrastructure as Code (IaC)?***
+**Why Adopt Platform-Based Infrastructure as Code (IaC)?**
 Writing Platform-based IaC code has several benefits, including:
 1. **Efficient Extensibility and Enhancement**
 - **Initial Setup**: Requires some effort and resources to set up.
@@ -102,32 +102,32 @@ Adopting a platform-based approach to Infrastructure as Code with Terraform is a
 Further Readings:
 [1] https://www.forbes.com/sites/forbestechcouncil/2021/02/04/infrastructure-as-code-platform-what-it-is-and-how-it-can-be-used-in-multicloud-environments/?sh=266184a13831
 
-*** I already have modules, can I use them?***
+** I already have modules, can I use them?**
 If you already have modules, you can directly use them. We have written a guide on how to use existing modules in the platform-based code. You can find it here.
 
 
-***How do I get started?***
+**How do I get started?**
 You can get started by reading our documentation and following the steps outlined in the guide. You can also check out our examples to see how we have implemented platform-based IaC in real-world scenarios.
 
-***I have a question that is not answered here. What should I do?***
+**I have a question that is not answered here. What should I do?**
 Please refer to [support.md](https://raw.githubusercontent.com/cldcvr/terrarium/main/SUPPORT.md) Also join our Discord Community [here](Discord Link). We will be happy to answer any questions you may have.
 
-***How do I contribute to this project?***
+**How do I contribute to this project?**
 You can contribute to this project by submitting a pull request or opening an issue on GitHub. Please refer to our Review our [contributing guidelines](https://github.com/cldcvr/cldcvr-repo-template/blob/main/CONTRIBUTING.md).
  for more information.
 
-***What is the license for this project?***
+**What is the license for this project?**
 This project is licensed under the Apache License, Version 2.0. Please refer to the LICENSE file for more information.
 
-***What is the roadmap for this project?***
+**What is the roadmap for this project?**
 We are currently working on adding more examples and documentation to this project. We also plan to add more features and functionality in the future. If you have any suggestions or feedback, please let us know.
 
-***Why should I use this project?***
+**Why should I use this project?**
 This project provides a set of tools and guidelines for writing platform-based IaC code. It also provides examples of how to use these tools and guidelines in real-world scenarios. If you are looking for a way to improve your infrastructure as code practices, this project can help you do that.
 
-***Who is behind this project?***
+**Who is behind this project?**
 This project is maintained by Ollion. We are a team of engineers who are passionate about DevOps. We have been using Terraform for several years now and have learned a lot along the way. We want to share our knowledge with the community so that others can benefit from it as well.
 
-***When will this project be ready for production use?***
-
+**When will this project be ready for production use?**
+Stay tuned for updates on this project. We are working hard to make this project production-ready as soon as possible.
 
