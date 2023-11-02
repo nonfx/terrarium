@@ -19,6 +19,8 @@ module "vpc" {
   cidr = local.vpc_cidr
 
   azs             = local.azs
+
+  # This code uses the `cidrsubnet` function to generate subnet ranges for the `private_subnets` and `public_subnets` variables. The `for` loop iterates over the `local.azs` map to generate a subnet range for each availability zone. The `cidrsubnet` function takes the `local.vpc_cidr` as the base CIDR block, `4` as the prefix length, and `k + coalesce(length(local.azs), 2)` as the subnet number for `private_subnets`, and `k + coalesce(length(local.azs), 2) + 4` as the subnet number for `public_subnets`. The `+4` is added to the subnet number for `public_subnets` to ensure that the subnets created for `private_subnets` and `public_subnets` do not overlap and do not result in duplicate subnets.
   private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
   public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
 
