@@ -11,11 +11,17 @@ Platform engineering is an evolution of business agility and DevOps, and it look
 In summary, platform engineering is the discipline of designing and building toolchains, workflows, and platforms that enable self-service capabilities for software engineering organizations. It helps drive consistency and speed up common tasks by creating internal developer platforms that serve cross-company needs so that vertical application teams can serve their end-users.
 
 Further Reading:
+
 [1] https://youtube.com/watch?v=Bfhl8kcSaEI
+
 [2] https://platformengineering.org/blog/what-is-platform-engineering
+
 [3] https://thenewstack.io/platform-engineering/
+
 [4] https://circleci.com/blog/what-is-platform-engineering/
+
 [5] https://www.liatrio.com/blog/what-is-platform-engineering-the-concept-behind-the-term
+
 [6] https://humanitec.com/platform-engineering
 
 
@@ -63,11 +69,18 @@ Here are some reasons why Terraform is preferred over other IaC tools:
 In summary, Terraform is preferred over other IaC tools because of its vendor-neutral approach, multi-cloud support, declarative approach, powerful configuration language, large community, extensive provider ecosystem, and consistent state management.
 
 Further Reading:
+
 [1] https://blog.gruntwork.io/why-we-use-terraform-and-not-chef-puppet-ansible-saltstack-or-cloudformation-7989dad2865c
+
 [2] https://www.reddit.com/r/Terraform/comments/149bkxi/terraform_with_other_iac_tools/
-[3] https://k21academy.com/terraform-iac/why-terraform-not-chef-ansible-puppet-cloudformation/
+
+[3] https://k21academy.com/terraform-iac/
+why-terraform-not-chef-ansible-puppet-cloudformation/
+
 [4] https://spectralops.io/blog/terraform-vs-ansible/
+
 [5] https://selleo.com/blog/why-choose-terraform-over-chef-puppet-ansible-saltstack-and-cloudformation
+
 [6] https://ibatulanand.medium.com/extensive-comparison-of-iac-tools-49118e962ef8
 
 **Why Adopt Platform-Based Infrastructure as Code (IaC)?**
@@ -95,14 +108,13 @@ Writing Platform-based IaC code has several benefits, including:
 - **Knowledge Sharing**: Ensures that knowledge is accessible and shared among all team members, regardless of their experience level.
 - **Collaborative Environment**: Fosters a work environment where all team members can actively participate and contribute to infrastructure development.
 
-## Conclusion
-
-Adopting a platform-based approach to Infrastructure as Code with Terraform is a strategic decision that brings efficiency, security, and best practices to the forefront of your DevOps and SRE operations. It empowers teams, streamlines processes, and ensures that your infrastructure is robust and ready for the challenges ahead.
+    Adopting a platform-based approach to Infrastructure as Code with Terraform is a strategic decision that brings efficiency, security, and best practices to the forefront of your DevOps and SRE operations. It empowers teams, streamlines processes, and ensures that your infrastructure is robust and ready for the challenges ahead.
 
 Further Readings:
+
 [1] https://www.forbes.com/sites/forbestechcouncil/2021/02/04/infrastructure-as-code-platform-what-it-is-and-how-it-can-be-used-in-multicloud-environments/?sh=266184a13831
 
-** I already have modules, can I use them?**
+**I already have modules, can I use them?**
 If you already have modules, you can directly use them. We have written a guide on how to use existing modules in the platform-based code. You can find it here.
 
 
