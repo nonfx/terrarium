@@ -23,7 +23,8 @@ const (
 )
 
 var (
-	cmd *cobra.Command
+	cmd              *cobra.Command
+	flagDumpFilePath string
 )
 
 func NewCmd() *cobra.Command {
@@ -32,11 +33,15 @@ func NewCmd() *cobra.Command {
 		Short: "farm update updates the databse with latest farm release",
 		RunE:  cmdRunE,
 	}
+
+	cmd.Flags().StringVar(&flagDumpFilePath, "dumpFile", "", "use a pre-existing dump file for update instead of downloading fresh.")
+	cmd.Flags().MarkHidden("dumpFile")
+
 	return cmd
 }
 
 func cmdRunE(cmd *cobra.Command, args []string) error {
-	dumpFilePath, latestReleaseTag, err := downloadArtifact(config.FarmDefault(), artifactName)
+	dumpFilePath, latestReleaseTag, err := setupArtifactDir(config.FarmDefault(), flagDumpFilePath)
 	if err != nil {
 		return err
 	}
@@ -71,8 +76,27 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func setupArtifactDir(repo, existingFilePath string) (string, string, error) {
+	if existingFilePath == "" {
+		return downloadArtifact(repo)
+	}
+
+	f, err := os.Open(existingFilePath)
+	if err != nil {
+		return "", "", eris.Wrapf(err, "failed to open the file: %s", existingFilePath)
+	}
+	defer f.Close()
+
+	tempDir, err := moveToTmpDir(f)
+	if err != nil {
+		return "", "", err
+	}
+
+	return tempDir, "local", nil
+}
+
 // downloadArtifact downloads the latest artifact
-func downloadArtifact(repo, artifactName string) (string, string, error) {
+func downloadArtifact(repo string) (string, string, error) {
 	releaseTag, err := utils.GetLatestReleaseTag(repo)
 	if err != nil {
 		return "", "", eris.Wrap(err, "failed to fetch latest release tag: %v")
@@ -88,21 +112,30 @@ func downloadArtifact(repo, artifactName string) (string, string, error) {
 		return "", "", eris.Errorf("HTTP request failed with status code %d", resp.StatusCode)
 	}
 
-	tempDir := filepath.Join(os.TempDir(), "farm-artifact")
-	err = os.MkdirAll(tempDir, os.ModePerm)
+	tempDir, err := moveToTmpDir(resp.Body)
 	if err != nil {
-		return "", "", eris.Wrap(err, "error creating temporary directory: %v")
+		return "", "", err
+	}
+
+	return tempDir, releaseTag, nil
+}
+
+func moveToTmpDir(fileData io.ReadCloser) (string, error) {
+	tempDir := filepath.Join(os.TempDir(), "farm-artifact")
+	err := os.MkdirAll(tempDir, os.ModePerm)
+	if err != nil {
+		return "", eris.Wrap(err, "error creating temporary directory: %v")
 	}
 
 	outFile, err := os.Create(filepath.Join(tempDir, artifactName))
 	if err != nil {
-		return "", "", eris.Wrap(err, "error creating output file: %v")
+		return "", eris.Wrap(err, "error creating output file: %v")
 	}
 	defer outFile.Close()
 
-	_, err = io.Copy(outFile, resp.Body)
+	_, err = io.Copy(outFile, fileData)
 	if err != nil {
-		return "", "", eris.Wrap(err, "error copying artifact to output file: %v")
+		return "", eris.Wrap(err, "error copying artifact to output file: %v")
 	}
-	return tempDir, releaseTag, nil
+	return tempDir, nil
 }

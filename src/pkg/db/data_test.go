@@ -60,7 +60,7 @@ var modules = db.TFModules{
 		Version:     "1.1",
 		Description: "this is first test module",
 		Namespace:   "unit-test",
-		TaxonomyID:  uuidTax1,
+		TaxonomyID:  &uuidTax1,
 
 		Taxonomy: &db.Taxonomy{
 			Model: db.Model{ID: uuidTax1},
@@ -156,7 +156,7 @@ var modules = db.TFModules{
 		Version:     "1.1",
 		Description: "this is second test module",
 		Namespace:   "unit-test",
-		TaxonomyID:  uuidTax2,
+		TaxonomyID:  &uuidTax2,
 
 		Taxonomy: &db.Taxonomy{
 			Model: db.Model{ID: uuidTax2},
@@ -249,7 +249,7 @@ var dependencies = []db.Dependency{
 		Title:       "dependency-1",
 		InterfaceID: "dependency-1-interface",
 		Description: "this is first test dependency",
-		TaxonomyID:  uuidTax1,
+		TaxonomyID:  &uuidTax1,
 		Attributes: db.DependencyAttributes{
 			{
 				Model:        db.Model{ID: uuidDepAttr1},
@@ -291,7 +291,7 @@ var dependencies = []db.Dependency{
 		Title:       "dependency-2",
 		InterfaceID: "dependency-2-interface",
 		Description: "this is second test dependency",
-		TaxonomyID:  uuidTax2,
+		TaxonomyID:  &uuidTax2,
 		Attributes:  db.DependencyAttributes{},
 	},
 }

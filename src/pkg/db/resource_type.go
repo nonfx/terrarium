@@ -8,9 +8,9 @@ import "github.com/google/uuid"
 type TFResourceType struct {
 	Model
 
-	ProviderID   uuid.UUID `gorm:"uniqueIndex:resource_type_unique"`
-	ResourceType string    `gorm:"uniqueIndex:resource_type_unique"`
-	TaxonomyID   uuid.UUID `gorm:"default:null"`
+	ProviderID   uuid.UUID  `gorm:"uniqueIndex:resource_type_unique"`
+	ResourceType string     `gorm:"uniqueIndex:resource_type_unique"`
+	TaxonomyID   *uuid.UUID `gorm:"default:null"`
 
 	Provider TFProvider `gorm:"foreignKey:ProviderID"`
 	Taxonomy *Taxonomy  `gorm:"foreignKey:TaxonomyID"`
