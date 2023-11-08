@@ -112,7 +112,7 @@ Adopting a platform-based approach to Infrastructure as Code with Terraform is a
 
 ## I already have modules, can I use them?
 
-Yes, if you already have modules, you can directly use them. We have a guide on how to use existing modules in the platform-based code, which you can find [here](#).
+Yes, if you already have modules, you can directly use them. We have a guide on how to use existing modules in the platform-based code, which you can find [here](https://raw.githubusercontent.com/cldcvr/terrarium/main/examples/cldcvr-modules-platform/platform.md).
 
 ---
 
@@ -130,13 +130,13 @@ If you have any additional questions, please refer to our [Support Guidelines](h
 
 ## How do I contribute to this project?
 
-You can contribute by submitting pull requests, opening issues on GitHub, and reviewing our [Contributing Guidelines](https://github.com/cldcvr/cldcvr-repo-template/blob/main/CONTRIBUTING.md) for more information.
+You can contribute by submitting pull requests, opening issues on GitHub, and reviewing our [Contributing Guidelines](https://github.com/cldcvr/terrarium/blob/main/CONTRIBUTING.md) for more information.
 
 ---
 
 ## What is the license for this project?
 
-This project is licensed under the Apache License, Version 2.0. For more information, please refer to the [LICENSE file](LICENSE).
+This project is licensed under the Apache License, Version 2.0. For more information, please refer to the [LICENSE file](https://github.com/cldcvr/terrarium/blob/main/LICENSE).
 
 ---
 
