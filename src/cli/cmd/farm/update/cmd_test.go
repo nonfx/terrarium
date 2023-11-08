@@ -12,7 +12,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 
@@ -20,6 +22,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/db/mocks"
 	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -39,7 +42,7 @@ func TestCmd(t *testing.T) {
 	config.SetDBMocks(mockDB)
 	clitest.RunTests(t, []clitesting.CLITestCase{
 		{
-			Name: "success",
+			Name: "success git download",
 			GockSetup: func(ctx context.Context, t *testing.T) {
 				var buf bytes.Buffer
 				gzWriter := gzip.NewWriter(&buf)
@@ -57,6 +60,29 @@ func TestCmd(t *testing.T) {
 					Body(bytes.NewReader(buf.Bytes())).
 					SetHeader("Content-Encoding", "gzip")
 			},
+		},
+		{
+			Name: "success reuse existing dump file",
+			GockSetup: func(ctx context.Context, t *testing.T) {
+				var buf bytes.Buffer
+				gzWriter := gzip.NewWriter(&buf)
+				gzWriter.Write([]byte("some dummy SQL command;"))
+				gzWriter.Close()
+
+				outFile, err := os.Create("./mocks/mock_dump.sql.gz")
+				require.NoError(t, err)
+				defer outFile.Close()
+
+				_, err = io.Copy(outFile, &buf)
+				require.NoError(t, err)
+			},
+			Args: []string{"--dumpFile", "./mocks/mock_dump.sql.gz"},
+		},
+		{
+			Name:     "fail invalid dump file location",
+			Args:     []string{"--dumpFile", "./mocks/mock_dump_invalid_location.sql.gz"},
+			WantErr:  true,
+			ExpError: "no such file or directory",
 		},
 		{
 			Name: "download artifact non ok http response",

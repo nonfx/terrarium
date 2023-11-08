@@ -24,7 +24,7 @@ type TFModule struct {
 	Version     Version `gorm:"uniqueIndex:module_unique"`
 	Namespace   string
 	Description string
-	TaxonomyID  uuid.UUID `gorm:"default:null"`
+	TaxonomyID  *uuid.UUID `gorm:"default:null"`
 
 	Taxonomy   *Taxonomy           `gorm:"foreignKey:TaxonomyID"`
 	Attributes []TFModuleAttribute `gorm:"foreignKey:ModuleID"` // Attributes of the module
@@ -111,10 +111,14 @@ func (db *gDB) QueryTFModules(filterOps ...FilterOption) (result TFModules, err 
 }
 
 func (m TFModule) ToProto() *terrariumpb.Module {
+	taxId := uuid.Nil.String()
+	if m.TaxonomyID != nil {
+		taxId = m.TaxonomyID.String()
+	}
 	inp := m.GetInputAttributesWithMappings()
 	return &terrariumpb.Module{
 		Id:              m.ID.String(),
-		TaxonomyId:      m.TaxonomyID.String(),
+		TaxonomyId:      taxId,
 		ModuleName:      m.ModuleName,
 		Source:          m.Source,
 		Version:         string(m.Version),

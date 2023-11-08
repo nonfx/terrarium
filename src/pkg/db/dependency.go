@@ -14,11 +14,11 @@ import (
 type Dependency struct {
 	Model
 
-	TaxonomyID  uuid.UUID `gorm:"default:null"` // Given taxonomy's uncertain presence in YAML, setting TaxonomyID default as NULL accommodates potential absence of taxonomy data.
-	InterfaceID string    `gorm:"unique"`
-	Title       string    `gorm:"default:null"`
-	Description string    `gorm:"default:null"`
-	ExtendsID   string    `gorm:"-"` //This is yet to be finalized
+	TaxonomyID  *uuid.UUID `gorm:"default:null"` // Given taxonomy's uncertain presence in YAML, setting TaxonomyID default as NULL accommodates potential absence of taxonomy data.
+	InterfaceID string     `gorm:"unique"`
+	Title       string     `gorm:"default:null"`
+	Description string     `gorm:"default:null"`
+	ExtendsID   string     `gorm:"-"` //This is yet to be finalized
 
 	Attributes DependencyAttributes `gorm:"foreignKey:DependencyID"`
 	Taxonomy   *Taxonomy            `gorm:"foreignKey:TaxonomyID"`

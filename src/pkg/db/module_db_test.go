@@ -56,7 +56,7 @@ func Test_gDB_CreateTFModule(t *testing.T) {
 					if tt.wantErr {
 						assert.Error(t, err)
 					} else {
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						uniqueFieldsJoined := tt.module.Source + "|" + string(tt.module.Version)
 						if wantID, ok := moduleIDByNames[uniqueFieldsJoined]; ok {
 							assert.Equal(t, wantID, id)

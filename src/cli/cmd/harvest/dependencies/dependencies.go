@@ -69,10 +69,13 @@ func processDependency(g db.DB, dep dependency.Interface) error {
 
 	// Create a db.Dependency instance
 	dbDep := &db.Dependency{
-		TaxonomyID:  taxonomyID,
 		InterfaceID: dep.ID,
 		Title:       dep.Title,
 		Description: dep.Description,
+	}
+
+	if taxonomyID != uuid.Nil {
+		dbDep.TaxonomyID = &taxonomyID
 	}
 
 	_, err = g.CreateDependencyInterface(dbDep)
