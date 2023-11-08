@@ -124,7 +124,7 @@ To get started, read our documentation, follow the steps in our guide, and check
 
 ## I have a question that is not answered here. What should I do?
 
-If you have any additional questions, please refer to our [Support Guidelines](https://raw.githubusercontent.com/cldcvr/terrarium/main/SUPPORT.md) and join our [Discord Community](Discord Link). We are here to help!
+If you have any additional questions, please refer to our [Support Guidelines](https://raw.githubusercontent.com/cldcvr/terrarium/main/SUPPORT.md) and join our [Discord Community](https://discord.gg/gG3gDm9GmF). We are here to help!
 
 ---
 
