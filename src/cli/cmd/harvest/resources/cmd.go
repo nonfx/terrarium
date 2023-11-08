@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/db"
-	"github.com/cldcvr/terrarium/src/pkg/metadata/cli"
+	"github.com/cldcvr/terrarium/src/pkg/metadata/modulelist"
 	"github.com/cldcvr/terrarium/src/pkg/tf/runner"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
@@ -59,15 +59,15 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from modules list YAML file '%s'...\n", flagModuleListFile)
-	moduleList, err := cli.LoadFarmModules(flagModuleListFile)
+	moduleList, err := modulelist.LoadFarmModules(flagModuleListFile)
 	if err != nil {
 		return err
 	}
 
 	tfRunner := runner.NewTerraformRunner()
-	for _, item := range moduleList.Farm {
-		log.Info("harvesting resources from module", "name", item.Name, "source", item.Source)
-		dir, _, err := item.CreateTerraformFile(flagWorkDir)
+	for _, item := range moduleList.Groups() {
+		log.Info("harvesting resources", "groupName", item.Name)
+		dir, err := item.CreateTerraformFile(flagWorkDir)
 		if err != nil {
 			return err
 		}
