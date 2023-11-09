@@ -1,0 +1,8 @@
+# Copyright (c) Ollion
+# SPDX-License-Identifier: Apache-2.0
+
+id: common
+
+dependencies:
+  - use: logs_bucket
+    inputs:

@@ -106,3 +106,47 @@ func assertFileSame(t *testing.T, filePathExpected string, filePathActual string
 
 	assert.Equal(t, expected, actual)
 }
+
+func Test_updateRelPath(t *testing.T) {
+	type args struct {
+		line    string
+		srcDir  string
+		destDir string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			args: args{
+				line:    `  source = "./../modules"`,
+				srcDir:  `a/b/c`,
+				destDir: `a/x/y`,
+			},
+			want: `  source = "../../b/modules"`,
+		},
+		{
+			args: args{
+				line:    `  source = "./modules"`,
+				srcDir:  `a/b/c`,
+				destDir: `a/x/y`,
+			},
+			want: `  source = "../../b/c/modules"`,
+		},
+		{
+			args: args{
+				line:    `  source = "git.com/modules"`,
+				srcDir:  `a/b/c`,
+				destDir: `a/x/y`,
+			},
+			want: `  source = "git.com/modules"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := updateRelPath(tt.args.line, tt.args.srcDir, tt.args.destDir)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

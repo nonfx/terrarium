@@ -1,0 +1,15 @@
+# Copyright (c) Ollion
+# SPDX-License-Identifier: Apache-2.0
+
+id: aa
+
+dependencies:
+  - id: my_db
+    use: postgres
+  - id: my_bucket
+    use: bucket
+  - id: my_db3
+    use: postgres
+    inputs:
+      version: "12"
+

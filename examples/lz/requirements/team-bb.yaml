@@ -1,0 +1,10 @@
+# Copyright (c) Ollion
+# SPDX-License-Identifier: Apache-2.0
+
+id: bb
+
+dependencies:
+  - id: my_db2
+    use: postgres
+  - id: my_bucket2
+    use: bucket

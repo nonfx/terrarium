@@ -1,0 +1,56 @@
+# Copyright (c) Ollion
+# SPDX-License-Identifier: Apache-2.0
+
+profiles: []
+components:
+    - id: bucket
+      title: Bucket
+      inputs:
+        type: object
+        properties:
+            name:
+                title: Name
+                type: string
+                default: ""
+      outputs:
+        type: object
+    - id: environment
+      title: Environment
+      inputs:
+        type: object
+      outputs:
+        type: object
+    - id: postgres
+      title: Postgres
+      inputs:
+        type: object
+        properties:
+            version:
+                title: Version
+                type: string
+                default: "11"
+      outputs:
+        type: object
+graph:
+    - id: data.terraform_remote_state.common
+      requirements:
+        - provider.terraform
+    - id: local.tr_component_environment
+      requirements: []
+    - id: module.subnet_dev
+      requirements:
+        - data.terraform_remote_state.common
+        - local.tr_component_environment
+    - id: module.tr_component_bucket
+      requirements: []
+    - id: module.tr_component_environment
+      requirements:
+        - module.subnet_dev
+    - id: module.tr_component_postgres
+      requirements:
+        - module.subnet_dev
+    - id: output.subnet
+      requirements:
+        - module.subnet_dev
+    - id: provider.terraform
+      requirements: []
