@@ -1,0 +1,74 @@
+# Copyright (c) Ollion
+# SPDX-License-Identifier: Apache-2.0
+
+profiles: []
+components:
+    - id: bucket
+      title: Bucket
+      inputs:
+        type: object
+        properties:
+            name:
+                title: Name
+                type: string
+                default: ""
+      outputs:
+        type: object
+    - id: environment
+      title: Environment
+      inputs:
+        type: object
+      outputs:
+        type: object
+    - id: logs_bucket
+      title: Logs Bucket
+      inputs:
+        type: object
+        properties:
+            retention_period:
+                title: Retention Period
+                type: number
+                default: 365
+      outputs:
+        type: object
+    - id: postgres
+      title: Postgres
+      inputs:
+        type: object
+        properties:
+            version:
+                title: Version
+                type: string
+                default: "11"
+      outputs:
+        type: object
+graph:
+    - id: local.count_env_pg
+      requirements:
+        - local.tr_component_environment
+        - local.tr_component_postgres
+    - id: local.tr_component_environment
+      requirements: []
+    - id: local.tr_component_postgres
+      requirements: []
+    - id: module.log_sync
+      requirements: []
+    - id: module.tr_component_bucket
+      requirements: []
+    - id: module.tr_component_environment
+      requirements:
+        - module.vpc
+    - id: module.tr_component_logs_bucket
+      requirements:
+        - module.log_sync
+    - id: module.tr_component_postgres
+      requirements: []
+    - id: module.vpc
+      requirements:
+        - local.count_env_pg
+    - id: output.log_sync_self_link
+      requirements:
+        - module.log_sync
+    - id: output.vpc_network_name
+      requirements:
+        - module.vpc

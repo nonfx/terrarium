@@ -15,12 +15,13 @@ import (
 
 func TestMatchAppAndPlatform(t *testing.T) {
 	tests := []struct {
-		name     string
-		pm       *platform.PlatformMetadata
-		apps     app.Apps
-		wantErr  bool
-		errMsg   string
-		wantApps app.Apps
+		name                string
+		pm                  *platform.PlatformMetadata
+		apps                app.Apps
+		ignoreUnimplemented bool
+		wantErr             bool
+		errMsg              string
+		wantApps            app.Apps
 	}{
 		{
 			name: "Component not found in platform",
@@ -39,7 +40,7 @@ func TestMatchAppAndPlatform(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "component 'testDep.missingComp' is not implemented in the platform",
+			errMsg:  ErrComponentNotImplemented.Error(),
 		},
 		{
 			name: "Invalid input",
@@ -144,7 +145,7 @@ func TestMatchAppAndPlatform(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MatchAppAndPlatform(tt.pm, tt.apps)
+			err := MatchAppAndPlatform(tt.pm, tt.apps, tt.ignoreUnimplemented)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errMsg)
