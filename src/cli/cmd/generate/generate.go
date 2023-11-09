@@ -10,16 +10,22 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
-	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/app"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	tfwriter "github.com/cldcvr/terrarium/src/pkg/tf/writer"
 	"github.com/rotisserie/eris"
 )
+
+const (
+	localsFileName = "tr_gen_locals.tf"
+)
+
+var srcRelativePath = regexp.MustCompile(`\s*\bsource\b\s*=\s*\"((.\/|..\/)+.*)\"`)
 
 func blocksToPull(g platform.Graph, components ...string) []platform.BlockID {
 	blockIDs := []platform.BlockID{}
@@ -101,14 +107,21 @@ func getRelativeFilePath(basePath, targetPath string) (string, error) {
 	return filepath.Rel(basePath, targetPath)
 }
 
-func updateFileIndex(fileIndex map[string][][2]int, relFilePath string, b platform.ParsedBlock) {
+func updateFileIndex(fileIndex map[string][][2]int, srcFilePath string, b platform.ParsedBlock) {
+	srcFileName := filepath.Base(srcFilePath)
+	// 1. skip the gen_locals file since that file is supposed to be generated entirely
+	// 2. skip anything that is not a tf file
+	if srcFileName == localsFileName || filepath.Ext(srcFileName) != ".tf" {
+		return
+	}
+
 	pos := b.GetPos()
-	fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pos.Line, pos.EndLine})
+	fileIndex[srcFilePath] = append(fileIndex[srcFilePath], [2]int{pos.Line, pos.EndLine})
 
 	if parentPosGetter, ok := b.(platform.BlockParentPosGetter); ok && parentPosGetter.GetParentPos() != nil {
 		pPos := parentPosGetter.GetParentPos()
-		fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.Line, pPos.Line})       // add first line
-		fileIndex[relFilePath] = append(fileIndex[relFilePath], [2]int{pPos.EndLine, pPos.EndLine}) // add last line
+		fileIndex[srcFilePath] = append(fileIndex[srcFilePath], [2]int{pPos.Line, pPos.Line})       // add first line
+		fileIndex[srcFilePath] = append(fileIndex[srcFilePath], [2]int{pPos.EndLine, pPos.EndLine}) // add last line
 	}
 }
 
@@ -128,7 +141,7 @@ func writeLocalsToFile(locals map[string]interface{}, destDir string, apps app.A
 		locals[k] = apps.GetDependenciesByType(compName).GetInputs()
 	}
 
-	localsFile, err := os.Create(path.Join(destDir, "tr_gen_locals.tf"))
+	localsFile, err := os.Create(path.Join(destDir, localsFileName))
 	if err != nil {
 		return eris.Wrapf(err, "error creating generated locals file")
 	}
@@ -169,24 +182,19 @@ func isInRange(lineNum int, ranges ...[2]int) bool {
 func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 	srcFile, destFile := filepath.Join(srcDir, relFile), filepath.Join(destDir, relFile)
 
-	err := os.MkdirAll(filepath.Dir(destFile), constants.ReadWriteExecutePermissions)
-	if err != nil {
-		return eris.Wrapf(err, "failed to create directory for %s", destFile)
-	}
-
 	srcLines, err := readAllLines(srcFile)
 	if err != nil {
-		return eris.Wrap(err, "failed to read lines to copy")
+		return eris.Wrapf(err, "failed to read lines to copy. file: %s", srcFile)
 	}
 
 	destLines, err := readAllLines(destFile)
 	if err != nil && !os.IsNotExist(err) {
-		return eris.Wrap(err, "failed to read destination file")
+		return eris.Wrapf(err, "failed to read destination file: %s", srcFile)
 	}
 
 	output, err := os.Create(destFile)
 	if err != nil {
-		return eris.Wrap(err, "failed to create destination file")
+		return eris.Wrapf(err, "failed to create destination file: %s", destFile)
 	}
 	defer output.Close()
 
@@ -195,6 +203,7 @@ func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 	for i, line := range srcLines {
 		lineNum := i + 1
 		if isInRange(lineNum, ranges...) {
+			line = updateRelPath(line, srcDir, destDir)
 			writer.WriteString(line + "\n")
 		} else if lineNum <= len(destLines) {
 			writer.WriteString(destLines[lineNum-1] + "\n")
@@ -204,6 +213,33 @@ func copyLines(srcDir, destDir, relFile string, ranges ...[2]int) error {
 	}
 
 	return writer.Flush()
+}
+
+func updateRelPath(line, srcDir, destDir string) string {
+	matches := srcRelativePath.FindStringSubmatch(line)
+	if len(matches) == 0 {
+		return line
+	}
+
+	relPath := matches[1]
+	newRelPath, _ := changeBasePath(relPath, srcDir, destDir)
+
+	newLine := strings.Replace(line, relPath, newRelPath, 1)
+	return newLine
+}
+
+// changeBasePath changes the base of a given relative path from oldBase to newBase.
+func changeBasePath(pathRelToOldBase, oldBase, newBase string) (string, error) {
+	// Construct the full old path
+	fullOldPath := filepath.Join(oldBase, pathRelToOldBase)
+
+	// Find the relative path from newBase to fullOldPath
+	relPathToNewBase, err := filepath.Rel(newBase, fullOldPath)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Clean(relPathToNewBase), nil
 }
 
 func copyProfileConfigurationFile(moduleDirPath string, profileName string, codeDestDirPath string) error {

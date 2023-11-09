@@ -4,14 +4,20 @@
 package utils
 
 import (
+	"errors"
+
 	"github.com/cldcvr/terrarium/src/pkg/metadata/app"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	pkgutils "github.com/cldcvr/terrarium/src/pkg/utils"
 	"github.com/rotisserie/eris"
 )
 
+var (
+	ErrComponentNotImplemented = eris.New("component is not implemented in the platform")
+)
+
 // MatchAppAndPlatform validate app dependency inputs and set default inputs
-func MatchAppAndPlatform(pm *platform.PlatformMetadata, apps app.Apps) (err error) {
+func MatchAppAndPlatform(pm *platform.PlatformMetadata, apps app.Apps, ignoreUnimplemented bool) (err error) {
 	for _, app := range pkgutils.ToRefArr(apps) {
 		deps := pkgutils.ToRefArr(app.Dependencies)
 		if app.Compute.ID != "" {
@@ -21,7 +27,9 @@ func MatchAppAndPlatform(pm *platform.PlatformMetadata, apps app.Apps) (err erro
 		for _, dep := range deps {
 			if !dep.NoProvision {
 				err = validateDependency(pm, dep)
-				if err != nil {
+				if ignoreUnimplemented && errors.Is(err, ErrComponentNotImplemented) {
+					err = nil
+				} else if err != nil {
 					return
 				}
 			}
@@ -35,7 +43,7 @@ func MatchAppAndPlatform(pm *platform.PlatformMetadata, apps app.Apps) (err erro
 func validateDependency(pm *platform.PlatformMetadata, appDep *app.Dependency) error {
 	comp := pm.Components.GetByID(appDep.Use)
 	if comp == nil {
-		return eris.Errorf("component '%s.%s' is not implemented in the platform", appDep.ID, appDep.Use)
+		return eris.Wrapf(ErrComponentNotImplemented, "'%s.%s'", appDep.ID, appDep.Use)
 	}
 
 	if appDep.Inputs == nil {

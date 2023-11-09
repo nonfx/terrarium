@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
+	"github.com/cldcvr/terrarium/src/cli/internal/constants"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/platform"
 	"github.com/cldcvr/terrarium/src/pkg/metadata/utils"
 	"github.com/rotisserie/eris"
@@ -19,10 +19,12 @@ import (
 var (
 	cmd *cobra.Command
 
-	flagPlatformDir string
-	flagOutDir      string
-	flagApps        []string
-	flagProfile     string
+	flagPlatformDir         string
+	flagOutDir              string
+	flagApps                []string
+	flagProfile             string
+	flagIgnoreUnimplemented bool
+	flagSkipEnvFile         bool
 )
 
 func NewCmd() *cobra.Command {
@@ -37,6 +39,8 @@ func NewCmd() *cobra.Command {
 	cmd.Flags().StringArrayVarP(&flagApps, "app", "a", nil, "path to the app directory or the app yaml file. can be more then one")
 	cmd.Flags().StringVarP(&flagOutDir, "output-dir", "o", "./.terrarium", "path to the directory where you want to generate the output")
 	cmd.Flags().StringVarP(&flagProfile, "configuration-profile", "c", "", "name of platform configuration profile to apply")
+	cmd.Flags().BoolVar(&flagIgnoreUnimplemented, "ignore-unimplemented", false, "set this to ignore errors when a component is not implemented in the platform") // not recommended
+	cmd.Flags().BoolVar(&flagSkipEnvFile, "skip-env-file", false, "set this to skip creating the env files for each app")                                         // not recommended
 
 	return cmd
 }
@@ -51,19 +55,20 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	m, diags := tfconfig.LoadModule(flagPlatformDir, &tfconfig.ResolvedModulesSchema{})
-	if diags.HasErrors() {
-		absPath, _ := filepath.Abs(flagPlatformDir)
-		return eris.Wrapf(diags.Err(), "failed to parse the given platform terraform module at: '%s' (%s)", flagPlatformDir, absPath)
-	}
+	m, _ := tfconfig.LoadModule(flagPlatformDir, &tfconfig.ResolvedModulesSchema{})
 
 	existingYaml, _ := os.ReadFile(path.Join(flagPlatformDir, defaultYAMLFileName))
 
 	pm, _ := platform.NewPlatformMetadata(m, existingYaml)
 
-	err = utils.MatchAppAndPlatform(pm, apps)
+	err = utils.MatchAppAndPlatform(pm, apps, flagIgnoreUnimplemented)
 	if err != nil {
 		return err
+	}
+
+	err = os.MkdirAll(flagOutDir, constants.ReadWriteExecutePermissions)
+	if err != nil {
+		return eris.Wrapf(err, "failed to create directory for %s", flagOutDir)
 	}
 
 	blockCount, err := writeTF(pm.Graph, flagOutDir, apps, m, flagProfile)
@@ -71,9 +76,11 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 		return eris.Wrapf(err, "failed to write terraform code to dir: %s", flagOutDir)
 	}
 
-	err = writeAppsEnv(pm, apps)
-	if err != nil {
-		return err
+	if !flagSkipEnvFile {
+		err = writeAppsEnv(pm, apps)
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Successfully pulled %d of %d terraform blocks at: %s\n", blockCount, len(pm.Graph), flagOutDir)
