@@ -16,6 +16,11 @@ The Terrarium project aims to empower platform engineering professionals by prov
 
 ## Installation Instructions
 
+### Prerequisite
+
+<img alt="Terraform" src="https://media.licdn.com/dms/image/C5612AQGiwqCpe35VkQ/article-cover_image-shrink_423_752/0/1642724243098?e=1704326400&v=beta&t=W4sWYLN_tS9CcY4YY0hW8Jx_D7bwlzTlKr_EhtEKfcs" width="160px">        <img alt="yaml" src="https://user-images.githubusercontent.com/25181517/192149581-88194d20-1a37-4be8-8801-5dc0017ffbbe.png" width="80px">                   <img alt="Golang" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/yaml/yaml.png" width="70px">                    
+
+### Steps
 1. Download [Terrarium](https://github.com/cldcvr/terrarium/releases) and extract the TAR archive.
 
    ```bash
@@ -42,6 +47,10 @@ The Terrarium project aims to empower platform engineering professionals by prov
    ```bash
    make install
    ```
+> [!IMPORTANT]
+> Make sure you have go version 1.20 or above if not try this link to download https://go.dev/dl/
+
+
 
 4. Verify the Installation
 
