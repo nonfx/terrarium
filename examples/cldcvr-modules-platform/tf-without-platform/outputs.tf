@@ -22,33 +22,28 @@ output "ec2_instance_id" {
 
 # EC2 Security Group Outputs
 output "ec2_security_group_id" {
-  value = module.ec2_sg.security_group_id
+  value = module.ec2_sg.id
   description = "The ID of the EC2 security group."
 }
 
 # Database Outputs
 output "database_id" {
-  value = module.aws_sql_database.database_id
+  value = module.aws_sql_database.rds_id
   description = "The ID of the database."
 }
 
 output "database_endpoint" {
-  value = module.aws_sql_database.endpoint
+  value = module.aws_sql_database.rds_endpoint
   description = "The endpoint of the database."
 }
 
 # Database Security Group Outputs
 output "db_security_group_id" {
-  value = module.db_sg.security_group_id
+  value = module.db_sg.id
   description = "The ID of the database security group."
 }
 
 # Redis Outputs
-output "redis_id" {
-  value = module.redis.id
-  description = "The ID of the Redis instance."
-}
-
 output "redis_endpoint" {
   value = module.redis.endpoint
   description = "The endpoint of the Redis instance."
@@ -56,6 +51,6 @@ output "redis_endpoint" {
 
 # Redis Security Group Outputs
 output "redis_security_group_id" {
-  value = module.redis_sg.security_group_id
+  value = module.redis_sg.id
   description = "The ID of the Redis security group."
 }
