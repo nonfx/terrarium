@@ -29,7 +29,7 @@ variable "ec2_config" {
   description = "The configuration for the EC2 instance"
   default = {
     "default" : {
-      ami : "ami-0e18308d78c527c8a"
+      ami : "ami-0230bd60aa48260c6"
       instance_type : "t2.micro"
       monitoring_enabled : true
     }

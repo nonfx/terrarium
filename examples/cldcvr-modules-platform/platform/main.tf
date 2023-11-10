@@ -57,11 +57,11 @@ module "tr_component_service_web" {
 }
 
 module "ec2_sg" {
-  source   = "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
+  source = "github.com/cldcvr/cldcvr-xa-terraform-aws-security-group?ref=v0.1.0"
   for_each = {
     for k, v in local.tr_component_service_web : k => merge(v, var.ec2_config["default"])
   }
-  vpc_id   = module.vpc.vpc_id
+  vpc_id = module.vpc.vpc_id
   security_group = {
     name = "${local.name}-${each.key}-ec2-sg",
     ingress = [
@@ -117,7 +117,7 @@ locals {
 
 resource "random_password" "rds_password" {
   length  = 16
-  special = true
+  special = false
 }
 
 module "tr_component_postgres" {
@@ -155,7 +155,7 @@ module "tr_component_postgres" {
   subnet_ids                  = module.vpc.private_subnets
   vpc_security_group_ids      = [module.db_sg[each.key].id]
 
-  depends_on = [ module.db_sg ]
+  depends_on = [module.db_sg]
 
 }
 

@@ -15,6 +15,9 @@ module "tr_component_postgres" {
 
   vpc_security_group_ids = [module.postgres_security_group.security_group_id]
   subnet_ids             = module.core_vpc.database_subnets
+
+  allocated_storage = 10
+  username          = "dbuser"
 }
 
 module "postgres_security_group" {
