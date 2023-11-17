@@ -1,0 +1,8 @@
+components:
+    - id: s3
+      title: S3
+      outputs:
+        type: object
+graph:
+    - id: module.tr_component_s3
+      requirements: []
