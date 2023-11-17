@@ -17,6 +17,9 @@ components:
           default: postgres
     outputs:
       type: object
+      properties:
+        host:
+          title: Host
   - id: redis
     title: Redis
     inputs:

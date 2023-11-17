@@ -7,22 +7,22 @@ output "vpc_id" {
 #EC2 Output
 output "public_ip" {
   description = "The public IP address of the EC2 instance"
-  value       = { for k,v in module.tr_component_service_web : k => v.public_ip}
+  value       = { for k, v in module.tr_component_service_web : k => v.public_ip }
 }
 
 output "public_dns" {
   description = "The public DNS name of the EC2 instance"
-  value       = { for k,v in module.tr_component_service_web : k => v.public_dns}
+  value       = { for k, v in module.tr_component_service_web : k => v.public_dns }
 }
 
 #DB Output
-output "db_host" {
+output "postgres_host" {
   description = "The hostname of the DB instance"
-  value = { for k, v in module.tr_component_postgres : k => v.rds_endpoint}
+  value       = { for k, v in module.tr_component_postgres : k => v.rds_endpoint }
 }
 
 #Redis Output
 output "redis_host" {
   description = "The hostname of the Redis instance"
-  value = { for k, v in module.tr_component_redis : k => v.endpoint}
+  value       = { for k, v in module.tr_component_redis : k => v.endpoint }
 }
