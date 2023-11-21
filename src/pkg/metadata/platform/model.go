@@ -87,6 +87,10 @@ type BlockProviderGetter interface {
 	GeProviderName() string
 }
 
+func (pm *PlatformMetadata) FromFileBytes(bytes []byte) error {
+	return yaml.Unmarshal(bytes, pm)
+}
+
 // NewPlatformMetadata creates a new PlatformMetadata object.
 // It parses the platform module and existing YAML to create the components and the graph.
 func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (*PlatformMetadata, error) {
@@ -94,8 +98,7 @@ func NewPlatformMetadata(platformModule *tfconfig.Module, existingYaml []byte) (
 
 	// If there is existing YAML, unmarshal it into the PlatformMetadata object
 	if len(existingYaml) > 0 {
-		err := yaml.Unmarshal(existingYaml, &p)
-		if err != nil {
+		if err := p.FromFileBytes(existingYaml); err != nil {
 			return nil, err
 		}
 	}

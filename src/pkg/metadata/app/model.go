@@ -3,7 +3,17 @@
 
 package app
 
-import "gopkg.in/yaml.v3"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+	"reflect"
+
+	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/structpb"
+	"gopkg.in/yaml.v3"
+)
 
 // App multiple apps configuration
 type Apps []App
@@ -33,7 +43,107 @@ type App struct {
 	Dependencies Dependencies `yaml:"dependencies"`
 }
 
+func (e App) WrapProtoMessage() (message *anypb.Any, err error) {
+	platformArtifact, err := e.ProtoValue()
+	if err != nil {
+		return nil, fmt.Errorf("invalid platform-artifact data: %v", err)
+	}
+	message, err = anypb.New(platformArtifact)
+	if err != nil {
+		return nil, fmt.Errorf("could not create platform-artifact message: %v", err)
+	}
+	return
+}
+
+func (e App) ProtoValue() (*terrariumpb.App, error) {
+	compute, err := e.Compute.ProtoValue()
+	if err != nil {
+		return nil, fmt.Errorf("invalid compute data: %v", err)
+	}
+	dependencies, err := e.Dependencies.ProtoValue()
+	if err != nil {
+		return nil, fmt.Errorf("invalid dependencies data: %v", err)
+	}
+
+	return &terrariumpb.App{
+		Id:           e.ID,
+		Name:         e.Name,
+		EnvPrefix:    e.EnvPrefix,
+		Compute:      compute,
+		Dependencies: dependencies,
+	}, nil
+}
+
+func (e *App) ScanProto(m *terrariumpb.App) {
+	if m != nil {
+		e.ID = m.Id
+		e.Name = m.Name
+		e.EnvPrefix = m.EnvPrefix
+		e.Compute.ScanProto(m.Compute)
+		e.Dependencies.ScanProto(m.Dependencies)
+	}
+}
+
+func (e App) Value() (driver.Value, error) {
+	return json.Marshal(e)
+}
+
+func (e *App) Scan(value interface{}) error {
+	data, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("invalid data")
+	}
+	return json.Unmarshal(data, e)
+}
+
+func (e App) ToFileBytes() ([]byte, error) {
+	return yaml.Marshal(e)
+}
+
+// IsEquivalent returns if this and the other app generate the same infrastructure.
+func (e App) IsEquivalent(other App) (isEquivalent bool) {
+	if isEquivalent = e.Compute.IsEquivalent(other.Compute); !isEquivalent {
+		return
+	}
+
+	if isEquivalent = len(e.Dependencies) == len(other.Dependencies); !isEquivalent {
+		return
+	}
+
+	for _, thisItem := range e.Dependencies {
+		for _, otherItem := range other.Dependencies {
+			if isEquivalent = thisItem.IsEquivalent(otherItem); isEquivalent {
+				break
+			}
+		}
+
+		if !isEquivalent {
+			return
+		}
+	}
+
+	return
+}
+
 type Dependencies []Dependency
+
+func (e Dependencies) ProtoValue() (values []*terrariumpb.AppDependency, err error) {
+	values = make([]*terrariumpb.AppDependency, len(e))
+	for i := range e {
+		values[i], err = e[i].ProtoValue()
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (e *Dependencies) ScanProto(m []*terrariumpb.AppDependency) {
+	*e = make(Dependencies, len(m))
+	for i := range m {
+		(*e)[i].ScanProto(m[i])
+	}
+}
 
 // Dependency represents a single dependency of the application,
 // which could be a database, another service, cache, etc.
@@ -62,6 +172,40 @@ type Dependency struct {
 	// If true, this dependency is shared and its inputs are set in another app
 	// and its outputs are made available here.
 	NoProvision bool `yaml:"no_provision"`
+}
+
+func (e Dependency) ProtoValue() (*terrariumpb.AppDependency, error) {
+	inputs, err := structpb.NewStruct(e.Inputs)
+	if err != nil {
+		return nil, fmt.Errorf("invalid inputs data: %v", err)
+	}
+	return &terrariumpb.AppDependency{
+		Id:          e.ID,
+		Use:         e.Use,
+		EnvPrefix:   e.EnvPrefix,
+		Inputs:      inputs,
+		Outputs:     e.Outputs,
+		NoProvision: e.NoProvision,
+	}, nil
+}
+
+func (e *Dependency) ScanProto(m *terrariumpb.AppDependency) {
+	if m != nil {
+		e.ID = m.Id
+		e.Use = m.Use
+		e.EnvPrefix = m.EnvPrefix
+		e.Inputs = m.Inputs.AsMap()
+		e.Outputs = m.Outputs
+		e.NoProvision = m.NoProvision
+	}
+}
+
+// IsEquivalent returns if this and the other dependency generate the same infrastructure.
+func (e Dependency) IsEquivalent(other Dependency) bool {
+	return e.ID == other.ID &&
+		e.Use == other.Use &&
+		e.NoProvision == other.NoProvision &&
+		reflect.DeepEqual(e.Inputs, other.Inputs)
 }
 
 func NewApp(content []byte) (*App, error) {
