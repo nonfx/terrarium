@@ -45,8 +45,11 @@ components:
 graph:
     - id: local.count_env_pg
       requirements:
+        - local.tr_component_bucket
         - local.tr_component_environment
         - local.tr_component_postgres
+    - id: local.tr_component_bucket
+      requirements: []
     - id: local.tr_component_environment
       requirements: []
     - id: local.tr_component_postgres

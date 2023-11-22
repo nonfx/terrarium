@@ -1,4 +1,4 @@
-REQ_ENVS := dev staging prod
+REQ_ENVS := dev staging prod # modify this to manipulate how many envs are required.
 REQUIREMENTS_DIR := ./requirements
 PLATFORM_DIR := ./platforms
 TARGET_DIR := ./layers
@@ -30,30 +30,33 @@ req_team_env_yaml = $(filter %-$(2).yaml,$(REQ_TEAMS_YAML)) $(filter %-$(1)-$(2)
 req_team_shared_yaml = $(filter %-$(1).yaml,$(REQ_TEAMS_YAML) $(REQ_SHARED_TEAMS_YAML)) $(REQ_ENV_YAML) # function to get yaml files for the shared dir in a team $(1)=team name
 
 .PHONY: dryrun
-dryrun:
+dryrun:  ## Shows all the files and directories being identified for platforms, requirements and target dirs for generated code.
 	@echo "Platforms: $(PLATFORMS_ALL:%=\n\t%)\n"
-	@echo "Targets: $(TARGETS_ALL:%=\n\t%)\n"
 	@echo "Requirements: $(REQ_ALL_YAML:%=\n\t%)\n"
+	@echo "Targets: $(TARGETS_ALL:%=\n\t%)\n"
 
 .PHONY: lz_cleanup
-lz_cleanup:
+lz_cleanup:  ## Delete all target folders
 	rm -rf $(TARGET_COMM_DIR)
 	rm -rf $(TARGET_BU_DIR)
 	rm -rf $(REQ_ENV_YAML)
 
 .PHONY: lz
-lz: $(TARGETS_ALL)
+lz: $(TARGETS_ALL)  ## Generate terraform code in the target directories
 
 .PHONY: lint_all
-lint_all: $(PLATFORM_YAML_FILES)
+lint_all: $(PLATFORM_YAML_FILES)  ## Lint terrarium platforms
 
 .PHONY: lint_cleanup
-lint_cleanup:
+lint_cleanup:  ## Delete all generated platforms files in the platform directories
 	rm  -f $(PLATFORM_YAML_FILES)
 
 # generate the manifest file for envs based on the set of given env types in `REQ_ENVS`
-$(REQ_ENV_YAML):
-	@echo "id: env_deps" > $@
+$(REQ_ENV_YAML): Makefile
+	@rm -f $@
+	@echo "# NOTE: This is generated code. Do not edit." >> $@
+	@echo "# Update REQ_ENVS variable in the makefile to make changes to this\n" >> $@
+	@echo "id: env_deps" >> $@
 	@echo "dependencies:" >> $@
 	@$(foreach env,$(REQ_ENVS),echo "- id: $(env)" >> $@; echo "  use: environment" >> $@;)
 
@@ -79,6 +82,10 @@ endef
 
 $(foreach env,$(REQ_ENVS),$(eval $(call rules_team_env,$(env))))
 
-$(PLATFORM_DIR)/%/terrarium.yaml: $(PLATFORM_DIR)/%/*.tf
+$(PLATFORM_DIR)/%/terrarium.yaml: $(PLATFORM_DIR)/%/*.tf $(PLATFORM_DIR)/%/*.tfvars
 	rm -f $@
 	terrarium platform lint -d $(dir $@)
+
+.PHONY: help
+help:
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
