@@ -205,7 +205,16 @@ func (e Dependency) IsEquivalent(other Dependency) bool {
 	return e.ID == other.ID &&
 		e.Use == other.Use &&
 		e.NoProvision == other.NoProvision &&
-		reflect.DeepEqual(e.Inputs, other.Inputs)
+		isEquivalent(e.Inputs, other.Inputs)
+}
+
+func isEquivalent(m map[string]interface{}, n map[string]interface{}) bool {
+	// empty and nil maps are considered equivalent
+	return (isEmpty(m) && isEmpty(n)) || reflect.DeepEqual(m, n)
+}
+
+func isEmpty(m map[string]interface{}) bool {
+	return len(m) == 0
 }
 
 func NewApp(content []byte) (*App, error) {

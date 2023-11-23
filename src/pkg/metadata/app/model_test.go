@@ -115,6 +115,32 @@ func TestDependency_IsEquivalent(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "same with nil input map",
+			base: Dependency{
+				ID:        "eda5d4e1-98bd-438b-b477-c05d32cf79ea",
+				Use:       "Security",
+				EnvPrefix: "strategic",
+				Inputs:    map[string]interface{}{},
+				Outputs: map[string]string{
+					"withdrawal": "compressing",
+				},
+				NoProvision: true,
+			},
+			args: args{
+				other: Dependency{
+					ID:        "eda5d4e1-98bd-438b-b477-c05d32cf79ea",
+					Use:       "Security",
+					EnvPrefix: "strategic",
+					Inputs:    nil,
+					Outputs: map[string]string{
+						"withdrawal": "compressing",
+					},
+					NoProvision: true,
+				},
+			},
+			want: true,
+		},
+		{
 			name: "different id",
 			base: base,
 			args: args{
