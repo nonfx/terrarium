@@ -1,8 +1,41 @@
 components:
-    - id: s3
-      title: S3
+    - id: s3_bucket
+      title: S3 Bucket
+      inputs:
+        type: object
+        properties:
+            bucket:
+                title: Bucket
+                type: string
+                default: terrarium-test-bucket
       outputs:
         type: object
+        properties:
+            arn:
+                title: Arn
+            id:
+                title: Id
 graph:
-    - id: module.tr_component_s3
+    - id: local.tr_component_s3_bucket
+      requirements: []
+    - id: module.tr_component_s3_bucket
+      requirements:
+        - local.tr_component_s3_bucket
+        - var.acl
+        - var.control_object_ownership
+        - var.object_ownership
+        - var.versioning
+    - id: output.tr_component_s3_bucket_arn
+      requirements:
+        - module.tr_component_s3_bucket
+    - id: output.tr_component_s3_bucket_id
+      requirements:
+        - module.tr_component_s3_bucket
+    - id: var.acl
+      requirements: []
+    - id: var.control_object_ownership
+      requirements: []
+    - id: var.object_ownership
+      requirements: []
+    - id: var.versioning
       requirements: []
