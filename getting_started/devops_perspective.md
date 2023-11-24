@@ -6,24 +6,10 @@
 examples/platform-demo/platform
 ```
 
-- As a Devops we know that we are eager to know how terrarium is getting synced with terraform 
-
-- So here are the details 
-
-    - Source code repo for terrarium
-
-        ```
-        ```
-
-    - Code is written on Golang
-
-
-
-
 ### How to write a basic platform ??
 
-# Let say we have a requirement for s3 bucket.
-# Steps
+#### Let say we have a requirement for s3 bucket.
+#### Steps
 
 Step 1: Pick up a module for anywhere for eg: i have picked it up from terraform registry
 > source : https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest
@@ -165,7 +151,16 @@ dependencies:
 |  use     | Indicates the specific dependency interface ID that is used as an app dependency. It may include version as short-hand expression instead of adding version to the inputs block.  |
 |  inputs  |  Represents customization options for the selected dependency interface. It is a key-value map where the keys represent the input names, and the values represent the corresponding input values. |
 
+Step 2: Generate the .terrarium folder which consist of your platform through banking_app_s3_bucket.yaml file
 
+```
+terrarium generate -a t.yaml
+```
+![myimage](images/three.png)
+
+![myimage](images/four.png)
+
+And you are all set to apply and deploy your platform :tada:
 
 #### References
 
