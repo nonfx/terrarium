@@ -158,12 +158,12 @@ dependencies:
 
 |  Arguments  |  description |
 |  -----  |  ----------- |
-|  id(root) |            |
-|  name   |              |
-|  env_prefix |          |
-|  id(under dependencies) |          |
-|  use     |             |
-|  inputs  |             |
+|  id(root) |  your app ID (Can be anything)          |
+|  name   |   your application name           |
+|  env_prefix | environment name         |
+|  id(under dependencies) |           |
+|  use     | resource that you want to use (like i have used s3_bucket)         |
+|  inputs  |  Inputs that the developer will give like custom bucket name           |
 
 
 
