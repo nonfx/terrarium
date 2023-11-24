@@ -29,7 +29,7 @@ examples/platform-demo/platform
 Step 1: Pick up a module for anywhere for eg: i have picked it up from terraform registry
 > source : https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest
 
-Step 2: Create a main.tf file and paste it there like below
+Step 2: Create a main.tf file and paste it like below
 
 ```
 module "s3_bucket_for_logs" {
@@ -52,6 +52,14 @@ module "s3_bucket_for_logs" {
 Step 3: Now change it according to your platform requirement. Suppose you want to take bucket name from developer and you want all the remaining values to be same so your main.tf will be like below.
 
 ```
+locals{
+    tr_component_s3_bucket_for_logs = {
+        "defaults" : {
+         "bucket" : "terrarium-test-bucket"
+        }
+    }
+}
+
 module "tr_component_s3_bucket_for_logs" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
@@ -67,7 +75,14 @@ module "tr_component_s3_bucket_for_logs" {
 
   attach_elb_log_delivery_policy = true  # Required for ALB logs
   attach_lb_log_delivery_policy  = true  # Required for ALB/NLB logs
+}
+
+output "tr_component_s3_bucket_id" {
+    value = {for k, v in module.tr_component_s3_bucket_for_logs : k => v.s3_bucket_id }
+}
 ```
+> [!IMPORTANT]
+> For arguments you see in the above code  tr_components_ works with modules , locals and outputs for now so if you want to take arguments from developer just define it in locals  as shown  above 
 
 ### Generate terrarium.yaml file from terraform code
 
