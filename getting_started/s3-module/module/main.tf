@@ -1,17 +1,13 @@
-module "tr_component_s3_bucket_for_logs" {
+module "tr_component_s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
 
-  for_each = local.tr_component_s3_bucket_for_logs
+  for_each = local.tr_component_s3_bucket
   bucket = each.value.bucket
-  acl    = each.value.acl
+  acl    = var.acl
 
-  # Allow deletion of non-empty bucket
-  force_destroy = each.value.force_destroy
+  control_object_ownership = var.control_object_ownership
+  object_ownership         = var.object_ownership
 
-  control_object_ownership = each.value.control_object_ownership
-  object_ownership         = each.value.object_ownership
-
-  attach_elb_log_delivery_policy = each.value.attach_elb_log_delivery_policy  # Required for ALB logs
-  attach_lb_log_delivery_policy  = each.value.attach_lb_log_delivery_policy  # Required for ALB/NLB logs
-}
+  versioning = var.versioning
+  }
