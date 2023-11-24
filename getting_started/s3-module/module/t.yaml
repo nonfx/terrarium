@@ -4,22 +4,6 @@ env_prefix: BA
 
 dependencies:
   - id: ledgerdb
-    use: s3_bucket_for_logs
+    use: s3_bucket
     inputs:
-      acl: "log-delivery-write"
-      attach_elb_log_delivery_policy: true
-      attach_lb_log_delivery_policy:  true
-      bucket: terrarium-test-bucket
-      control_object_ownership: true
-      force_destroy:   true
-      object_ownership: ObjectWriter
-  - id: biosdb
-    use: s3_bucket_for_logs
-    inputs:
-      acl: "log-delivery-write"
-      attach_elb_log_delivery_policy: true
-      attach_lb_log_delivery_policy:  true
-      bucket: terrarium-test-bucket
-      control_object_ownership: true
-      force_destroy:   true
-      object_ownership: ObjectWriter
+      bucket: ollion-banking-app-bucket
