@@ -92,6 +92,7 @@ terrarium platform lint
 
 ### Generated terrarium yaml file 
 
+
 ```
 components:
     - id: s3_bucket_for_logs
@@ -113,3 +114,6 @@ graph:
         - module.tr_component_s3_bucket_for_logs
 
 ```
+
+> [!IMPORTANT]
+> The generated terrarium file shown above is  the configuration yaml which is the metadata of your platform. Now this file can be used anywhere like ?
