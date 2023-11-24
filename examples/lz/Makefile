@@ -82,7 +82,7 @@ endef
 
 $(foreach env,$(REQ_ENVS),$(eval $(call rules_team_env,$(env))))
 
-$(PLATFORM_DIR)/%/terrarium.yaml: $(PLATFORM_DIR)/%/*.tf $(PLATFORM_DIR)/%/*.tfvars
+$(PLATFORM_DIR)/%/terrarium.yaml: $(PLATFORM_DIR)/%/*.tf*
 	rm -f $@
 	terrarium platform lint -d $(dir $@)
 

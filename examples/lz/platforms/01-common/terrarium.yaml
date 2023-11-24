@@ -43,7 +43,7 @@ components:
       outputs:
         type: object
 graph:
-    - id: local.count_env_pg
+    - id: local.count_everything
       requirements:
         - local.tr_component_bucket
         - local.tr_component_environment
@@ -68,7 +68,7 @@ graph:
       requirements: []
     - id: module.vpc
       requirements:
-        - local.count_env_pg
+        - local.count_everything
     - id: output.log_sync_self_link
       requirements:
         - module.log_sync
