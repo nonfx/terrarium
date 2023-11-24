@@ -158,14 +158,18 @@ dependencies:
 
 |  Arguments  |  description |
 |  -----  |  ----------- |
-|  id(root) |  your app ID (Can be anything)          |
-|  name   |   your application name           |
-|  env_prefix | environment name         |
-|  id(under dependencies) |           |
-|  use     | resource that you want to use (like i have used s3_bucket)         |
-|  inputs  |  Inputs that the developer will give like custom bucket name           |
+|  id(root) |  A required identifier for the app in the project. It must start with an alphabet character, can only contain alphanumeric characters, and must not exceed 20 characters in length. |
+|  name   | A human-friendly name for the application. |
+|  env_prefix | The prefix used for environment variables in this app. If not set, it defaults to an empty string. |
+|  id(under dependencies) |   A required identifier for the dependency in the project. It must start with an alphabet character, can only contain alphanumeric characters, and must not exceed 20 characters in length.         |
+|  use     | Indicates the specific dependency interface ID that is used as an app dependency. It may include version as short-hand expression instead of adding version to the inputs block.  |
+|  inputs  |  Represents customization options for the selected dependency interface. It is a key-value map where the keys represent the input names, and the values represent the corresponding input values. |
 
 
+
+#### References
+
+https://github.com/cldcvr/terrarium/blob/himanshu/s3/src/pkg/metadata/app/readme.md
 
 
 
