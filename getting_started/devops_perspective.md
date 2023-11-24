@@ -127,7 +127,8 @@ graph:
 
 #### Steps
 
-Step 1: Create a yaml file lets say banking_app_s3_bucket.yaml. Checkout the code snnipet below
+Step 1: Create a yaml file lets say banking_app_s3_bucket.yaml 
+Checkout the code snnipet below
 
 ```
 id: banking_app
@@ -154,8 +155,10 @@ dependencies:
 Step 2: Generate the .terrarium folder which consist of your platform through banking_app_s3_bucket.yaml file
 
 ```
-terrarium generate -a t.yaml
+terrarium generate -a banking_app_s3_bucket.yaml
 ```
+Here's how your output will be looking like  :point_down:
+
 ![myimage](images/three.png)
 
 ![myimage](images/four.png)
