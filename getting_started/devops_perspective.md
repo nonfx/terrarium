@@ -137,3 +137,37 @@ graph:
 > [!IMPORTANT]
 > The generated terrarium file shown above is  the configuration yaml which is the metadata of your platform.
 
+### how do we write yaml file(the file that will be written by a developer) to get this platform we just created ??
+
+#### Steps
+
+Step 1: Create a yaml file lets say banking_app_s3_bucket.yaml. Checkout the code snnipet below
+
+```
+id: banking_app
+name: Banking App
+env_prefix: BA
+
+dependencies:
+  - id: ledgerdb
+    use: s3_bucket
+    inputs:
+      bucket: ollion-banking-app-bucket
+```
+##### Arguments description
+
+|  Arguments  |  description |
+|  -----  |  ----------- |
+|  id(root) |            |
+|  name   |              |
+|  env_prefix |          |
+|  id(under dependencies) |          |
+|  use     |             |
+|  inputs  |             |
+
+
+
+
+
+
+
