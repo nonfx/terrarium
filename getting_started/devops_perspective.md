@@ -32,53 +32,51 @@ Step 1: Pick up a module for anywhere for eg: i have picked it up from terraform
 Step 2: Create a main.tf file and paste it like below
 
 ```
-module "s3_bucket_for_logs" {
+module "tr_component_s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
-  bucket = "my-s3-bucket-for-logs"
-  acl    = "log-delivery-write"
 
-  # Allow deletion of non-empty bucket
-  force_destroy = true
+  for_each = local.tr_component_s3_bucket
+  bucket = each.value.bucket
+  acl    = var.acl
 
-  control_object_ownership = true
-  object_ownership         = "ObjectWriter"
+  control_object_ownership = var.control_object_ownership
+  object_ownership         = var.object_ownership
 
-  attach_elb_log_delivery_policy = true  # Required for ALB logs
-  attach_lb_log_delivery_policy  = true  # Required for ALB/NLB logs
-}
+  versioning = var.versioning
+  }
 ```
 
 Step 3: Now change it according to your platform requirement. Suppose you want to take bucket name from developer and you want all the remaining values to be same so your main.tf will be like below.
 
 ```
 locals{
-    tr_component_s3_bucket_for_logs = {
-        "defaults" : {
+    tr_component_s3_bucket = {
+        "default" : {
          "bucket" : "terrarium-test-bucket"
         }
     }
 }
 
-module "tr_component_s3_bucket_for_logs" {
+module "tr_component_s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
-  for_each = local.tr_component_s3_bucket_for_logs
+
+  for_each = local.tr_component_s3_bucket
   bucket = each.value.bucket
-  acl    = "log-delivery-write"
+  acl    = var.acl
 
-  # Allow deletion of non-empty bucket
-  force_destroy = true
+  control_object_ownership = var.control_object_ownership
+  object_ownership         = var.object_ownership
 
-  control_object_ownership = true
-  object_ownership         = "ObjectWriter"
-
-  attach_elb_log_delivery_policy = true  # Required for ALB logs
-  attach_lb_log_delivery_policy  = true  # Required for ALB/NLB logs
-}
+  versioning = var.versioning
+  }
 
 output "tr_component_s3_bucket_id" {
-    value = {for k, v in module.tr_component_s3_bucket_for_logs : k => v.s3_bucket_id }
+    value = {for k, v in module.tr_component_s3_bucket : k => v.s3_bucket_id }
+}
+output "tr_component_s3_bucket_arn" {
+    value = {for k, v in module.tr_component_s3_bucket : k => v.s3_bucket_arn }
 }
 ```
 > [!IMPORTANT]
@@ -95,24 +93,46 @@ terrarium platform lint
 
 ```
 components:
-    - id: s3_bucket_for_logs
-      title: S3 Bucket For Logs
-      inputs: {}
+    - id: s3_bucket
+      title: S3 Bucket
+      inputs:
+        type: object
+        properties:
+            bucket:
+                title: Bucket
+                type: string
+                default: terrarium-test-bucket
       outputs:
         type: object
+        properties:
+            arn:
+                title: Arn
+            id:
+                title: Id
 graph:
-    - id: local.tr_component_s3_bucket_for_logs
+    - id: local.tr_component_s3_bucket
       requirements: []
-    - id: module.tr_component_s3_bucket_for_logs
+    - id: module.tr_component_s3_bucket
       requirements:
-        - local.tr_component_s3_bucket_for_logs
+        - local.tr_component_s3_bucket
+        - var.acl
+        - var.control_object_ownership
+        - var.object_ownership
+        - var.versioning
     - id: output.tr_component_s3_bucket_arn
       requirements:
-        - module.tr_component_s3_bucket_for_logs
+        - module.tr_component_s3_bucket
     - id: output.tr_component_s3_bucket_id
       requirements:
-        - module.tr_component_s3_bucket_for_logs
-
+        - module.tr_component_s3_bucket
+    - id: var.acl
+      requirements: []
+    - id: var.control_object_ownership
+      requirements: []
+    - id: var.object_ownership
+      requirements: []
+    - id: var.versioning
+      requirements: []
 ```
 
 > [!IMPORTANT]
