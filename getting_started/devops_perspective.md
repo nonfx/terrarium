@@ -22,8 +22,7 @@ examples/platform-demo/platform
 
 ### How to write a basic platform ??
 
-# Let say we have a requirement for s3 bucket which store logs for ALB.
-
+# Let say we have a requirement for s3 bucket.
 # Steps
 
 Step 1: Pick up a module for anywhere for eg: i have picked it up from terraform registry
@@ -136,4 +135,5 @@ graph:
 ```
 
 > [!IMPORTANT]
-> The generated terrarium file shown above is  the configuration yaml which is the metadata of your platform. Now this file can be used anywhere like ?
+> The generated terrarium file shown above is  the configuration yaml which is the metadata of your platform.
+
