@@ -81,29 +81,176 @@ func TestSetDefaults(t *testing.T) {
 	assert.Equal(t, apps[0].Dependencies[0].Inputs["version"], "11")
 }
 
-func TestValidate(t *testing.T) {
-	apps := getAppsTest()
+func TestAppsValidate(t *testing.T) {
+	tests := []struct {
+		name        string
+		apps        Apps
+		expectError string
+	}{
+		{
+			name: "Valid Apps",
+			apps: func() Apps {
+				return getAppsTest()
+			}(),
+		},
+		{
+			name: "Empty App ID",
+			apps: func() Apps {
+				apps := getAppsTest()
+				apps[0].ID = ""
+				return apps
+			}(),
+			expectError: "app id must not be empty",
+		},
+		{
+			name: "Duplicate App ID",
+			apps: func() Apps {
+				apps := getAppsTest()
+				apps[0].ID = apps[1].ID
+				return apps
+			}(),
+			expectError: "duplicate app ID: testapp2",
+		},
+		{
+			name: "Empty Dependency ID",
+			apps: func() Apps {
+				apps := getAppsTest()
+				apps[0].Dependencies[0].ID = ""
+				return apps
+			}(),
+			expectError: "dependency `id` field must not be empty",
+		},
+		{
+			name: "Duplicate Dependency ID",
+			apps: func() Apps {
+				apps := getAppsTest()
+				apps[0].Dependencies[1].NoProvision = false
+				return apps
+			}(),
+			expectError: "duplicate dependency ID: testdep3",
+		},
+		{
+			name: "Un-provisioned Shared Dependency",
+			apps: func() Apps {
+				apps := getAppsTest()
+				apps = apps[:1]
+				return apps
+			}(),
+			expectError: "shared dependency not provisioned: testdep3",
+		},
+	}
 
-	assert.Nil(t, apps.Validate())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.apps.Validate()
 
-	apps[0].ID = ""
-	assert.ErrorContains(t, apps.Validate(), "app id must not be empty")
+			if tt.expectError != "" {
+				assert.ErrorContains(t, err, tt.expectError)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
 
-	apps = getAppsTest()
-	apps[0].ID = apps[1].ID
-	assert.ErrorContains(t, apps.Validate(), "duplicate app ID: testapp2")
+func TestAppValidate(t *testing.T) {
+	tests := []struct {
+		name        string
+		app         App
+		expectError string
+	}{
+		{
+			name: "Valid App",
+			app:  getAppsTest()[1],
+		},
+		{
+			name: "Valid App with NoProvision",
+			app:  getAppsTest()[0],
+		},
+		{
+			name: "Empty App ID",
+			app: func() App {
+				app := getAppsTest()[0]
+				app.ID = ""
+				return app
+			}(),
+			expectError: "app id must not be empty",
+		},
+		{
+			name: "Empty Dependency ID",
+			app: func() App {
+				app := getAppsTest()[0]
+				app.Dependencies[0].ID = ""
+				return app
+			}(),
+			expectError: "dependency `id` field must not be empty for",
+		},
+		{
+			name: "Duplicate Dependency ID",
+			app: func() App {
+				app := getAppsTest()[1]
+				app.Dependencies[0].ID = app.Dependencies[1].ID
+				return app
+			}(),
+			expectError: "duplicate dependency ID: testdep4",
+		},
+	}
 
-	apps = getAppsTest()
-	apps[0].Dependencies[0].ID = ""
-	assert.ErrorContains(t, apps.Validate(), "dependency id must not be empty")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.app.Validate()
 
-	apps = getAppsTest()
-	apps[0].Dependencies[1].NoProvision = false
-	assert.ErrorContains(t, apps.Validate(), "duplicate dependency ID: testdep3")
+			if tt.expectError != "" {
+				assert.ErrorContains(t, err, tt.expectError)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
 
-	apps = getAppsTest()
-	apps = apps[:1]
-	assert.ErrorContains(t, apps.Validate(), "shared dependency not provisioned: testdep3")
+func TestDependencyValidate(t *testing.T) {
+	tests := []struct {
+		name    string
+		dep     Dependency
+		wantErr string
+	}{
+		{
+			name: "Valid Dependency",
+			dep: Dependency{
+				ID:  "dep1",
+				Use: "dep",
+			},
+		},
+		{
+			name: "Empty Dependency ID",
+			dep: Dependency{
+				ID:  "",
+				Use: "dep",
+			},
+			wantErr: "dependency `id` field must not be empty",
+		},
+		{
+			name: "Empty Dependency Use field",
+			dep: Dependency{
+				ID:  "dep1",
+				Use: "",
+			},
+			wantErr: "dependency `use` field must not be empty",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.dep.Validate()
+
+			if tt.wantErr != "" {
+				assert.ErrorContains(t, err, tt.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }
 
 func TestGetAppByID(t *testing.T) {
