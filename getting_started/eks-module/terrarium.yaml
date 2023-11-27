@@ -1,0 +1,104 @@
+components:
+    - id: eks
+      title: Eks
+      inputs:
+        type: object
+        properties:
+            cluster_endpoint_public_access:
+                title: Cluster Endpoint Public Access
+                type: boolean
+                default: true
+            cluster_name:
+                title: Cluster Name
+                type: string
+                default: my-cluster
+            cluster_version:
+                title: Cluster Version
+                type: string
+                default: "1.27"
+      outputs:
+        type: object
+        properties:
+            cluster_arn:
+                title: Cluster Arn
+            cluster_endpoint:
+                title: Cluster Endpoint
+            cluster_id:
+                title: Cluster Id
+            cluster_status:
+                title: Cluster Status
+            cluster_version:
+                title: Cluster Version
+            oidc_provider:
+                title: Oidc Provider
+            oidc_provider_arn:
+                title: Oidc Provider Arn
+graph:
+    - id: local.tr_component_eks
+      requirements: []
+    - id: module.tr_component_eks
+      requirements:
+        - local.tr_component_eks
+        - var.aws_auth_accounts
+        - var.aws_auth_roles
+        - var.aws_auth_users
+        - var.cluster_addons
+        - var.control_plane_subnet_ids
+        - var.eks_managed_node_group_defaults
+        - var.eks_managed_node_groups
+        - var.fargate_profiles
+        - var.manage_aws_auth_configmap
+        - var.self_managed_node_group_defaults
+        - var.self_managed_node_groups
+        - var.subnet_ids
+        - var.tags
+        - var.vpc_id
+    - id: output.tr_component_eks_cluster_arn
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_cluster_endpoint
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_cluster_id
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_cluster_status
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_cluster_version
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_oidc_provider
+      requirements:
+        - module.tr_component_eks
+    - id: output.tr_component_eks_oidc_provider_arn
+      requirements:
+        - module.tr_component_eks
+    - id: var.aws_auth_accounts
+      requirements: []
+    - id: var.aws_auth_roles
+      requirements: []
+    - id: var.aws_auth_users
+      requirements: []
+    - id: var.cluster_addons
+      requirements: []
+    - id: var.control_plane_subnet_ids
+      requirements: []
+    - id: var.eks_managed_node_group_defaults
+      requirements: []
+    - id: var.eks_managed_node_groups
+      requirements: []
+    - id: var.fargate_profiles
+      requirements: []
+    - id: var.manage_aws_auth_configmap
+      requirements: []
+    - id: var.self_managed_node_group_defaults
+      requirements: []
+    - id: var.self_managed_node_groups
+      requirements: []
+    - id: var.subnet_ids
+      requirements: []
+    - id: var.tags
+      requirements: []
+    - id: var.vpc_id
+      requirements: []
