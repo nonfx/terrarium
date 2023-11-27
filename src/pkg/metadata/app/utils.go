@@ -9,46 +9,82 @@ import (
 	"github.com/rotisserie/eris"
 )
 
-// Validates the uniqueness of application and dependency IDs across all apps.
+// Validate ensures that each application and its dependencies have unique IDs within the scope of all applications.
+// It also checks that shared dependencies are provisioned.
 func (apps Apps) Validate() error {
-	seenAppIDs := make(map[string]struct{})
-	seenDepIDs := make(map[string]struct{})
-	sharedDepIDs := make(map[string]struct{})
+	seenAppIDs := make(map[string]struct{})   // Tracks observed application IDs for uniqueness.
+	seenDepIDs := make(map[string]struct{})   // Tracks observed dependency IDs for uniqueness.
+	sharedDepIDs := make(map[string]struct{}) // Tracks IDs of dependencies marked as shared.
 
 	for _, app := range apps {
-		if app.ID == "" {
-			return eris.New("app id must not be empty")
-		}
-
-		// App ID must be unique across all apps
-		if _, exists := seenAppIDs[app.ID]; exists {
-			return eris.New("duplicate app ID: " + app.ID)
-		}
-		seenAppIDs[app.ID] = struct{}{}
-
-		for i, dep := range app.GetDependencies() {
-			if dep.ID == "" {
-				return eris.Errorf("dependency id must not be empty for: %s (%d)", dep.Use, i)
-			}
-
-			// Dependency ID to provision must be unique in a project
-			if _, exists := seenDepIDs[dep.ID]; !dep.NoProvision && exists {
-				return eris.New("duplicate dependency ID: " + dep.ID)
-			}
-
-			if dep.NoProvision {
-				sharedDepIDs[dep.ID] = struct{}{}
-			} else {
-				seenDepIDs[dep.ID] = struct{}{}
-			}
+		// Validate each application and its dependencies.
+		if err := app.validate(seenAppIDs, seenDepIDs, sharedDepIDs); err != nil {
+			return err
 		}
 	}
 
-	// shared dependency must have a provisioned instance with same ID.
+	// Ensure that each shared dependency is provisioned.
 	for depID := range sharedDepIDs {
 		if _, exists := seenDepIDs[depID]; !exists {
 			return eris.New("shared dependency not provisioned: " + depID)
 		}
+	}
+
+	return nil
+}
+
+// Validate ensures that the application and its dependencies have unique IDs within the scope of the given applications.
+func (app *App) Validate() error {
+	return app.validate(map[string]struct{}{}, map[string]struct{}{}, map[string]struct{}{})
+}
+
+// validate checks the uniqueness of the app's ID and its dependencies' IDs.
+func (app *App) validate(seenAppIDs, seenDepIDs, sharedDepIDs map[string]struct{}) error {
+	if app.ID == "" {
+		return eris.New("app id must not be empty")
+	}
+
+	// Ensure the app's ID is unique.
+	if _, exists := seenAppIDs[app.ID]; exists {
+		return eris.New("duplicate app ID: " + app.ID)
+	}
+	seenAppIDs[app.ID] = struct{}{}
+
+	for _, dep := range app.GetDependencies() {
+		// Validate each dependency within the context of the app.
+		if err := dep.validate(seenDepIDs, sharedDepIDs); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Validate if the dependency ID is set
+func (dep *Dependency) Validate() error {
+	return dep.validate(map[string]struct{}{}, map[string]struct{}{})
+}
+
+// validate checks the uniqueness of a dependency's ID and tracks shared dependencies.
+func (dep *Dependency) validate(seenDepIDs, sharedDepIDs map[string]struct{}) error {
+	if dep.ID == "" {
+		return eris.Errorf("dependency `id` field must not be empty for: %s", dep.Use)
+	}
+
+	if dep.Use == "" {
+		return eris.Errorf("dependency `use` field must not be empty for: %s", dep.ID)
+	}
+
+	// Ensure the dependency's ID is unique unless it's marked as NoProvision.
+	if _, exists := seenDepIDs[dep.ID]; !dep.NoProvision && exists {
+		return eris.New("duplicate dependency ID: " + dep.ID)
+	}
+
+	// Track the dependency ID as either shared or seen based on its provisioning status.
+	if dep.NoProvision {
+		sharedDepIDs[dep.ID] = struct{}{}
+	} else {
+		seenDepIDs[dep.ID] = struct{}{}
 	}
 
 	return nil
