@@ -55,7 +55,7 @@ func TestNewCmd(t *testing.T) {
 			},
 			Args:     []string{},
 			WantErr:  true,
-			ExpError: "invalid inputs",
+			ExpError: "invalid PlatformId: value must be a valid UUID | caused by: invalid uuid format",
 		},
 		{
 			Name: "error connecting to db",

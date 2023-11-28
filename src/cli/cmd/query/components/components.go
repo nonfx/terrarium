@@ -4,6 +4,8 @@
 package components
 
 import (
+	"strings"
+
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/cli/internal/utils"
 	"github.com/cldcvr/terrarium/src/pkg/db"
@@ -45,7 +47,8 @@ func NewCmd() *cobra.Command {
 func queryComponents(cmd *cobra.Command, args []string) error {
 	err := flags.Validate()
 	if err != nil {
-		return eris.Wrap(err, "invalid inputs")
+		msg := strings.ReplaceAll(err.Error(), "ListComponentsRequest.", "")
+		return eris.New(msg)
 	}
 
 	g, err := config.DBConnect()
