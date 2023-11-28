@@ -71,14 +71,14 @@ func (cArr *Components) Parse(platformModule *tfconfig.Module) {
 }
 
 func (c *Component) fetchInputs(m *tfconfig.Module) {
+	if c.Inputs == nil {
+		c.Inputs = &jsonschema.Node{}
+	}
+
 	varName := ComponentPrefix + c.ID
 	v := m.Locals[varName]
 	if v == nil {
 		return
-	}
-
-	if c.Inputs == nil {
-		c.Inputs = &jsonschema.Node{}
 	}
 
 	fieldDoc := getLocalInputBlockDocs(v)
