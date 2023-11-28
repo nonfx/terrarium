@@ -16,7 +16,8 @@ import (
 func createTestPlatformModule() *tfconfig.Module {
 	return &tfconfig.Module{
 		ModuleCalls: map[string]*tfconfig.ModuleCall{
-			"tr_component_test": {},
+			"tr_component_test":  {},
+			"tr_component_test2": {},
 		},
 		Locals: map[string]*tfconfig.Local{
 			"tr_component_test": &tfconfig.Local{
@@ -53,7 +54,7 @@ func TestNewComponents(t *testing.T) {
 	module := createTestPlatformModule()
 	components := NewComponents(module)
 
-	assert.Len(t, components, 1, "Number of components should be 1")
+	assert.Len(t, components, 2, "Number of components should be 2")
 	assert.Equal(t, "test", components[0].ID, "Component ID should be 'test'")
 	assert.Equal(t, "value1", components[0].Inputs.Properties["input1"].Default, "Default value for input1 should be 'value1'")
 	assert.Equal(t, 42.0, components[0].Inputs.Properties["input2"].Default, "Default value for input2 should be 42")
@@ -88,7 +89,7 @@ func TestComponents_Parse(t *testing.T) {
 	components := Components{}
 	components.Parse(module)
 
-	assert.Len(t, components, 1, "Number of components should be 1 after parsing")
+	assert.Len(t, components, 2, "Number of components should be 1 after parsing")
 	assert.Equal(t, "test", components[0].ID, "Component ID should be 'test'")
 	assert.Equal(t, "value1", components[0].Inputs.Properties["input1"].Default, "Default value for input1 should be 'value1'")
 	assert.Equal(t, 42.0, components[0].Inputs.Properties["input2"].Default, "Default value for input2 should be 42")
@@ -111,6 +112,12 @@ func TestComponent_fetchInputs(t *testing.T) {
 	assert.Equal(t, 42.0, component.Inputs.Properties["input2"].Default, "Default value for input2 should be 42")
 	assert.Equal(t, true, component.Inputs.Properties["input3"].Default, "Default value for input3 should be true")
 	assert.Equal(t, "array", component.Inputs.Properties["input4"].Type, "Type value for input4 should be array")
+
+	component2 := components.GetByID("test2")
+	assert.NotNil(t, component2, "Component with ID 'test' should be found")
+
+	component.fetchInputs(module)
+	assert.NotNil(t, component2.Inputs, "Inputs should not be nil after fetching")
 }
 
 func TestComponent_fetchOutputs(t *testing.T) {
