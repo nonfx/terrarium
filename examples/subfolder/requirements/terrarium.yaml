@@ -1,0 +1,56 @@
+id: folder
+
+dependencies:
+  - id: common
+    use: folder
+    inputs:
+      display_name: "test1"
+      parent: "folders/802470219928"
+  - id: apac
+    use: folder
+    inputs:
+      display_name: "test2"
+      parent: "folders/802470219928"
+  - id: canada
+    use: folder
+    inputs:
+      display_name: "test3"
+      parent: "folders/802470219928"
+  - id: shared
+    use: subfolder
+    inputs:
+      display_name: "test4"
+      id: "apac"
+  - id: dev
+    use: subfolder
+    inputs:
+      display_name: "test5"
+      id: "apac"
+  - id: monitoring
+    use: subfolder1
+    inputs:
+      display_name: "monitoring-folder"
+      id: "shared"
+
+  - id: prod-project
+    use: project
+    inputs:
+      name: "p-proj-test"
+      project_id: "p-proj-700"
+      id: "apac"
+      billing_account: "017769-C68281-DA1844"
+      auto_create_network: false
+      labels: {}
+      skip_delete: false
+      service: []
+  - id: dev-project
+    use: project
+    inputs:
+      name: "d-prj-test"
+      project_id: "d-prj-100"
+      id: "apac"
+      billing_account: "017769-C68281-DA1844"
+      auto_create_network: false
+      labels: {}
+      skip_delete: false
+      service: []
