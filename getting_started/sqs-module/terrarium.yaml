@@ -1,0 +1,48 @@
+components:
+    - id: sqs
+      title: Sqs
+      inputs:
+        type: object
+        properties:
+            name:
+                title: Name
+                type: string
+                default: ollion-sqs
+      outputs:
+        type: object
+        properties:
+            arn:
+                title: Arn
+            id:
+                title: Id
+            name:
+                title: Name
+            url:
+                title: Url
+graph:
+    - id: local.tr_component_sqs
+      requirements: []
+    - id: module.tr_component_sqs
+      requirements:
+        - local.tr_component_sqs
+        - var.kms_data_key_reuse_period_seconds
+        - var.kms_master_key_id
+        - var.tags
+    - id: output.tr_component_sqs_arn
+      requirements:
+        - module.tr_component_sqs
+    - id: output.tr_component_sqs_id
+      requirements:
+        - module.tr_component_sqs
+    - id: output.tr_component_sqs_name
+      requirements:
+        - module.tr_component_sqs
+    - id: output.tr_component_sqs_url
+      requirements:
+        - module.tr_component_sqs
+    - id: var.kms_data_key_reuse_period_seconds
+      requirements: []
+    - id: var.kms_master_key_id
+      requirements: []
+    - id: var.tags
+      requirements: []
