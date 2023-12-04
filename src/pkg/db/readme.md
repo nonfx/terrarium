@@ -51,7 +51,7 @@ erDiagram
         string taxonomy_level_2
         string taxonomy_level_3
     }
-    "dependecies" {
+    "dependencies" {
         string id PK
         string taxonomy_id FK
         string interface_id
@@ -59,6 +59,21 @@ erDiagram
         string description
         json inputs
         json outputs
+    }
+    "platforms" {
+        string id PK
+        string title
+        string description
+        string repo_url
+        string repo_directory
+        string commit_sha
+        string ref_label
+        enum label_type
+    }
+    "platform_component" {
+        string id PK
+        string platform_id FK
+        string dependency_id FK
     }
 
     %% Define relationships
@@ -69,5 +84,7 @@ erDiagram
     "tf_module_attributes" }|--|| "tf_resource_attributes" : related_resource_type_attribute_id
     "taxonomies" ||--|{ "tf_resource_types" : has
     "tf_provider" ||--|{ "tf_resource_types" : has
-    "dependecies" ||--|{ "taxonomies" : has
+    "dependencies" ||--|{ "taxonomies" : has
+    "dependencies" ||--|{ "platform_component" : implemented_in
+    "platforms" ||--|{ "platform_component" : has
 ```
