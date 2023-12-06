@@ -59,10 +59,18 @@ func writeTF(g platform.Graph, destDir string, apps app.Apps, tfModule *tfconfig
 		}
 	}
 
-	if profileName != "" {
-		if err := copyProfileConfigurationFile(tfModule.Path, profileName, destDir); err != nil {
-			return count, err
-		}
+	// copy base files to the generated code.
+	err = copyBaseFiles(tfModule.Path, destDir)
+	if err != nil {
+		return count, err
+	}
+
+	if profileName == "" {
+		return count, nil
+	}
+
+	if err := copyProfileConfigurationFile(tfModule.Path, profileName, destDir); err != nil {
+		return count, err
 	}
 
 	return count, nil
@@ -260,6 +268,26 @@ func copyProfileConfigurationFile(moduleDirPath string, profileName string, code
 	return nil
 }
 
+// copyBaseFiles copy all files from src dir to dest dir that
+// matches the following file name pattern: 'tr_base*.tf'
+func copyBaseFiles(srcDirPath, destDirPath string) error {
+	pattern := filepath.Join(srcDirPath, "tr_base*.tf")
+	files, err := filepath.Glob(pattern)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		filename := filepath.Base(file)
+		destFile := filepath.Join(destDirPath, filename)
+		if err := copyFile(file, destFile); err != nil {
+			return eris.Wrapf(err, "failed to copy the file '%s'", filename)
+		}
+	}
+
+	return nil
+}
+
 func getProfileVariableInputSourceFile(moduleDirPath string, profileName string) (filePath string, err error) {
 	profileSourceFileName := fmt.Sprintf("%s.%s", profileName, "tfvars")
 	profileSourceFilePath := path.Join(moduleDirPath, profileSourceFileName)
@@ -291,13 +319,13 @@ func getProfileVariableInputDestFile(destDirPath string) (filePath string, err e
 func copyFile(srcPath string, dstPath string) error {
 	source, err := os.Open(srcPath)
 	if err != nil {
-		return eris.Wrapf(err, "could not open copy source file '%s'", srcPath)
+		return eris.Wrapf(err, "could not open source file '%s'", srcPath)
 	}
 	defer source.Close()
 
 	destination, err := os.Create(dstPath)
 	if err != nil {
-		return eris.Wrapf(err, "could not create copy destination file '%s'", srcPath)
+		return eris.Wrapf(err, "could not create destination file '%s'", srcPath)
 	}
 	defer destination.Close()
 
