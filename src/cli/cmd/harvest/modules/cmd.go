@@ -33,19 +33,26 @@ func NewCmd() *cobra.Command {
 	cmd = &cobra.Command{
 		Use:     "modules",
 		Aliases: []string{"mo"},
-		Short:   "Scrapes Terraform modules and attributes from the terraform directory",
+		Short:   "Harvests Terraform modules and attributes into the database",
 		Long: heredoc.Doc(`
-			The 'modules' command scrapes all Terraform modules and its attributes from the specified terraform directory.
+			The 'modules' command harvests all Terraform modules and their attributes into the database.
 
-			Prerequisite: Run "terraform init" in the directory before using this command.
+			This command can operate in two modes:
+			1. Direct scraping from a specified Terraform directory.
+			2. Processing a list of modules specified in a module list file.
+
+			For direct scraping, ensure to run "terraform init" in the Terraform directory before using this command.
+			When using a module list file, the command processes only the specified modules.
+
+			Additional flags allow including local modules and specifying a working directory for improved performance.
 		`),
 		RunE: cmdRunE,
 	}
 
-	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
-	cmd.Flags().BoolVarP(&flagIncludeLocal, "enable-local-modules", "l", false, "A boolean flag to control include/exclude of local modules")
-	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "store all module sources in this directory; improves performance by reusing data between harvest commands")
+	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "Path to the Terraform directory")
+	cmd.Flags().BoolVarP(&flagIncludeLocal, "enable-local-modules", "l", false, "Include local modules in the scraping process")
+	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "Path to a file listing modules to process. In this mode, 'terraform init' and 'terraform providers schema -json' are executed automatically. More details at https://github.com/cldcvr/terrarium/blob/main/src/pkg/metadata/modulelist/readme.md")
+	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "Directory for storing module sources. Using a workdir improves performance by reusing data between harvesting multiple modules. This flag should be used in conjunction with 'module-list-file'.")
 
 	return cmd
 }

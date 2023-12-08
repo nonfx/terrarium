@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/charmbracelet/log"
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/cli/internal/config"
@@ -29,13 +30,17 @@ func NewCmd() *cobra.Command {
 	cmd = &cobra.Command{
 		Use:   "mappings",
 		Short: "Scrapes resource attribute mappings from the terraform directory",
-		Long:  "The 'mappings' command scrapes resource attribute mappings from the specified terraform directory.",
-		RunE:  cmdRunE,
+		Long: heredoc.Doc(
+			`The 'mappings' command scrapes resource attribute mappings from the specified terraform directory.
+			It parses Terraform code and its modules to find mappings between input and output resource attributes,
+			such as linking an input attribute of one resource to an output attribute of another.
+		`),
+		RunE: cmdRunE,
 	}
 
-	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "terraform directory path")
-	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "store all module sources in this directory; improves performance by reusing data between harvest commands")
+	cmd.Flags().StringVarP(&flagTFDir, "dir", "d", ".", "Path to the Terraform directory")
+	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "Path to a file listing modules to process. In this mode, 'terraform init' and 'terraform providers schema -json' are executed automatically. More details at https://github.com/cldcvr/terrarium/blob/main/src/pkg/metadata/modulelist/readme.md")
+	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "Directory for storing module sources. Using a workdir improves performance by reusing data between harvesting multiple modules. This flag should be used in conjunction with 'module-list-file'.")
 
 	return cmd
 }

@@ -1,6 +1,6 @@
-# Farm Module List File Format
+# Module List File Format
 
-Module list can be used to provide Terraform modules to be loaded by CLI `harvest` commands.
+The Module List File Format is used to specify Terraform modules for the `harvest` CLI commands. This format allows for more efficient module management and initialization.
 
 ## Overview
 
@@ -12,20 +12,35 @@ In case of the module list file the CLI performs workspace initialization for ea
 
 ## Module List File Structure
 
-Each entry has a required `source` and an optional `version` attribute that maps to Terraform module call `source` and `version` attributes.
-In addition to these each may also declare a boolean `export` attribute. Only modules that set it to `true` will be processed by the `module-harvest` command - i.e. will be included in the user's module library.
-Finally each entry must declare a unique `name` identifier. This value will be used as exported module's name in the library.
+Each module entry in the list must include:
+
+- `name`: A unique identifier for the module (required).
+- `source`: The Terraform module source (required).
+- `version`: The Terraform module version (optional).
+- `export`: A boolean indicating if the module should be processed by the module harvest command (optional).
+- `group`: A string to group compatible modules for efficient initialization (optional).
+
+Modules with the `export` attribute set to `true` are included in the user's module library. Those without it or set to `false` are used only for resource attribute discovery and mapping.
+
+The `group` attribute allows users to specify a group name for compatible modules. Modules in the same group are initialized together, which can significantly speed up the `terraform init` process. This is particularly useful for large sets of modules with shared dependencies.
 
 ## Example Module List File
 
 ```yaml
 farm:
-  - name: vpc # REQUIRED: unique user-defined module name (will be used as name for exported modules)
-    source: "terraform-aws-modules/vpc/aws" # REQUIRED: Terraform module source
-    version: "4.0.2" # OPTIONAL: Terraform module version
-    export: true # OPTIONAL: if true the module can be imported to the module library, otherwise it will be used only in discovery of resource attributes and mappings
+  - name: vpc
+    source: "terraform-aws-modules/vpc/aws"
+    version: "4.0.2"
+    export: true
+    group: "group1" # Grouping modules for efficient initialization
   - name: voting-demo
     source: "github.com/cldcvr/codepipes-tutorials//voting/infra/aws/eks?ref=terrarium-sources"
-    export: false # this modules will only be used to discover resource attributes and mappings between resources
-
+    export: false
+    group: "group1" # Same group as 'vpc' for shared initialization
+  - name: rds
+    source: "terraform-aws-modules/rds/aws"
+    export: true
+    group: "group2" # Different group for separate initialization
 ```
+
+In this example, `vpc` and `voting-demo` are part of the `group1` group and will be initialized together, while `database` is in a separate `group2` group.

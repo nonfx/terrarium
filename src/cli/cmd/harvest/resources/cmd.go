@@ -25,23 +25,33 @@ var (
 	flagWorkDir        string
 )
 
+const DefaultSchemaPath = ".terraform/providers/schema.json"
+
 func NewCmd() *cobra.Command {
 	cmd = &cobra.Command{
 		Use:     "resources",
 		Aliases: []string{"res"},
-		Short:   "Harvests Terraform resources and attributes using the provider schema json",
+		Short:   "Harvests Terraform providers, resource types, and resource attributes",
 		Long: heredoc.Docf(`
-			Harvests Terraform resources and attributes using the provider schema json.
+			Harvests Terraform providers, resource types, and resource attributes.
 
-			This command requires terraform provider schema already generated. To do that, run:
+			This command operates in two modes:
+			1. Using a pre-generated provider schema JSON file.
+			2. Using a module list file, where 'terraform init' and 'terraform providers schema -json'
+			   are executed automatically for multiple given modules.
+
+			For the first mode, ensure the provider schema JSON file is generated using:
 				terraform init && terraform providers schema -json > %s
+
+			In the second mode, only specify a module list file, and the necessary Terraform commands
+			are run internally to generate the required data.
 		`, DefaultSchemaPath),
 		RunE: cmdRunE,
 	}
 
-	cmd.Flags().StringVarP(&flagSchemaFile, "schema-file", "s", DefaultSchemaPath, "terraform provider schema json file path")
-	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "list file of modules to process")
-	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "store all module sources in this directory; improves performance by reusing data between harvest commands")
+	cmd.Flags().StringVarP(&flagSchemaFile, "schema-file", "s", DefaultSchemaPath, "Path to the Terraform provider schema JSON file. Use this for the first mode of operation.")
+	cmd.Flags().StringVarP(&flagModuleListFile, "module-list-file", "f", "", "Path to a file listing modules to process. In this mode, 'terraform init' and 'terraform providers schema -json' are executed automatically. More details at https://github.com/cldcvr/terrarium/blob/main/src/pkg/metadata/modulelist/readme.md")
+	cmd.Flags().StringVarP(&flagWorkDir, "workdir", "w", "", "Directory for storing module sources. Using a workdir improves performance by reusing data between harvesting multiple modules. This flag should be used in conjunction with 'module-list-file'.")
 
 	return cmd
 }
@@ -53,10 +63,13 @@ func cmdRunE(cmd *cobra.Command, _ []string) error {
 		return eris.Wrapf(err, "error connecting to the database")
 	}
 
+	// First mode - using schema file
 	if flagModuleListFile == "" {
 		fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from the provider schema JSON file at '%s'...\n", flagSchemaFile)
 		return loadFrom(g, flagSchemaFile)
 	}
+
+	// Second mode using module list file
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Loading modules from modules list YAML file '%s'...\n", flagModuleListFile)
 	moduleList, err := modulelist.LoadFarmModules(flagModuleListFile)
