@@ -13,6 +13,7 @@ import (
 	"github.com/cldcvr/terrarium/src/pkg/pb/terrariumpb"
 	"github.com/rotisserie/eris"
 	"github.com/xeipuuv/gojsonschema"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type Node struct {
@@ -158,5 +159,30 @@ func (n *Node) ToProto() *terrariumpb.JSONSchema {
 		}
 	}
 
+	if n.Default != nil {
+		switch defaultValue := n.Default.(type) {
+		case float64:
+			protoSchema.Default = &structpb.Value{
+				Kind: &structpb.Value_NumberValue{
+					NumberValue: defaultValue,
+				},
+			}
+		case int:
+			protoSchema.Default = &structpb.Value{
+				Kind: &structpb.Value_NumberValue{
+					NumberValue: float64(defaultValue),
+				},
+			}
+		case string:
+			protoSchema.Default = &structpb.Value{
+				Kind: &structpb.Value_StringValue{
+					StringValue: defaultValue,
+				},
+			}
+		// Add more cases as needed for other types
+		default:
+			protoSchema.Default = nil
+		}
+	}
 	return protoSchema
 }

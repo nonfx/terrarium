@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xeipuuv/gojsonschema"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func TestNode_Compile(t *testing.T) {
@@ -251,6 +252,121 @@ func TestNode_ToProto(t *testing.T) {
 			jsn:  nil,
 			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
 				require.Nil(t, result)
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSONSchema with Default float",
+			jsn: &Node{
+				Title:       "Test Title",
+				Description: "Test Description",
+				Type:        "object",
+				Properties: map[string]*Node{
+					"property1": {
+						Title: "Property 1",
+						Type:  "string",
+					},
+					"property2": {
+						Title: "Property 2",
+						Type:  "integer",
+					},
+				},
+				Default: 80.0, // Adding a Default value of type float64
+			},
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.NotNil(t, result)
+				assert.Equal(t, "Test Title", result.Title)
+				assert.Equal(t, "Test Description", result.Description)
+				assert.Equal(t, "object", result.Type)
+				require.Len(t, result.Properties, 2)
+				assert.NotNil(t, result.Properties["property1"])
+				assert.NotNil(t, result.Properties["property2"])
+
+				// Asserting the Default field value
+				require.NotNil(t, result.Default)
+				assert.IsType(t, &structpb.Value_NumberValue{}, result.Default.Kind)
+				defaultValue := result.Default.GetNumberValue()
+				assert.Equal(t, float64(80.0), defaultValue)
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSONSchema with Default int",
+			jsn: &Node{
+				Title:       "Test Title",
+				Description: "Test Description",
+				Type:        "object",
+				Properties: map[string]*Node{
+					"property1": {
+						Title: "Property 1",
+						Type:  "string",
+					},
+					"property2": {
+						Title: "Property 2",
+						Type:  "integer",
+					},
+				},
+				Default: 100, // Adding a Default value of type int
+			},
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.NotNil(t, result)
+				assert.NotNil(t, result.Default)
+
+				intValue, ok := result.Default.GetKind().(*structpb.Value_NumberValue)
+				require.True(t, ok, "Expected Default to be of type int")
+				assert.Equal(t, float64(100), intValue.NumberValue)
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSONSchema with Default string",
+			jsn: &Node{
+				Title:       "Test Title",
+				Description: "Test Description",
+				Type:        "object",
+				Properties: map[string]*Node{
+					"property1": {
+						Title: "Property 1",
+						Type:  "string",
+					},
+					"property2": {
+						Title: "Property 2",
+						Type:  "integer",
+					},
+				},
+				Default: "hello", // Adding a Default value of type string
+			},
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.NotNil(t, result)
+				assert.NotNil(t, result.Default)
+
+				stringValue, ok := result.Default.GetKind().(*structpb.Value_StringValue)
+				require.True(t, ok, "Expected Default to be of type string")
+				assert.Equal(t, "hello", stringValue.StringValue)
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSONSchema with nil Default",
+			jsn: &Node{
+				Title:       "Test Title",
+				Description: "Test Description",
+				Type:        "object",
+				Properties: map[string]*Node{
+					"property1": {
+						Title: "Property 1",
+						Type:  "string",
+					},
+					"property2": {
+						Title: "Property 2",
+						Type:  "integer",
+					},
+				},
+				Default: nil, // Setting Default as nil
+			},
+			validator: func(t *testing.T, result *terrariumpb.JSONSchema) {
+				require.NotNil(t, result)
+				assert.Nil(t, result.Default)
 			},
 			wantErr: false,
 		},
