@@ -15,8 +15,6 @@ import (
 	"github.com/rotisserie/eris"
 )
 
-const DefaultSchemaPath = ".terraform/providers/schema.json"
-
 func pushProvidersSchemaToDB(providersSchema *schema.ProvidersSchema, dbConn db.DB) (providerCount, allResCount, allAttrCount int, err error) {
 	// Process each provider in the schema
 	for providerName, resources := range providersSchema.ProviderSchemas {

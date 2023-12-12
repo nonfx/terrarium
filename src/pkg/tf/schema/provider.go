@@ -93,6 +93,11 @@ type BlockTypeRepresentation struct {
 // ListLeafNodes returns a map of leaf nodes in the BlockRepresentation.
 // Leaf nodes are the attributes directly present in the block and attributes within nested blocks.
 // The keys of the map are the attribute paths, and the values are the corresponding AttributeRepresentation.
+//
+// Example:
+//
+//	Input: { a: string, b: {c: string, d: string}}
+//	Output: { a: string, b: map, "b.c": string, "b.d": string }
 func (btr BlockRepresentation) ListLeafNodes() map[string]AttributeRepresentation {
 	leafNodes := map[string]AttributeRepresentation{}
 
