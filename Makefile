@@ -201,6 +201,10 @@ farm-release-pull:
 	fi; \
 	curl -L -o data/$(FARM_DB_DUMP_FILE) "$$DB_DUMP_URL"
 
+.PHONY: toc
+toc:
+	./scripts/doc_tree.sh
+
 .PHONY: help
 help:
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
