@@ -1,4 +1,4 @@
-name: Build and Push to DockerHub
+name: Push Harvester Image
 
 on:
   push:
