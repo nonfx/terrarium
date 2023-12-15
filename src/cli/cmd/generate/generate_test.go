@@ -120,6 +120,14 @@ func Test_updateRelPath(t *testing.T) {
 	}{
 		{
 			args: args{
+				line:    `  source = "../../modules"`,
+				srcDir:  `/a/b/c`,
+				destDir: `/a/x/y`,
+			},
+			want: `  source = "../../modules"`,
+		},
+		{
+			args: args{
 				line:    `  source = "./../modules"`,
 				srcDir:  `a/b/c`,
 				destDir: `a/x/y`,

@@ -11,6 +11,7 @@ import (
 
 	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCmd(t *testing.T) {
@@ -21,6 +22,9 @@ func TestCmd(t *testing.T) {
 			os.RemoveAll("./testdata/.terrarium")
 		},
 	}
+
+	wd, err := os.Getwd()
+	require.NoError(t, err)
 
 	testSetup.RunTests(t, []clitesting.CLITestCase{
 		{
@@ -102,6 +106,38 @@ func TestCmd(t *testing.T) {
 					},
 					[]string{ // shouldNotExist
 						"component_postgres.tf",
+					},
+				) && pass
+				return pass
+			},
+		},
+		{
+			Name: "Success (edge case absolute path empty block)",
+			Args: []string{
+				"--platform-dir",
+				path.Clean(path.Join(wd, "../../../../examples/lz/platforms/03-team-env")),
+				"--output-dir",
+				"./testdata/.terrarium",
+				"--app",
+				path.Clean(path.Join(wd, "../../../../examples/lz/requirements/team-aa.yaml")),
+			},
+			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
+				pass := assert.Equal(t, "Successfully pulled 8 of 10 terraform blocks at: ./testdata/.terrarium\n", string(output))
+				pass = assertFilesExists(t,
+					"./testdata/.terrarium",
+					[]string{ // shouldExist
+						"app_aa.env.mustache",
+						"bucket.tf",
+						"database.tf",
+						"remote_state.tf",
+						"tr_gen_locals.tf",
+						"variable.tf",
+					},
+					[]string{ // shouldNotExist
+						"dev.tfvars",
+						"prod.tfvars",
+						"staging.tfvars",
+						"terrarium.yaml",
 					},
 				) && pass
 				return pass
