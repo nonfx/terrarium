@@ -93,7 +93,7 @@ func processBlocks(g platform.Graph, blocks []platform.BlockID, tfModule *tfconf
 		}
 
 		b, found := bID.GetBlock(tfModule)
-		if !found {
+		if !found || b.GetPos().Filename == "" {
 			return nil
 		}
 
