@@ -37,10 +37,18 @@ components:
                 default: "11"
       outputs:
         type: object
+        properties:
+            host:
+                title: Host
+                description: The host address of the PostgreSQL server.
+            name:
+                title: Name
+            password:
+                title: Password
+            port:
+                title: Port
+                description: The port number on which the PostgreSQL server is listening.
 graph:
-    - id: data.terraform_remote_state.shared
-      requirements:
-        - provider.terraform
     - id: local.tr_component_bucket
       requirements: []
     - id: local.tr_component_postgres
@@ -52,16 +60,22 @@ graph:
       requirements: []
     - id: module.tr_component_postgres
       requirements:
-        - data.terraform_remote_state.shared
         - local.tr_component_postgres
-        - var.env_type
         - var.instance_type
     - id: output.tr_component_bucket_uri
       requirements:
         - module.tr_component_bucket
-    - id: provider.terraform
-      requirements: []
-    - id: var.env_type
-      requirements: []
+    - id: output.tr_component_postgres_host
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_postgres_name
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_postgres_password
+      requirements:
+        - module.tr_component_postgres
+    - id: output.tr_component_postgres_port
+      requirements:
+        - module.tr_component_postgres
     - id: var.instance_type
       requirements: []

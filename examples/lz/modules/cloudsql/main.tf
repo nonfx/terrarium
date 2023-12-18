@@ -3,7 +3,7 @@ variable "subnet" {
   type = string
 }
 
-variable "version" {
+variable "engine_version" {
   description = "version of the db"
   type = string
 }
@@ -16,8 +16,6 @@ variable "family" {
 variable "instance_type" {
   default = "small"
 }
-
-provider "random" {}
 
 resource "random_string" "host" {
   length = 8
@@ -33,17 +31,18 @@ resource "random_integer" "port" {
 }
 
 output "host" {
-  value = random_string.host
+  value = random_string.host.result
 }
 
 output "port" {
-  value = random_integer.port
+  value = random_integer.port.result
 }
 
 output "name" {
-  value = base64encode(concat(var.subnet, var.version))
+  value = base64encode(format("%s_%s", var.subnet, var.engine_version))
 }
 
 output "password" {
-  value = random_password.password
+  value = random_password.password.result
+  sensitive = true
 }
