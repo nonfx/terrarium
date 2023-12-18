@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/charmbracelet/log v0.2.3
 	github.com/cldcvr/terraform-config-inspect v0.0.0-20230821164346-f0b467a9714a
-	github.com/cldcvr/terrarium/src/pkg v0.0.0-20231016050054-4c1b56ef5afb
+	github.com/cldcvr/terrarium/src/pkg v0.0.0-20231215133716-640b4dd33566
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/hcl/v2 v2.17.0
@@ -51,7 +51,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -89,8 +89,8 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/zclconf/go-cty v1.13.2
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gorm.io/gorm v1.25.2 // indirect
 )
