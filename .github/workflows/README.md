@@ -45,7 +45,7 @@ flowchart LR
 
 ## 3. Create new release tag (v*)
 
-The release process currently deals with releasing the new version of Terrarium CLI binary. The Terrarium API doesn't have a Prod release (or deployment) setup currently.
+The release process currently deals with releasing a new version of Terrarium CLI binary. The Terrarium API doesn't have a Prod release (or deployment) setup currently.
 
 ```mermaid
 flowchart TD
@@ -53,5 +53,11 @@ flowchart TD
   PR --> A["Build CLI binaries for multiple platforms\nGitHub Action pipeline"]
   A --> U["Upload binaries to the GitHub Release"]
   U --> GHL["Mark the GitHub release as latest"]
-  U --> HBL["Update the latest version on Homebrew-tap"]
+  U --> HBA["Auto generate PR in Homebrew-tap repo\nfrom GitHub action"]
+  HBA --> HBL["Merge the PR to publish the\n latest CLI version on Homebrew-tap"]
 ```
+
+When creating a new version release in GitHub, mark it as "Pre-release", then wait for the pipelines to finish, and you should see the release assets uploaded. Then make a business decision to publish the release, and do two things to publish the release:
+
+1. Label the GitHub release as "latest"
+2. Merge the auto generated PR in [homebrew-tap](https://github.com/cldcvr/homebrew-tap) repo. - This step is responsible for publishing the new version in Homebrew for all the users that use Homebrew for CLI installation
