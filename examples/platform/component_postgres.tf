@@ -1,7 +1,7 @@
 # A relational database management system using SQL.
 # @title: PostgreSQL Database
 module "tr_component_postgres" {
-  source = "terraform-aws-modules/rds/aws"
+  source = "./mock-modules/rds"
 
   for_each = local.tr_component_postgres
 
@@ -18,7 +18,7 @@ module "tr_component_postgres" {
 }
 
 module "postgres_security_group" {
-  source = "terraform-aws-modules/security-group/aws"
+  source = "./mock-modules/security-group"
 
   name   = "postgres_sg"
   vpc_id = module.core_vpc.vpc_id

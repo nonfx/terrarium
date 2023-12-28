@@ -28,10 +28,13 @@ components:
             port:
                 title: Port
 graph:
+    - id: local.tr_component_postgres
+      requirements: []
     - id: module.postgres_security_group
       requirements: []
     - id: module.tr_component_postgres
       requirements:
+        - local.tr_component_postgres
         - module.postgres_security_group
     - id: output.tr_component_postgres_host
       requirements:

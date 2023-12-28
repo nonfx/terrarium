@@ -52,7 +52,7 @@ func lintPlatform(dir string) error {
 		err = nil
 	}
 
-	pm, err := platform.NewPlatformMetadata(module, fileData)
+	pm, err := platform.NewPlatformMetadata(module, nil)
 	if err != nil {
 		return eris.Wrap(err, "erro parsing platform metadata")
 	}

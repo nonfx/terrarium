@@ -9,6 +9,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cldcvr/terrarium/src/cli/internal/config"
 	"github.com/cldcvr/terrarium/src/pkg/testutils/clitesting"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,6 +17,8 @@ import (
 
 func TestCmd(t *testing.T) {
 	os.RemoveAll("./testdata/.terrarium")
+	t.Setenv("TR_LOG_LEVEL", "fatal")
+	config.LoadDefaults()
 	testSetup := clitesting.CLITest{
 		CmdToTest: NewCmd,
 		TeardownTestCase: func(ctx context.Context, t *testing.T, tc clitesting.CLITestCase) {
@@ -41,19 +44,27 @@ func TestCmd(t *testing.T) {
 		},
 		{
 			Name: "Success (no env files)",
-			Args: []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium", "--skip-env-file"},
+			Args: []string{
+				"-p", "../../../../examples/platform/",
+				"-a", "../../../../examples/apps/voting-be",
+				"-a", "../../../../examples/apps/voting-worker",
+				"-a", "../../../../examples/apps/voting-fe",
+				"-o", "./testdata/.terrarium",
+				"--skip-env-file",
+			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				pass := assert.Equal(t, "Successfully pulled 13 of 22 terraform blocks at: ./testdata/.terrarium\n", string(output))
+				pass := assert.Equal(t, "Successfully pulled 21 of 41 terraform blocks at: ./testdata/.terrarium\n", string(output))
 				pass = assertFilesExists(t,
 					"./testdata/.terrarium",
 					[]string{ // shouldExist
 						"component_redis.tf",
 						"outputs.tf",
-						"tr_base_backend.tf",
+						"tr_base_always.tf",
 						"tr_gen_locals.tf",
 						"vpc.tf",
 					},
 					[]string{ // shouldNotExist
+						"never.tf",
 						"app_voting_be.env.mustache",
 						"app_voting_worker.env.mustache",
 						"tr_gen_profile.auto.tfvars",
@@ -65,9 +76,15 @@ func TestCmd(t *testing.T) {
 		},
 		{
 			Name: "Success (no profile)",
-			Args: []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium"},
+			Args: []string{
+				"-p", "../../../../examples/platform/",
+				"-a", "../../../../examples/apps/voting-be",
+				"-a", "../../../../examples/apps/voting-worker",
+				"-a", "../../../../examples/apps/voting-fe",
+				"-o", "./testdata/.terrarium",
+			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				pass := assert.Equal(t, "Successfully pulled 13 of 22 terraform blocks at: ./testdata/.terrarium\n", string(output))
+				pass := assert.Equal(t, "Successfully pulled 21 of 41 terraform blocks at: ./testdata/.terrarium\n", string(output))
 				pass = assertFilesExists(t,
 					"./testdata/.terrarium",
 					[]string{ // shouldExist
@@ -75,11 +92,12 @@ func TestCmd(t *testing.T) {
 						"app_voting_worker.env.mustache",
 						"component_redis.tf",
 						"outputs.tf",
-						"tr_base_backend.tf",
+						"tr_base_always.tf",
 						"tr_gen_locals.tf",
 						"vpc.tf",
 					},
 					[]string{ // shouldNotExist
+						"never.tf",
 						"tr_gen_profile.auto.tfvars",
 						"component_postgres.tf",
 					},
@@ -89,9 +107,16 @@ func TestCmd(t *testing.T) {
 		},
 		{
 			Name: "Success (with profile)",
-			Args: []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium", "-c", "dev"},
+			Args: []string{
+				"-p", "../../../../examples/platform/",
+				"-a", "../../../../examples/apps/voting-be",
+				"-a", "../../../../examples/apps/voting-worker",
+				"-a", "../../../../examples/apps/voting-fe",
+				"-o", "./testdata/.terrarium",
+				"-c", "dev",
+			},
 			ValidateOutput: func(ctx context.Context, t *testing.T, cmdOpts clitesting.CmdOpts, output []byte) bool {
-				pass := assert.Equal(t, "Successfully pulled 13 of 22 terraform blocks at: ./testdata/.terrarium\n", string(output))
+				pass := assert.Equal(t, "Successfully pulled 21 of 41 terraform blocks at: ./testdata/.terrarium\n", string(output))
 				pass = assertFilesExists(t,
 					"./testdata/.terrarium",
 					[]string{ // shouldExist
@@ -99,12 +124,13 @@ func TestCmd(t *testing.T) {
 						"app_voting_worker.env.mustache",
 						"component_redis.tf",
 						"outputs.tf",
-						"tr_base_backend.tf",
+						"tr_base_always.tf",
 						"tr_gen_locals.tf",
 						"tr_gen_profile.auto.tfvars",
 						"vpc.tf",
 					},
 					[]string{ // shouldNotExist
+						"never.tf",
 						"component_postgres.tf",
 					},
 				) && pass
@@ -144,8 +170,13 @@ func TestCmd(t *testing.T) {
 			},
 		},
 		{
-			Name:     "Invalid profile name",
-			Args:     []string{"-p", "../../../../examples/platform/", "-a", "../../../../examples/apps/voting-be", "-a", "../../../../examples/apps/voting-worker", "-o", "./testdata/.terrarium", "-c", "Isle"},
+			Name: "Invalid profile name",
+			Args: []string{
+				"-p", "../../../../examples/platform/",
+				"-a", "../../../../examples/apps/voting-be",
+				"-a", "../../../../examples/apps/voting-worker",
+				"-o", "./testdata/.terrarium", "-c", "Isle",
+			},
 			WantErr:  true,
 			ExpError: "could not retrieve configuration file for platform profile 'Isle'",
 		},

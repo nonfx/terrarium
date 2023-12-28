@@ -1,12 +1,16 @@
 # Terrarium Dependency Interface
 
-The Dependency Interface is a crucial Architecture Building Block in the Terrarium project. It defines the necessary information about an infrastructure dependency, such as the schema of inputs, schema of outputs, title and description. The format for Inputs and Outputs schema is based on the JSON schema spec.
+The Dependency Interface is a crucial Architecture Building Block in the Terrarium project. It defines the necessary information about an infrastructure dependency, such as the schema of inputs, schema of outputs, title, and description. The format for Inputs and Outputs schema is based on the JSON schema spec.
 
 ## Overview
 
-The Dependency Interface, once defined, serves as a contract between the application and Infrastructure as Code (IaC). It assists the application in identifying the inputs it needs to provide to call a dependency and the outputs it would receive from it. Conversely, it aids the IaC in implementing the dependency by utilizing the inputs and returning the declared outputs.
+The Dependency Interface, once defined, serves as a contract between the application and Terrarium Platform Templates (the IaC platform).
 
-The Dependency Interfaces are defined in the Terrarium farm repository, implemented as IaC in the Terrarium Platform Templates, and used in user applications as part of the App manifest YAML.
+App Developers - It assists application developers in identifying the inputs they need to provide to use an infrastructure dependency and the outputs they will receive from it as app environment variables.
+
+Platform Developers - It aids platform developers in implementing the dependencies in Terrarium Platform Templates by utilizing the inputs and returning the declared outputs.
+
+The Dependency Interfaces are defined in the [Terrarium farm repository](https://github.com/cldcvr/terrarium-farm), implemented as IaC in the [Terrarium Platform Templates](../../../../examples/platform/readme.md), and used in user applications as part of the [App manifest](../app/readme.md).
 
 ```mermaid
 graph LR
@@ -23,10 +27,10 @@ A Dependency Interface can be implemented across multiple platforms. This featur
 
 Each Dependency Interface is defined using several YAML attributes:
 
-- `id`: Identifier of the dependency interface. This identifier is referred by the app manifest in order to "use" the dependency interface. And it is also used in the Terrarium Platform Template to "implement" the dependency interface as a IaC component.
+- `id`: Identifier of the dependency interface. This identifier is referred to by the app manifest in order to "use" the dependency interface. And it is also used in the Terrarium Platform Template to "implement" the dependency interface as an IaC component.
 - `title`: A human-readable title for the dependency.
 - `description`: A detailed description of what the dependency is and what it does.
-- `inputs`: The schema for the inputs that the dependency requires. This schema is defined based on the [JSON Schema specification](https://json-schema.org/)
+- `inputs`: The schema for the inputs that the dependency requires. This schema is defined based on the [JSON Schema specification](https://json-schema.org/).
 - `outputs`: The schema for the outputs that the dependency produces. Like `inputs`, this schema definition is also based on the JSON Schema specification.
 
 ## Example
@@ -43,7 +47,7 @@ dependency-interfaces:
       properties:
           db_name:
               title: Database name
-              description: The name provided here may get prefix and suffix based
+              description: The name provided here may get a prefix and suffix based
               type: string
               default: random
           version:
