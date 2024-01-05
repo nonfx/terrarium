@@ -22,13 +22,13 @@ resources:
   repositories:
     - repository: templates
       type: github
-      name: cldcvr/product-build-tools
-      endpoint: Github-CldCvr
+      name: ollionorg/product-build-tools
+      endpoint: Github-OllionOrg
       trigger: none
     - repository: terrariumTest
       type: github
-      endpoint: Github-CldCvr
-      name: cldcvr/terrarium-api-automation
+      endpoint: Github-OllionOrg
+      name: ollionorg/terrarium-api-automation
       ref: $(testBranch)
 
 pool:
@@ -41,7 +41,7 @@ stages:
       - group: Terrarium-API-Automation-Staging
       - group: Common-Dev
       - name: GIT_REPO
-        value: https://github.com/cldcvr/terrarium
+        value: https://github.com/ollionorg/terrarium
     jobs:
       - job: Run_Tests
         displayName: Run Test
@@ -89,7 +89,7 @@ stages:
               sudo chmod +x /usr/local/bin/docker-compose
               cd terrarium
               go env -w GO111MODULE=on
-              go env -w GOPRIVATE=github.com/cldcvr/*
+              go env -w GOPRIVATE=github.com/ollionorg/*
               make docker-init
               make docker-build docker-run docker-harvest
             env:
