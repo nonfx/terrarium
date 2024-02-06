@@ -6,7 +6,6 @@ package generate
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/cldcvr/terraform-config-inspect/tfconfig"
 	"github.com/cldcvr/terrarium/src/cli/internal/constants"
@@ -57,9 +56,7 @@ func cmdRunE(cmd *cobra.Command, args []string) error {
 
 	m, _ := tfconfig.LoadModule(flagPlatformDir, &tfconfig.ResolvedModulesSchema{})
 
-	existingYaml, _ := os.ReadFile(path.Join(flagPlatformDir, defaultYAMLFileName))
-
-	pm, _ := platform.NewPlatformMetadata(m, existingYaml)
+	pm, _ := platform.NewPlatformMetadata(m, nil)
 
 	err = utils.MatchAppAndPlatform(pm, apps, flagIgnoreUnimplemented)
 	if err != nil {
