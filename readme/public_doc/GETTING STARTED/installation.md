@@ -1,10 +1,11 @@
 ---
 title: "Installation"
-slug: "Installation"
+slug: "installation"
 excerpt: "Get started with Terrarium by following these simple installation instructions."
 hidden: false
 category: 64fad6b9f42eab14641a53a6
 ---
+
 # Installation Instructions
 
 1. Download [Terrarium](https://github.com/cldcvr/terrarium/releases) and extract the TAR archive.

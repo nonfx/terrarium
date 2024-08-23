@@ -1,6 +1,6 @@
 ---
 title: "App Manifest"
-slug: "App Manifest"
+slug: "app-manifest"
 excerpt: "Simplify application dependency management with structured terrarium.yaml files and Terrarium tools, enabling seamless integration with infrastructure-as-code workflows."
 hidden: false
 category: 64fad762908a8c005066ee0a
